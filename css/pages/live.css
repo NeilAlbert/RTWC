@@ -1,0 +1,291 @@
+/* ==========================================================================
+   THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
+   Live Streaming Page Specific Stylesheet (css/pages/live.css)
+   ========================================================================== */
+
+/* Page Hero */
+.page-hero {
+  background-color: var(--primary-navy-dark);
+  color: var(--text-light);
+  padding: 3.5rem 0 3rem 0;
+  text-align: center;
+  border-bottom: 4px solid var(--accent-gold);
+}
+
+.live-status-banner {
+  display: none;
+  align-items: center;
+  gap: 0.6rem;
+  background-color: rgba(184, 134, 11, 0.2);
+  border: 1px solid var(--accent-gold-border);
+  padding: 0.4rem 1.25rem;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent-gold-hover);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.live-status-banner.is-visible {
+  display: inline-flex;
+}
+
+.live-status-banner.is-live {
+  background-color: #991B1B;
+  border-color: #EF4444;
+  color: #FFFFFF;
+}
+
+.page-hero-title {
+  color: var(--text-light);
+  font-size: 2.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.page-hero-desc {
+  max-width: 720px;
+  margin: 0 auto;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+/* Live Player Section */
+.live-player-section {
+  padding: 4rem 0;
+  background-color: var(--bg-main);
+}
+
+.live-player-layout {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr;
+  gap: 2rem;
+}
+
+.player-main-card {
+  background-color: var(--bg-white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.stream-embed-container {
+  position: relative;
+  width: 100%;
+  min-height: 700px;
+  background-color: var(--primary-navy-dark);
+}
+
+.stream-offline-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(18, 35, 69, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  z-index: 10;
+  transition: opacity 0.3s ease;
+}
+
+.stream-offline-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.offline-content {
+  max-width: 500px;
+  color: var(--text-light);
+}
+
+.offline-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  background-color: rgba(184, 134, 11, 0.2);
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem auto;
+}
+
+.offline-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.offline-content h3 {
+  color: var(--text-light);
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.offline-content p {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.stream-info-bar {
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background-color: var(--bg-white);
+  border-top: 1px solid var(--border-color);
+}
+
+.stream-info-bar h2 {
+  font-size: 1.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.stream-info-bar p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Sidebar Cards */
+.live-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.sidebar-card {
+  background-color: var(--bg-white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar-card-header {
+  background-color: var(--primary-navy);
+  color: var(--text-light);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 3px solid var(--accent-gold);
+}
+
+.sidebar-card-header svg {
+  width: 22px;
+  height: 22px;
+  color: var(--accent-gold);
+}
+
+.sidebar-card-header h3 {
+  color: var(--text-light);
+  font-size: 1.1rem;
+}
+
+.sidebar-card-body {
+  padding: 1.25rem;
+}
+
+.schedule-slot {
+  padding: 0.85rem 0;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+.schedule-slot:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.slot-day {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--primary-navy);
+  margin-bottom: 0.2rem;
+}
+
+.slot-time {
+  font-size: 0.88rem;
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+/* Replay Section */
+.replay-section {
+  padding: 4rem 0 5rem 0;
+  background-color: var(--bg-white);
+}
+
+.replay-player-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  align-items: center;
+  background-color: var(--bg-main);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.replay-img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.replay-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.replay-badge {
+  background-color: var(--accent-gold-light);
+  color: var(--accent-gold);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-full);
+  width: fit-content;
+}
+
+.replay-info h2 {
+  font-size: 2rem;
+}
+
+.replay-info p {
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.fb-live-iframe {
+  border: none;
+  overflow: hidden;
+}
+
+.flex-column-gap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .live-player-layout {
+    grid-template-columns: 1fr;
+  }
+  .replay-player-card {
+    grid-template-columns: 1fr;
+  }
+}

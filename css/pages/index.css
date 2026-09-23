@@ -1,0 +1,675 @@
+/* ==========================================================================
+   THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
+   Home Page Specific Stylesheet (css/pages/index.css)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. HERO SECTION
+   -------------------------------------------------------------------------- */
+.hero-section {
+  position: relative;
+  min-height: 82vh;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(18, 35, 69, 0.88) 0%, rgba(31, 56, 100, 0.78) 100%),
+              url('../../assets/images/hero.jpg') center/cover no-repeat;
+  color: #FFFFFF;
+  padding: 5rem 0;
+  overflow: hidden;
+}
+
+.hero-overlay-glow {
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(184, 134, 11, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
+  pointer-events: none;
+}
+
+.hero-content {
+  max-width: 780px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(184, 134, 11, 0.2);
+  border: 1px solid rgba(184, 134, 11, 0.5);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  color: #FCE8B3;
+  padding: 0.4rem 1.1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  color: #FFFFFF;
+  line-height: 1.1;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.hero-title span {
+  color: var(--accent-gold-hover);
+  background: linear-gradient(90deg, #F5D061 0%, #B8860B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 2rem;
+  max-width: 650px;
+  line-height: 1.6;
+}
+
+.hero-service-times {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-left: 4px solid var(--accent-gold);
+  padding: 0.85rem 1.25rem;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-bottom: 2.25rem;
+  font-size: 0.95rem;
+}
+
+.hero-service-times strong {
+  color: var(--accent-gold-hover);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   2. WELCOME INTRO SECTION
+   -------------------------------------------------------------------------- */
+.welcome-section {
+  padding: 6rem 0;
+  background-color: var(--bg-white);
+}
+
+.welcome-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.welcome-image-wrapper {
+  position: relative;
+}
+
+.welcome-image {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  object-fit: cover;
+  width: 100%;
+  aspect-ratio: 4/3;
+}
+
+.welcome-badge-card {
+  position: absolute;
+  bottom: -20px;
+  right: -20px;
+  background: var(--primary-navy);
+  color: #FFFFFF;
+  padding: 1.25rem 1.75rem;
+  border-radius: var(--radius-md);
+  border-left: 5px solid var(--accent-gold);
+  box-shadow: var(--shadow-lg);
+  max-width: 260px;
+}
+
+.welcome-badge-card h4 {
+  color: var(--accent-gold);
+  font-size: 1.1rem;
+  margin-bottom: 0.2rem;
+}
+
+.welcome-text .section-tag {
+  margin-left: 0;
+}
+
+.welcome-text h2 {
+  font-size: 2.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.welcome-text p {
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  font-size: 1.05rem;
+}
+
+.welcome-pillars {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1.75rem 0 2rem 0;
+}
+
+.pillar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 600;
+  color: var(--primary-navy);
+  font-size: 0.95rem;
+}
+
+.pillar-item svg {
+  width: 20px;
+  height: 20px;
+  color: var(--accent-gold);
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   3. QUICK LINKS SECTION
+   -------------------------------------------------------------------------- */
+.quicklinks-section {
+  padding: 5rem 0;
+  background-color: var(--bg-main);
+}
+
+.quicklinks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.75rem;
+}
+
+.quicklink-card {
+  background-color: var(--bg-white);
+  padding: 2.25rem 1.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.quicklink-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: transparent;
+  transition: var(--transition-fast);
+}
+
+.quicklink-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-gold-border);
+}
+
+.quicklink-card:hover::before {
+  background: var(--accent-gold);
+}
+
+.quicklink-icon-box {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+  background-color: var(--accent-gold-light);
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.quicklink-icon-box svg {
+  width: 28px;
+  height: 28px;
+}
+
+.quicklink-card h3 {
+  font-size: 1.35rem;
+  margin-bottom: 0.6rem;
+  color: var(--primary-navy);
+}
+
+.quicklink-card p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.quicklink-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--accent-gold);
+}
+
+.quicklink-card:hover .quicklink-arrow {
+  color: var(--primary-navy);
+  transform: translateX(4px);
+}
+
+/* --------------------------------------------------------------------------
+   4. LATEST SERMON EMBED PLACEHOLDER
+   -------------------------------------------------------------------------- */
+.sermon-preview-section {
+  padding: 6rem 0;
+  background-color: var(--primary-navy-dark);
+  color: #FFFFFF;
+  position: relative;
+}
+
+.sermon-preview-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+.sermon-player-container {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background-color: #000000;
+}
+
+.sermon-thumb-img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  opacity: 0.85;
+}
+
+.play-overlay-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background-color: var(--accent-gold);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-gold);
+  border: none;
+  transition: var(--transition-fast);
+}
+
+.play-overlay-btn:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  background-color: var(--accent-gold-hover);
+}
+
+.play-overlay-btn svg {
+  width: 32px;
+  height: 32px;
+  margin-left: 4px;
+  fill: currentColor;
+}
+
+.sermon-info-box .section-tag {
+  background-color: rgba(184, 134, 11, 0.2);
+  color: var(--accent-gold-hover);
+  margin-left: 0;
+}
+
+.sermon-info-box h2 {
+  color: #FFFFFF;
+  font-size: 2.25rem;
+  margin-bottom: 1rem;
+}
+
+.sermon-meta-list {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.sermon-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sermon-meta-item svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent-gold);
+}
+
+.sermon-summary {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.05rem;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------------
+   5. UPCOMING EVENTS PREVIEW
+   -------------------------------------------------------------------------- */
+.events-preview-section {
+  padding: 6rem 0;
+  background-color: var(--bg-white);
+}
+
+.events-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.event-preview-card {
+  background-color: var(--bg-white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+}
+
+.event-preview-card:hover {
+  transform: translateY(-50px); /* adjusted later if needed */
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.event-card-header {
+  background-color: var(--primary-navy);
+  color: #FFFFFF;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.event-date-badge {
+  background-color: var(--accent-gold);
+  color: #FFFFFF;
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.8rem;
+  text-align: center;
+  min-width: 60px;
+}
+
+.event-date-month {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: block;
+}
+
+.event-date-day {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  font-family: 'Outfit', sans-serif;
+}
+
+.event-card-category {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-gold-hover);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.event-card-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.event-card-title {
+  font-size: 1.25rem;
+  color: var(--primary-navy);
+  margin-bottom: 0.75rem;
+}
+
+.event-card-meta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.event-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.event-meta-line svg {
+  width: 15px;
+  height: 15px;
+  color: var(--accent-gold);
+}
+
+.event-card-desc {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+/* --------------------------------------------------------------------------
+   6. PLAN YOUR VISIT (CTA & MAP PLACEHOLDER)
+   -------------------------------------------------------------------------- */
+.visit-section {
+  padding: 6rem 0;
+  background-color: var(--bg-main);
+}
+
+.visit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+
+.visit-card {
+  background-color: var(--bg-white);
+  padding: 2.75rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+}
+
+.visit-card h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.visit-card p {
+  color: var(--text-muted);
+  margin-bottom: 1.75rem;
+  font-size: 1.05rem;
+}
+
+.visit-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.visit-item {
+  display: flex;
+  gap: 1rem;
+}
+
+.visit-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--accent-gold-light);
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.visit-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.visit-item-text h4 {
+  font-size: 1.05rem;
+  margin-bottom: 0.2rem;
+}
+
+.visit-item-text p {
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
+
+.map-card {
+  background-color: var(--bg-white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  height: 100%;
+  min-height: 420px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-placeholder-canvas {
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.map-placeholder-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: var(--primary-navy);
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-md);
+}
+
+.map-placeholder-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.map-placeholder-canvas h3 {
+  font-size: 1.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.map-placeholder-canvas p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  max-width: 320px;
+  margin-bottom: 1.25rem;
+}
+
+/* Responsive adjustments for index page */
+@media (max-width: 991px) {
+  .welcome-grid,
+  .sermon-preview-grid,
+  .visit-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .welcome-badge-card {
+    position: static;
+    margin-top: 1rem;
+    max-width: 100%;
+  }
+
+  .hero-section {
+    padding: 4rem 0;
+    min-height: 70vh;
+  }
+}
+
+/* Page Specific Helper Classes */
+.btn-hero-outline {
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.badge-card-desc {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+}
+
+.sermon-actions-wrap {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.events-footer-cta {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.section-tag-flush {
+  margin-left: 0;
+}
+
+.map-placeholder-iframe {
+  border: 0;
+}
+

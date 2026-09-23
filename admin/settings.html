@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Settings | Admin — Royal Temple Worship Centre</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="admin-sidebar" id="admin-sidebar"></aside>
+
+    <div class="admin-main">
+      <header class="admin-topbar" id="admin-topbar"></header>
+
+      <main class="admin-content">
+        <div class="page-head">
+          <h1>Site Settings</h1>
+          <p>Edit the text shown across the public website.</p>
+        </div>
+
+        <div class="alert alert-info">
+          Changes here update text across the live site immediately.
+        </div>
+        <div class="alert alert-success" id="settings-success" role="status"></div>
+        <div class="alert alert-error" id="settings-error" role="alert"></div>
+
+        <form id="settings-form" novalidate>
+          <div class="panel">
+            <div class="panel-title">Site Content</div>
+            <div class="panel-sub">Leave a field unchanged to keep its current value.</div>
+            <div class="form-grid" id="settings-fields"></div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="save-settings-btn">Save Changes</button>
+            <button type="button" class="btn btn-outline" id="reset-settings-btn">Discard Changes</button>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/adminApi.js"></script>
+  <script src="js/adminAuth.js"></script>
+  <script src="js/pages/settings.js"></script>
+</body>
+</html>

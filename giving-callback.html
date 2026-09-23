@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- SEO & Social Meta Tags -->
+  <title>Payment Confirmation | Royal Temple Worship Centre</title>
+  <meta name="description" content="Payment confirmation for your online giving at Royal Temple Worship Centre (The Church of Pentecost).">
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Shared & Page Styles -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages/giving-callback.css">
+</head>
+<body>
+
+  <!-- Compact Header -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="navbar" aria-label="Main Navigation">
+        <a href="index.html" class="brand-link">
+          <img src="assets/images/logo.jpg" alt="Royal Temple Logo" class="brand-logo">
+          <div class="brand-text">
+            <span class="brand-name">Royal Temple</span>
+            <span class="brand-tagline">The Church of Pentecost</span>
+          </div>
+        </a>
+        <a href="giving.html" class="btn nav-cta-btn">Give Online</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="callback-main">
+    <div class="container">
+      <div class="status-card" id="status-card">
+        <!-- Loading state (shown while verifying with Paystack) -->
+        <div id="status-loading">
+          <div class="status-icon spinner" aria-hidden="true"></div>
+          <h1 class="status-title">Confirming your payment…</h1>
+          <p class="status-text">Please wait while we verify your transaction with Paystack.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-bottom">
+      <div class="container footer-bottom-content">
+        <div>
+          &copy; <span id="current-year">2026</span> Royal Temple Worship Centre — The Church of Pentecost. All Rights Reserved.
+        </div>
+        <div>
+          Payments are processed securely by <a href="https://paystack.com" target="_blank" rel="noopener noreferrer" class="cop-link">Paystack</a>.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+  <script src="js/pages/giving-callback.js"></script>
+</body>
+</html>

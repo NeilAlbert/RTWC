@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin Login | Royal Temple Worship Centre</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-church">Royal Temple Worship Centre</div>
+        <div class="brand-role">Admin Dashboard</div>
+      </div>
+
+      <form id="login-form" novalidate>
+        <div class="alert alert-error" id="login-error" role="alert"></div>
+
+        <div class="form-group">
+          <label for="login-email">Email address</label>
+          <input type="email" id="login-email" name="email" autocomplete="username" required>
+          <span class="field-error" id="err-email"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" name="password" autocomplete="current-password" required>
+          <span class="field-error" id="err-password"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="login-btn">Sign In</button>
+
+        <p class="login-note">Authorized staff only. All access is logged.</p>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/adminApi.js"></script>
+  <script src="js/adminAuth.js"></script>
+  <script src="js/pages/login.js"></script>
+</body>
+</html>

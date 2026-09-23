@@ -1,0 +1,276 @@
+/* ==========================================================================
+   THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
+   Contact & Prayer Request Page Specific Stylesheet (css/pages/contact.css)
+   ========================================================================== */
+
+/* Page Hero */
+.page-hero {
+  background-color: var(--primary-navy-dark);
+  color: var(--text-light);
+  padding: 4rem 0 3.5rem 0;
+  text-align: center;
+  border-bottom: 4px solid var(--accent-gold);
+}
+
+.page-hero-title {
+  color: var(--text-light);
+  font-size: 2.75rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.page-hero-desc {
+  max-width: 720px;
+  margin: 0 auto;
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+/* Contact Info Cards Grid */
+.contact-info-section {
+  padding: 5rem 0 3rem 0;
+  background-color: var(--bg-white);
+}
+
+.contact-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.info-card {
+  background-color: var(--bg-main);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  padding: 2rem;
+  text-align: center;
+  transition: var(--transition-normal);
+}
+
+.info-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-gold-border);
+  box-shadow: var(--shadow-md);
+}
+
+.info-card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background-color: var(--accent-gold-light);
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem auto;
+}
+
+.info-card-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.info-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.75rem;
+}
+
+.info-card p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+/* Dual Forms Section */
+.forms-section {
+  padding: 2rem 0 5rem 0;
+}
+
+.forms-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+}
+
+.form-card {
+  background-color: var(--bg-white);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.form-card-header {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.prayer-card .form-card-header {
+  position: relative;
+}
+
+.prayer-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background-color: var(--accent-gold-light);
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+.prayer-icon-badge svg {
+  width: 24px;
+  height: 24px;
+}
+
+.form-card-header h2 {
+  font-size: 1.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.form-card-header p {
+  color: var(--text-muted);
+  font-size: 0.94rem;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-label {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--primary-navy);
+}
+
+.form-input, .form-textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.96rem;
+  color: var(--text-dark);
+  transition: var(--transition-fast);
+  background-color: var(--bg-white);
+}
+
+.form-input:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.15);
+}
+
+.form-textarea {
+  resize: vertical;
+}
+
+.field-error {
+  font-size: 0.8rem;
+  color: #DC2626;
+  min-height: 1.1rem;
+}
+
+.checkbox-group {
+  margin-top: 0.25rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent-gold);
+  cursor: pointer;
+}
+
+.success-alert {
+  background-color: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  color: #166534;
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin-top: 1rem;
+}
+
+.no-display {
+  display: none;
+}
+
+
+/* Map Embed Section */
+.map-embed-section {
+  padding-bottom: 6rem;
+}
+
+.map-embed-card {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  height: 420px;
+}
+
+.google-map-placeholder {
+  width: 100%;
+  height: 100%;
+  background-color: var(--primary-navy-dark);
+  color: var(--text-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.google-map-placeholder svg {
+  width: 60px;
+  height: 60px;
+  color: var(--accent-gold);
+  margin-bottom: 1rem;
+}
+
+.google-map-placeholder h3 {
+  color: var(--text-light);
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.google-map-placeholder p {
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 500px;
+  font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .contact-info-grid {
+    grid-template-columns: 1fr;
+  }
+  .forms-grid {
+    grid-template-columns: 1fr;
+  }
+}

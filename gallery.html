@@ -1,0 +1,116 @@
+<!-- BACKEND REMOVED — see Facebook photo gallery previously called /api/facebook/gallery. Reconnect when backend is rebuilt. -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Photo Gallery | Royal Temple Worship Centre</title>
+    <meta name="description" content="Browse recent photos from Royal Temple Worship Centre’s Facebook page, updated directly from the church’s public posts." />
+    <meta name="keywords" content="Royal Temple Worship Centre, church photo gallery, Facebook gallery, photos" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://royaltemple.org/gallery.html" />
+    <meta property="og:title" content="Photo Gallery | Royal Temple Worship Centre" />
+    <meta property="og:description" content="See recent photos from Royal Temple Worship Centre’s Facebook page, refreshed automatically from the church’s posts." />
+    <meta property="og:image" content="assets/images/hero.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/pages/gallery.css" />
+  </head>
+  <body>
+    <div class="top-bar">
+      <div class="container top-bar-content">
+        <div class="top-bar-info">
+          <span>
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Royal Temple Worship Centre
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            +233 (0) 30 123 4567
+          </span>
+        </div>
+        <div class="top-bar-links">
+          <a href="#services">Service Times</a>
+          <span>|</span>
+          <a href="giving.html">Support Our Ministry</a>
+        </div>
+      </div>
+    </div>
+
+    <header class="site-header">
+      <div class="container">
+        <nav class="navbar" aria-label="Main Navigation">
+          <a href="index.html" class="brand-link">
+            <img src="assets/images/logo.jpg" alt="Royal Temple Worship Centre Logo" class="brand-logo" />
+            <div class="brand-text">
+              <span class="brand-name">Royal Temple Worship Centre</span>
+              <span class="brand-tagline">The Church of Pentecost</span>
+            </div>
+          </a>
+
+          <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-menu">
+            <svg viewBox="0 0 24 24">
+              <line x1="4" y1="12" x2="20" y2="12"></line>
+              <line x1="4" y1="6" x2="20" y2="6"></line>
+              <line x1="4" y1="18" x2="20" y2="18"></line>
+            </svg>
+          </button>
+
+          <ul class="nav-menu" id="nav-menu">
+            <li><a href="index.html" class="nav-link">Home</a></li>
+            <li><a href="about.html" class="nav-link">About Us</a></li>
+            <li><a href="ministries.html" class="nav-link">Ministries</a></li>
+            <li><a href="sermons.html" class="nav-link">Sermons</a></li>
+            <li><a href="events.html" class="nav-link">Events</a></li>
+            <li><a href="live.html" class="nav-link">Live</a></li>
+            <li><a href="gallery.html" class="nav-link active" aria-current="page">Gallery</a></li>
+            <li><a href="giving.html" class="nav-link">Giving</a></li>
+            <li><a href="contact.html" class="nav-link">Contact</a></li>
+            <li><a href="giving.html" class="btn nav-cta-btn">Give Online</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-hero gallery-hero" aria-label="Photo Gallery Header">
+        <div class="container">
+          <div class="page-hero-content">
+            <p class="section-tag">Photo Gallery</p>
+            <h1>Moments from our church family</h1>
+            <p class="page-hero-copy">
+              These photos are pulled directly from the church’s Facebook page so the gallery stays current with the latest updates from Royal Temple Worship Centre.
+            </p>
+            <a href="https://www.facebook.com/cop.rtwc/photos" target="_blank" rel="noopener noreferrer" class="btn btn-primary">View full Facebook photos</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="gallery-section" aria-label="Photo Gallery">
+        <div class="container">
+          <div id="galleryStatus" class="gallery-status" role="status">Loading photos…</div>
+          <div id="galleryGrid" class="gallery-grid" aria-live="polite"></div>
+          <div class="gallery-actions">
+            <button id="loadMoreButton" class="btn btn-secondary hidden" type="button">Load More</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="lightbox" class="lightbox hidden" role="dialog" aria-modal="true" aria-label="Photo preview">
+      <button type="button" class="lightbox-close" id="lightboxClose" aria-label="Close preview">×</button>
+      <div class="lightbox-content">
+        <img id="lightboxImage" src="" alt="" />
+        <div class="lightbox-meta">
+          <p id="lightboxCaption" class="lightbox-caption"></p>
+          <p id="lightboxDate" class="lightbox-date"></p>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/pages/gallery.js"></script>
+  </body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO & Social Meta Tags -->
+  <title>Events & Calendar | The Church of Pentecost — Royal Temple Worship Centre</title>
+  <meta name="description" content="Explore upcoming conventions, revivals, prayer retreats, camp meetings, and fellowship events at Royal Temple Worship Centre.">
+  <meta name="keywords" content="Church Events, Pentecost Conventions, Revivals, Royal Temple Calendar, Camp Meetings, Prayer Retreats">
+  
+  <!-- Open Graph / Social Media -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://royaltemple.org/events.html">
+  <meta property="og:title" content="Events & Calendar — Royal Temple Worship Centre">
+  <meta property="og:description" content="Stay informed and join our upcoming conventions, revival services, and church gatherings.">
+  <meta property="og:image" content="assets/images/hero.jpg">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Shared & Page Styles -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/pages/events.css">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="top-bar">
+    <div class="container top-bar-content">
+      <div class="top-bar-info">
+        <span>
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          Royal Temple Worship Centre Main Sanctuary
+        </span>
+        <span>
+          <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+          +233 (0) 30 123 4567
+        </span>
+      </div>
+      <div class="top-bar-links">
+        <a href="index.html#services">Service Times</a>
+        <span>|</span>
+        <a href="giving.html">Support Our Ministry</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header / Navigation -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="navbar" aria-label="Main Navigation">
+        <a href="index.html" class="brand-link">
+          <img src="assets/images/logo.jpg" alt="Royal Temple Logo" class="brand-logo">
+          <div class="brand-text">
+            <span class="brand-name">Royal Temple</span>
+            <span class="brand-tagline">The Church of Pentecost</span>
+          </div>
+        </a>
+
+        <!-- Hamburger Toggle Button -->
+        <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-menu">
+          <svg viewBox="0 0 24 24">
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="6" x2="20" y2="6"></line>
+            <line x1="4" y1="18" x2="20" y2="18"></line>
+          </svg>
+        </button>
+
+        <!-- Navigation Links -->
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="about.html" class="nav-link">About Us</a></li>
+          <li><a href="ministries.html" class="nav-link">Ministries</a></li>
+          <li><a href="sermons.html" class="nav-link">Sermons</a></li>
+          <li><a href="events.html" class="nav-link active">Events</a></li>
+          <li><a href="live.html" class="nav-link">Live Stream</a></li>
+          <li><a href="contact.html" class="nav-link">Contact</a></li>
+          <li><a href="giving.html" class="btn nav-cta-btn">Give Online</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- PAGE HERO -->
+    <section class="page-hero">
+      <div class="container">
+        <span class="section-tag section-tag-gold">Fellowship & Revival</span>
+        <h1 class="page-hero-title">Church Events & Calendar</h1>
+        <p class="page-hero-desc">
+          Plan ahead to attend our upcoming conventions, prayer retreats, youth camps, and praise celebrations — or revisit recaps from our past gatherings.
+        </p>
+      </div>
+    </section>
+
+    <!-- EVENT CONTROLS SECTION (VIEW TOGGLE & CATEGORY FILTERS) -->
+    <section class="events-controls-section">
+      <div class="container">
+        <!-- View Toggle (Upcoming vs Past) -->
+        <div class="view-toggle-bar">
+          <button class="view-tab active" id="tab-upcoming" data-view="upcoming">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Upcoming Events
+            <span class="badge-count" id="count-upcoming">0</span>
+          </button>
+          <button class="view-tab" id="tab-past" data-view="past">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Past Events Archive
+            <span class="badge-count" id="count-past">0</span>
+          </button>
+        </div>
+
+        <!-- Category Filter Tabs -->
+        <div class="category-tabs">
+          <button class="category-tab active" data-category="all">All Categories</button>
+          <button class="category-tab" data-category="Convention">Conventions</button>
+          <button class="category-tab" data-category="Revival">Revivals</button>
+          <button class="category-tab" data-category="Camp Meeting">Camp Meetings</button>
+          <button class="category-tab" data-category="Anniversary">Anniversaries</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- EVENTS LIST GRID -->
+    <section class="events-grid-section">
+      <div class="container">
+        <div class="events-section-header">
+          <h2 id="events-view-title" class="events-view-heading">Upcoming Events</h2>
+          <p id="events-view-subtitle" class="events-view-sub">Events scheduled for the coming weeks and months.</p>
+        </div>
+        
+        <div class="events-full-grid" id="events-full-container">
+          <!-- Dynamically populated by js/pages/events.js -->
+        </div>
+
+        <div id="no-events-msg" class="no-results">
+          <h3>No events found matching your selected criteria.</h3>
+          <p>Try switching categories or toggling between the "Upcoming" and "Past" views.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CALENDAR DOWNLOAD NOTE BANNER -->
+    <section class="calendar-note-section">
+      <div class="container">
+        <div class="calendar-note-box">
+          <div class="note-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+          <div class="note-text">
+            <h3>Subscribe to Royal Temple Event Calendar</h3>
+            <p>Never miss a divine gathering. Save events directly to your personal Google, Apple, or Outlook calendar.</p>
+          </div>
+          <button class="btn btn-outline-white text-nowrap" id="btn-subscribe-cal">
+            Sync Calendar (.ics)
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <!-- Brand Info -->
+        <div class="footer-col-brand">
+          <img src="assets/images/logo.jpg" alt="Royal Temple Logo" class="footer-logo">
+          <h3>Royal Temple Worship Centre</h3>
+          <div class="tagline">The Church of Pentecost</div>
+          <p>A glorious assembly dedicated to holy living, spirit-filled worship, and global evangelism.</p>
+          <div class="social-links">
+            <a href="#" class="social-icon-btn" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+            <a href="#" class="social-icon-btn" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg></a>
+            <a href="#" class="social-icon-btn" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+          </div>
+        </div>
+
+        <!-- Service Times -->
+        <div>
+          <h4 class="footer-h4">Service Times</h4>
+          <div class="service-time-item">
+            <span class="service-time-name">Sunday Worship Service</span>
+            <span class="service-time-clock">8:00 AM – 11:30 AM</span>
+          </div>
+          <div class="service-time-item">
+            <span class="service-time-name">Wednesday Bible Study</span>
+            <span class="service-time-clock">6:30 PM – 8:30 PM</span>
+          </div>
+          <div class="service-time-item">
+            <span class="service-time-name">Friday Prayer Tower</span>
+            <span class="service-time-clock">6:30 PM – 9:00 PM</span>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h4 class="footer-h4">Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="about.html">About & Statement of Faith</a></li>
+            <li><a href="ministries.html">Church Ministries</a></li>
+            <li><a href="sermons.html">Sermons Archive</a></li>
+            <li><a href="events.html">Upcoming Events</a></li>
+            <li><a href="giving.html">Online Giving</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact Info -->
+        <div>
+          <h4 class="footer-h4">Get in Touch</h4>
+          <p class="footer-text-block">
+            <strong>Address:</strong><br>
+            Royal Temple Worship Centre Complex,<br>
+            The Church of Pentecost.
+          </p>
+          <p class="footer-text-block">
+            <strong>Phone:</strong> +233 (0) 30 123 4567<br>
+            <strong>Email:</strong> info@royaltemple.org
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Copyright -->
+    <div class="footer-bottom">
+      <div class="container footer-bottom-content">
+        <div>
+          &copy; <span id="current-year">2026</span> Royal Temple Worship Centre — The Church of Pentecost. All Rights Reserved.
+        </div>
+        <div>
+          Affiliated with <a href="https://thecophq.org" target="_blank" rel="noopener noreferrer" class="cop-link">The Church of Pentecost International (thecophq.org)</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+  <script src="js/pages/events.js"></script>
+</body>
+</html>

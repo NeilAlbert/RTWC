@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Dashboard | Admin — Royal Temple Worship Centre</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="admin-sidebar" id="admin-sidebar"></aside>
+
+    <div class="admin-main">
+      <header class="admin-topbar" id="admin-topbar"></header>
+
+      <main class="admin-content">
+        <div class="page-head">
+          <h1>Dashboard</h1>
+          <p>Overview of site content and pending items.</p>
+        </div>
+
+        <div class="alert alert-error" id="dashboard-error" role="alert"></div>
+
+        <div class="stats-grid">
+          <div class="stat-card" id="stat-sermons">
+            <div class="stat-label">Sermons</div>
+            <div class="stat-value">…</div>
+            <div class="stat-note">Total in archive</div>
+          </div>
+          <div class="stat-card" id="stat-events">
+            <div class="stat-label">Upcoming Events</div>
+            <div class="stat-value">…</div>
+            <div class="stat-note">Scheduled ahead</div>
+          </div>
+          <div class="stat-card" id="stat-messages">
+            <div class="stat-label">Unread Messages</div>
+            <div class="stat-value">…</div>
+            <div class="stat-note">Contact form — new</div>
+          </div>
+          <div class="stat-card" id="stat-prayers">
+            <div class="stat-label">New Prayer Requests</div>
+            <div class="stat-value">…</div>
+            <div class="stat-note">Awaiting prayer</div>
+          </div>
+          <div class="stat-card" id="stat-newsletter">
+            <div class="stat-label">Newsletter Subscribers</div>
+            <div class="stat-value">…</div>
+            <div class="stat-note">Total emails</div>
+          </div>
+        </div>
+
+        <div class="panel panel-mt">
+          <div class="panel-title">Quick Actions</div>
+          <p class="panel-sub-text">
+            Use the navigation on the left to manage site content, messages, and giving records.
+          </p>
+          <div class="quick-actions">
+            <a class="btn btn-primary" href="settings.html">Edit Site Settings</a>
+            <a class="btn btn-outline" href="sermons.html">Manage Sermons</a>
+            <a class="btn btn-outline" href="events.html">Manage Events</a>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/adminApi.js"></script>
+  <script src="js/adminAuth.js"></script>
+  <script src="js/pages/dashboard.js"></script>
+</body>
+</html>

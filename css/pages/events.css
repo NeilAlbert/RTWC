@@ -1,0 +1,397 @@
+/* ==========================================================================
+   THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
+   Events Page Specific Stylesheet (css/pages/events.css)
+   ========================================================================== */
+
+/* Page Hero */
+.page-hero {
+  background-color: var(--primary-navy-dark);
+  color: var(--text-light);
+  padding: 4rem 0 3.5rem 0;
+  text-align: center;
+  border-bottom: 4px solid var(--accent-gold);
+}
+
+.page-hero-title {
+  color: var(--text-light);
+  font-size: 2.75rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.page-hero-desc {
+  max-width: 720px;
+  margin: 0 auto;
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+/* Events Controls Section (View Toggle + Category Filters) */
+.events-controls-section {
+  padding: 3rem 0 1.5rem 0;
+  background-color: var(--bg-white);
+}
+
+.view-toggle-bar {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.75rem;
+}
+
+.view-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-color);
+  padding: 0.7rem 1.6rem;
+  border-radius: var(--radius-full);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--primary-navy);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.view-tab svg {
+  color: var(--accent-gold);
+}
+
+.view-tab:hover {
+  border-color: var(--accent-gold);
+  background-color: var(--accent-gold-light);
+}
+
+.view-tab.active {
+  background-color: var(--primary-navy);
+  color: var(--text-light);
+  border-color: var(--primary-navy);
+  box-shadow: var(--shadow-sm);
+}
+
+.view-tab.active svg {
+  color: var(--accent-gold-hover);
+}
+
+.badge-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 0.5rem;
+  border-radius: var(--radius-full);
+  background-color: var(--accent-gold);
+  color: var(--text-light);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.view-tab.active .badge-count {
+  background-color: var(--accent-gold-hover);
+  color: var(--primary-navy-dark);
+}
+
+/* Category Tabs Section */
+.events-category-section {
+  padding: 2.5rem 0 1.5rem 0;
+}
+
+.category-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.category-tab {
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-color);
+  padding: 0.65rem 1.5rem;
+  border-radius: var(--radius-full);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary-navy);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.category-tab:hover, .category-tab.active {
+  background-color: var(--primary-navy);
+  color: var(--text-light);
+  border-color: var(--primary-navy);
+  box-shadow: var(--shadow-sm);
+}
+
+.category-tab.active {
+  border-color: var(--accent-gold);
+}
+
+/* Events Grid */
+.events-grid-section {
+  padding: 2rem 0 5rem 0;
+  background-color: var(--bg-main);
+}
+
+.events-section-header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 2.5rem auto;
+}
+
+.events-view-heading {
+  font-size: 2rem;
+  color: var(--primary-navy);
+  margin-bottom: 0.4rem;
+}
+
+.events-view-sub {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.events-full-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+/* No Results Message */
+.no-results {
+  display: none; /* Hidden by default; toggled via js/pages/events.js */
+  text-align: center;
+  padding: 4rem 1.5rem;
+  background-color: var(--bg-white);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.no-results h3 {
+  color: var(--primary-navy);
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.no-results p {
+  color: var(--text-muted);
+  font-size: 0.98rem;
+}
+
+.event-item-card {
+  background-color: var(--bg-white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+}
+
+.event-item-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-gold-border);
+}
+
+.event-item-header {
+  background-color: var(--primary-navy);
+  color: var(--text-light);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid var(--accent-gold);
+}
+
+.event-date-pill {
+  background-color: var(--accent-gold);
+  color: var(--text-light);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.85rem;
+  text-align: center;
+  min-width: 65px;
+}
+
+.event-date-month {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.event-date-day {
+  display: block;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.event-type-badge {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: var(--accent-gold-light);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.event-item-body {
+  padding: 1.75rem 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.event-item-title {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--primary-navy);
+  line-height: 1.35;
+}
+
+.event-item-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+}
+
+.event-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.event-meta-row svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent-gold);
+  flex-shrink: 0;
+}
+
+.event-item-desc {
+  font-size: 0.94rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 1.75rem;
+  flex-grow: 1;
+}
+
+.event-item-footer {
+  margin-top: auto;
+}
+
+/* Past Event Photo Recap Strip */
+.event-photo-box {
+  height: 170px;
+  overflow: hidden;
+  border-bottom: 3px solid var(--accent-gold);
+}
+
+.event-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.event-item-card:hover .event-photo {
+  transform: scale(1.05);
+}
+
+/* Past Event Concluded Tag */
+.event-concluded-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  justify-content: center;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-color);
+  background-color: var(--accent-gold-light);
+  color: var(--primary-navy);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.event-concluded-tag svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent-gold);
+}
+
+/* Calendar Subscribe Note */
+.calendar-note-section {
+  padding-bottom: 5rem;
+}
+
+.calendar-note-box {
+  background-color: var(--primary-navy);
+  color: var(--text-light);
+  padding: 3rem;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  border: 1px solid var(--accent-gold-border);
+}
+
+.note-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-full);
+  background-color: var(--accent-gold);
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.note-icon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.note-text h3 {
+  color: var(--text-light);
+  font-size: 1.6rem;
+  margin-bottom: 0.4rem;
+}
+
+.note-text p {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .events-full-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .calendar-note-box {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .events-full-grid {
+    grid-template-columns: 1fr;
+  }
+}

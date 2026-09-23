@@ -1,0 +1,539 @@
+/* ==========================================================================
+   THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
+   About Page Specific Stylesheet (css/pages/about.css)
+   ========================================================================== */
+
+/* Page Hero */
+.page-hero {
+  background-color: var(--primary-navy-dark);
+  color: var(--text-light);
+  padding: 4rem 0 3.5rem 0;
+  text-align: center;
+  border-bottom: 4px solid var(--accent-gold);
+}
+
+.page-hero-title {
+  color: var(--text-light);
+  font-size: 2.75rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.page-hero-desc {
+  max-width: 720px;
+  margin: 0 auto;
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+/* About History Section */
+.about-history-section {
+  padding: 5rem 0;
+  background-color: var(--bg-white);
+}
+
+.about-history-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+.about-history-text h2 {
+  font-size: 2.25rem;
+  margin: 0.5rem 0 1.25rem 0;
+}
+
+.about-history-text p {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  margin-bottom: 1.25rem;
+  line-height: 1.7;
+}
+
+.about-history-image {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.history-img {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+}
+
+.history-stat-overlay {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  background-color: var(--primary-navy-glass);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  padding: 1.25rem;
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--accent-gold);
+  color: var(--text-light);
+}
+
+.stat-number {
+  font-family: 'Outfit', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent-gold);
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Mission Vision Section */
+.mission-vision-section {
+  padding: 5rem 0;
+  background-color: var(--bg-main);
+}
+
+.mv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.mv-card {
+  background-color: var(--bg-white);
+  padding: 2.5rem 2rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-normal);
+}
+
+.mv-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-gold-border);
+}
+
+.mv-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+  background-color: var(--accent-gold-light);
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.mv-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.mv-card h3 {
+  font-size: 1.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.mv-card p {
+  color: var(--text-muted);
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+/* Statement of Faith Accordion */
+.faith-section {
+  padding: 5rem 0;
+  background-color: var(--bg-white);
+}
+
+.accordion-container {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.accordion-item {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background-color: var(--bg-white);
+  transition: var(--transition-fast);
+}
+
+.accordion-item.active {
+  border-color: var(--accent-gold);
+  box-shadow: var(--shadow-sm);
+}
+
+.accordion-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: 1rem;
+  transition: var(--transition-fast);
+}
+
+.accordion-header:hover {
+  background-color: var(--accent-gold-light);
+}
+
+.accordion-number {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  color: var(--accent-gold);
+  font-size: 1.1rem;
+  min-width: 30px;
+}
+
+.accordion-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--primary-navy);
+  flex-grow: 1;
+}
+
+.accordion-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--primary-navy);
+  transition: transform 0.3s ease;
+}
+
+.accordion-item.active .accordion-icon {
+  transform: rotate(180deg);
+  color: var(--accent-gold);
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+  background-color: #FCFBF9;
+  padding: 0 1.5rem;
+}
+
+.accordion-item.active .accordion-content {
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
+}
+
+.accordion-content p {
+  color: var(--text-muted);
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+/* Leadership Section */
+.leadership-section {
+  padding: 5rem 0;
+  background-color: var(--bg-main);
+}
+
+.leadership-subsection {
+  margin-top: 2.5rem;
+}
+
+.subsection-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.5rem;
+  color: var(--primary-navy);
+  margin-bottom: 0.5rem;
+  position: relative;
+  display: inline-block;
+}
+
+.subsection-title::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 3px;
+  background-color: var(--accent-gold);
+  margin-top: 0.35rem;
+  border-radius: var(--radius-full);
+}
+
+.subsection-desc {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Pastor Featured Card */
+.pastor-featured-card {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  background-color: var(--primary-navy);
+  color: var(--text-light);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--accent-gold);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  margin-top: 1.5rem;
+}
+
+.pastor-featured-image-box {
+  position: relative;
+  height: 100%;
+  min-height: 320px;
+}
+
+.pastor-featured-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pastor-featured-body {
+  padding: 2.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.pastor-featured-name {
+  color: var(--text-light);
+  font-size: 2rem;
+  margin-top: 0.3rem;
+  margin-bottom: 0.2rem;
+}
+
+.pastor-featured-body .leader-title {
+  color: var(--accent-gold-light);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+}
+
+.pastor-featured-body .leader-bio {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+/* Executive Leadership Grid */
+.executive-leadership-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.leader-card-executive .leader-image-box {
+  height: 280px;
+}
+
+/* General Leadership Grid */
+.leadership-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.leader-card {
+  background-color: var(--bg-white);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+}
+
+.leader-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.leader-image-box {
+  position: relative;
+  height: 240px;
+  overflow: hidden;
+}
+
+.leader-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.leader-role-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background-color: var(--primary-navy-glass);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  color: var(--accent-gold);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--accent-gold-border);
+}
+
+.leader-role-badge.badge-gold {
+  background-color: var(--accent-gold);
+  color: var(--text-light);
+  border: none;
+}
+
+.leader-role-badge.badge-navy {
+  background-color: var(--primary-navy);
+  color: var(--accent-gold-light);
+}
+
+.leader-card-body {
+  padding: 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.leader-name {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+  color: var(--primary-navy);
+}
+
+.leader-title {
+  color: var(--accent-gold);
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 0.85rem;
+}
+
+.leader-ministry-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-navy);
+  background-color: var(--accent-gold-light);
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.85rem;
+  align-self: flex-start;
+}
+
+.leader-ministry-tag svg {
+  width: 15px;
+  height: 15px;
+  color: var(--accent-gold);
+}
+
+.leader-bio {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.leader-action {
+  margin-top: auto;
+  padding-top: 1.25rem;
+}
+
+.btn-link-gold {
+  color: var(--accent-gold);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.btn-link-gold:hover {
+  color: var(--primary-navy);
+  text-decoration: underline;
+}
+
+/* Affiliation Section */
+.affiliation-section {
+  padding: 4rem 0 5rem 0;
+}
+
+.affiliation-box {
+  background-color: var(--primary-navy);
+  border-radius: var(--radius-lg);
+  padding: 3.5rem;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  border: 1px solid rgba(184, 134, 11, 0.3);
+}
+
+.affiliation-content h2 {
+  color: var(--text-light);
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.affiliation-content p {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 1.05rem;
+  max-width: 650px;
+}
+
+/* Shared Spacing Utilities (used by about.html leadership layout) */
+.margin-top-2 {
+  margin-top: 2rem;
+}
+
+.margin-bottom-3 {
+  margin-bottom: 3rem;
+}
+
+/* Mobile Breakpoints */
+@media (max-width: 1024px) {
+  .about-history-grid {
+    grid-template-columns: 1fr;
+  }
+  .mv-grid {
+    grid-template-columns: 1fr;
+  }
+  .pastor-featured-card {
+    grid-template-columns: 1fr;
+  }
+  .executive-leadership-grid {
+    grid-template-columns: 1fr;
+  }
+  .leadership-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .affiliation-box {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .leadership-grid {
+    grid-template-columns: 1fr;
+  }
+  .pastor-featured-body {
+    padding: 1.75rem 1.25rem;
+  }
+  .pastor-featured-name {
+    font-size: 1.5rem;
+  }
+  .page-hero-title {
+    font-size: 2rem;
+  }
+}
