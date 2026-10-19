@@ -21,6 +21,7 @@ const facebookLiveRoutes = require('./routes/facebookLive');
 const facebookGalleryRoutes = require('./routes/facebookGallery');
 const copNewsRoutes = require('./routes/copNews');
 const siteSettingsRoutes = require('./routes/siteSettings');
+const testimoniesRoutes = require('./routes/testimonies');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
 
@@ -93,6 +94,7 @@ app.use('/api/facebook', facebookLiveRoutes);
 app.use('/api/facebook', facebookGalleryRoutes);
 app.use('/api/cop-news', copNewsRoutes);
 app.use('/api/settings', siteSettingsRoutes);
+app.use('/api/testimonies', testimoniesRoutes);
 
 // -----------------------------------------------------------------------------
 // 404 + centralized error handling (MUST be last)

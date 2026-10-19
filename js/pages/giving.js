@@ -1,19 +1,16 @@
-/**
- * THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
- * Online Giving Page Specific JavaScript (js/pages/giving.js)
- *
- * Flow: the donor fills the form -> we POST to /api/giving/initiate ->
- * the backend creates a pending giving_records row and initializes a Paystack
- * transaction -> we redirect the donor's browser to Paystack's hosted checkout
- * (authorization_url). After payment, Paystack redirects back to
- * giving-callback.html, which calls GET /api/giving/verify/:reference.
- */
+// THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
+// Online Giving Page Specific JavaScript (js/pages/giving.js)
+// Connects to /api/giving/initiate backend endpoint for Paystack payment initialization.
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Base URL for the API. Empty string = same origin. Change this if the API
-  // is hosted on a different domain (e.g. 'https://api.royaltemple.org').
-  const API_BASE = '';
+  /* ==========================================================================
+     CONFIGURATION
+     ========================================================================== */
+  const API_BASE = '';  // Change this if API is hosted on a different domain
 
+  /* ==========================================================================
+     DOM REFERENCES
+     ========================================================================== */
   const form = document.getElementById('giving-form');
   const customAmountInput = document.getElementById('custom-amount');
   const presetBtns = document.querySelectorAll('.btn-preset');
@@ -25,7 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const nameInput = document.getElementById('giver-name');
   const emailInput = document.getElementById('giver-email');
 
-  // Preset Amount Button Handlers
+  /* ==========================================================================
+     PRESET AMOUNT BUTTON HANDLERS
+     ========================================================================== */
   presetBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       presetBtns.forEach(b => b.classList.remove('active'));
@@ -46,6 +45,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* ==========================================================================
+   HELPER FUNCTIONS
+   ========================================================================== */
   function showError(message) {
     if (!errorBox) return;
     errorBox.textContent = message;
@@ -66,7 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Form Submission Handler
+  /* ==========================================================================
+   FORM SUBMISSION HANDLER
+   ========================================================================== */
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -77,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const category = categorySelect ? categorySelect.value : '';
       const amount = Number(customAmountInput ? customAmountInput.value : 0);
 
-      // Client-side checks (the server validates again).
+      // Client-side checks (the server validates again)
       if (name.length < 2) {
         showError('Please enter your full name.');
         nameInput && nameInput.focus();
@@ -106,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch(`${API_BASE}/api/giving/initiate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, amount, category }),
+          body: JSON.stringify({ name, email, amount, category })
         });
 
         const data = await response.json().catch(() => ({}));
@@ -115,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
           throw new Error(data.message || 'Something went wrong. Please try again.');
         }
 
-        // Redirect the donor to Paystack's secure hosted checkout.
+        // Redirect the donor to Paystack's secure hosted checkout
         if (data.data && data.data.authorizationUrl) {
           window.location.href = data.data.authorizationUrl;
           return; // page will navigate away
@@ -127,4 +131,4 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-});
+});

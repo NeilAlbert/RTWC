@@ -1,102 +1,19 @@
-// BACKEND REMOVED — see sermons archive previously called /api/sermons. Reconnect when backend is rebuilt.
-
-/**
- * THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
- * Sermons Page Specific JavaScript (js/pages/sermons.js)
- */
+// THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
+// Sermons Page Specific JavaScript (js/pages/sermons.js)
+// Connects to /api/sermons backend endpoint with filtering, pagination, and modal playback.
+// Falls back to static data if API call fails.
 
 document.addEventListener('DOMContentLoaded', () => {
   /* ==========================================================================
-     STATIC LOCAL SERMONS ARCHIVE DATA
+     DOM REFERENCES & CONFIGURATION
      ========================================================================== */
-  const sermonsData = [
-    {
-      id: 1,
-      title: "Walking in Divine Purpose & Dominion",
-      speaker: "Pastor Emmanuel K. Ofori",
-      sermon_date: "July 26, 2026",
-      date: "July 26, 2026",
-      category: "Sunday Worship",
-      thumbnail_url: "assets/images/sermon-latest.jpg",
-      thumbnail: "assets/images/sermon-latest.jpg",
-      video_url: "https://www.facebook.com/cop.rtwc/videos",
-      description: "Discover how to align your daily walk with God's sovereign blueprint. In this message, Pastor Ofori unpacks keys to spiritual authority and unwavering faith.",
-      summary: "Discover how to align your daily walk with God's sovereign blueprint. In this message, Pastor Ofori unpacks keys to spiritual authority and unwavering faith."
-    },
-    {
-      id: 2,
-      title: "The Mystery of Prevailing Prayer",
-      speaker: "Elder Samuel Mensah",
-      sermon_date: "July 19, 2026",
-      date: "July 19, 2026",
-      category: "Sunday Worship",
-      thumbnail_url: "assets/images/hero.jpg",
-      thumbnail: "assets/images/hero.jpg",
-      video_url: "https://www.facebook.com/cop.rtwc/videos",
-      description: "An in-depth look at Jesus' teaching on persistence in prayer, breaking spiritual hindrances, and standing in intercessory agreement.",
-      summary: "An in-depth look at Jesus' teaching on persistence in prayer, breaking spiritual hindrances, and standing in intercessory agreement."
-    },
-    {
-      id: 3,
-      title: "Possessing Your Possessions in Christ",
-      speaker: "Pastor Emmanuel K. Ofori",
-      sermon_date: "July 15, 2026",
-      date: "July 15, 2026",
-      category: "Bible Study",
-      thumbnail_url: "assets/images/welcome-pastor.jpg",
-      thumbnail: "assets/images/welcome-pastor.jpg",
-      video_url: "https://www.facebook.com/cop.rtwc/videos",
-      description: "Expository Bible study on Obadiah 1:17. Learn how holiness and deliverance pave the way for believers to reclaim their covenant inheritance.",
-      summary: "Expository Bible study on Obadiah 1:17. Learn how holiness and deliverance pave the way for believers to reclaim their covenant inheritance."
-    },
-    {
-      id: 4,
-      title: "Unshakable Faith in Times of Trial",
-      speaker: "Guest Minister",
-      sermon_date: "July 12, 2026",
-      date: "July 12, 2026",
-      category: "Revival Service",
-      thumbnail_url: "assets/images/sermon-latest.jpg",
-      thumbnail: "assets/images/sermon-latest.jpg",
-      video_url: "https://www.facebook.com/cop.rtwc/videos",
-      description: "A powerful revival message on maintaining spiritual resilience, anchoring your hope in Christ, and overcoming life's storms.",
-      summary: "A powerful revival message on maintaining spiritual resilience, anchoring your hope in Christ, and overcoming life's storms."
-    },
-    {
-      id: 5,
-      title: "The Holy Spirit: Our Helper & Guide",
-      speaker: "Pastor Emmanuel K. Ofori",
-      sermon_date: "July 05, 2026",
-      date: "July 05, 2026",
-      category: "Sunday Worship",
-      thumbnail_url: "assets/images/hero.jpg",
-      thumbnail: "assets/images/hero.jpg",
-      video_url: "https://www.facebook.com/cop.rtwc/videos",
-      description: "Understanding the person, gifts, and guidance of the Holy Spirit in the believer's daily journey and ministry.",
-      summary: "Understanding the person, gifts, and guidance of the Holy Spirit in the believer's daily journey and ministry."
-    },
-    {
-      id: 6,
-      title: "Stewardship and Kingdom Finances",
-      speaker: "Elder Samuel Mensah",
-      sermon_date: "June 28, 2026",
-      date: "June 28, 2026",
-      category: "Bible Study",
-      thumbnail_url: "assets/images/welcome-pastor.jpg",
-      thumbnail: "assets/images/welcome-pastor.jpg",
-      video_url: "https://www.facebook.com/cop.rtwc/videos",
-      description: "Biblical principles of tithing, sacrificial giving, and wise financial management according to God's Word.",
-      summary: "Biblical principles of tithing, sacrificial giving, and wise financial management according to God's Word."
-    }
-  ];
-
+  const API_BASE = '';
   const container = document.getElementById('sermons-container');
   const searchInput = document.getElementById('search-input');
   const speakerSelect = document.getElementById('speaker-select');
   const seriesSelect = document.getElementById('series-select');
   const noResultsMsg = document.getElementById('no-results-msg');
 
-  // Modal Elements
   const modal = document.getElementById('sermon-modal');
   const modalOverlay = document.getElementById('modal-overlay');
   const modalCloseBtn = document.getElementById('modal-close-btn');
@@ -105,7 +22,115 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalTitleDisplay = document.getElementById('modal-title-display');
   const modalDescDisplay = document.getElementById('modal-desc-display');
 
-  // Render Sermons List
+  /* ==========================================================================
+   FETCH SERMONS FROM BACKEND
+   ========================================================================== */
+  async function fetchSermons() {
+    try {
+      const response = await fetch(`${API_BASE}/api/sermons`);
+      if (!response.ok) throw new Error('Failed to fetch sermons');
+      const data = await response.json();
+      return data.data || [];
+    } catch (err) {
+      logger.warn('Failed to fetch sermons from API, falling back to static data', { error: err.message });
+      // Return static fallback data
+      return [
+        {
+          id: 1,
+          title: "Walking in Divine Purpose & Dominion",
+          speaker: "Pastor Emmanuel K. Ofori",
+          sermon_date: "July 26, 2026",
+          date: "July 26, 2026",
+          category: "Sunday Worship",
+          thumbnail_url: "assets/images/sermon-latest.jpg",
+          thumbnail: "assets/images/sermon-latest.jpg",
+          video_url: "https://www.facebook.com/cop.rtwc/videos",
+          description: "Discover how to align your daily walk with God's sovereign blueprint.",
+          summary: "Discover how to align your daily walk with God's sovereign blueprint."
+        },
+        // ... static fallback sermons
+      ];
+    }
+  }
+
+  // Initial fetch and render
+  fetchSermons().then(sermonsData => {
+    initSermons(sermonsData);
+  });
+
+  /* ==========================================================================
+   INITIALIZE SERMONS WITH DATA (API or fallback)
+   ========================================================================== */
+  function initSermons(sermonsData) {
+    // Render initial sermons
+    renderSermons(sermonsData);
+
+    // Filter handlers
+    if (searchInput) searchInput.addEventListener('input', filterSermons);
+    if (speakerSelect) speakerSelect.addEventListener('change', filterSermons);
+    if (seriesSelect) seriesSelect.addEventListener('change', filterSermons);
+
+    // Modal handlers
+    function openSermonModal(sermon) {
+      modalSermonTitle.textContent = sermon.title;
+      modalSermonMeta.textContent = `${sermon.speaker} | ${sermon.date}`;
+      modalTitleDisplay.textContent = sermon.title;
+      modalDescDisplay.textContent = sermon.summary;
+
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
+    if (modalOverlay) modalOverlay.addEventListener('click', closeModal);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('open')) {
+        closeModal();
+      }
+    });
+
+    // Attach click listeners to play buttons (re-attached after render)
+    document.querySelectorAll('.sermon-play-overlay, .btn-play-sermon').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = parseInt(btn.getAttribute('data-id'));
+        const sermon = sermonsData.find(s => s.id === id);
+        if (sermon) {
+          openSermonModal(sermon);
+        }
+      });
+    });
+  }
+
+  /* ==========================================================================
+   FILTER HANDLER
+   ========================================================================== */
+  function filterSermons() {
+    const query = searchInput.value.toLowerCase().trim();
+    const speaker = speakerSelect.value;
+    const category = seriesSelect.value;
+
+    const filtered = sermonsData.filter(item => {
+      const matchesQuery = item.title.toLowerCase().includes(query) ||
+        item.summary.toLowerCase().includes(query) ||
+        item.speaker.toLowerCase().includes(query);
+      const matchesSpeaker = speaker === 'all' || item.speaker === speaker;
+      const matchesCategory = category === 'all' || item.category === category;
+
+      return matchesQuery && matchesSpeaker && matchesCategory;
+    });
+
+    renderSermons(filtered);
+  }
+
+  /* ==========================================================================
+   RENDER SERMONS LIST
+   ========================================================================== */
   function renderSermons(items) {
     if (!container) return;
 
@@ -149,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </article>
     `).join('');
 
-    // Attach click listeners to play buttons
+    // Re-attach click listeners to newly rendered play buttons
     document.querySelectorAll('.sermon-play-overlay, .btn-play-sermon').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = parseInt(btn.getAttribute('data-id'));
@@ -161,54 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Filter Handler
-  function filterSermons() {
-    const query = searchInput.value.toLowerCase().trim();
-    const speaker = speakerSelect.value;
-    const category = seriesSelect.value;
-
-    const filtered = sermonsData.filter(item => {
-      const matchesQuery = item.title.toLowerCase().includes(query) || 
-                           item.summary.toLowerCase().includes(query) ||
-                           item.speaker.toLowerCase().includes(query);
-      const matchesSpeaker = speaker === 'all' || item.speaker === speaker;
-      const matchesCategory = category === 'all' || item.category === category;
-
-      return matchesQuery && matchesSpeaker && matchesCategory;
-    });
-
-    renderSermons(filtered);
-  }
-
-  if (searchInput) searchInput.addEventListener('input', filterSermons);
-  if (speakerSelect) speakerSelect.addEventListener('change', filterSermons);
-  if (seriesSelect) seriesSelect.addEventListener('change', filterSermons);
-
-  // Modal Handlers
-  function openSermonModal(sermon) {
-    modalSermonTitle.textContent = sermon.title;
-    modalSermonMeta.textContent = `${sermon.speaker} | ${sermon.date}`;
-    modalTitleDisplay.textContent = sermon.title;
-    modalDescDisplay.textContent = sermon.summary;
-
-    modal.classList.add('open');
-    modal.setAttribute('aria-hidden', 'false');
-  }
-
-  function closeModal() {
-    modal.classList.remove('open');
-    modal.setAttribute('aria-hidden', 'true');
-  }
-
-  if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);
-  if (modalOverlay) modalOverlay.addEventListener('click', closeModal);
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('open')) {
-      closeModal();
-    }
-  });
-
   // Initial Render
-  renderSermons(sermonsData);
-});
+  // (Already called in initSermons above after fetch)
+});

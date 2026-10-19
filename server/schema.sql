@@ -1,11 +1,8 @@
--- =============================================================================
+-- ============================================================================
 -- ROYAL TEMPLE WORSHIP CENTRE (THE CHURCH OF PENTECOST) — DATABASE SCHEMA
 -- Run against the Aiven MySQL database, e.g.:
 --   mysql --host=$DB_HOST --port=$DB_PORT --user=$DB_USER --password=$DB_PASSWORD $DB_NAME < schema.sql
---
--- All tables use InnoDB + utf8mb4. All application queries must use
--- parameterized placeholders (?) — never string concatenation.
--- =============================================================================
+-- ============================================================================
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -60,6 +57,39 @@ CREATE TABLE IF NOT EXISTS events (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------
+-- testimonies — user-submitted testimonies with moderation workflow
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS testimonies (
+  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name          VARCHAR(150) NOT NULL,
+  email         VARCHAR(255) NOT NULL,
+  testimony     TEXT         NOT NULL,
+  permission_to_publish TINYINT(1) NOT NULL DEFAULT 0,
+  status        ENUM('pending','approved','rejected','published') NOT NULL DEFAULT 'pending',
+  created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_testimony_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------------
+-- announcements — admin-created announcements with publish/expiry dates
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS announcements (
+  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  title         VARCHAR(255) NOT NULL,
+  content       TEXT         NOT NULL,
+  image_url     VARCHAR(500),
+  publish_date  DATETIME     NOT NULL,
+  expiry_date   DATETIME,
+  priority      ENUM('low','normal','high') NOT NULL DEFAULT 'normal',
+  published     TINYINT(1)   NOT NULL DEFAULT 0,
+  created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_announcement_published (published),
+  KEY idx_announcement_expiry (expiry_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------------
 -- ministries
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS ministries (
@@ -80,7 +110,7 @@ CREATE TABLE IF NOT EXISTS leadership (
   id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
   name          VARCHAR(150) NOT NULL,
   role          ENUM('pastor','pastors_wife','presiding_elder','secretary',
-                      'elder','deacon','deaconess','ministry_leader') NOT NULL,
+              'elder','deacon','deaconess','ministry_leader') NOT NULL,
   ministry_id   INT UNSIGNED NULL,
   photo_url     VARCHAR(500),
   bio           TEXT,
@@ -144,12 +174,10 @@ CREATE TABLE IF NOT EXISTS giving_records (
   KEY idx_giving_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -----------------------------------------------------------------------------
 -- Migration (idempotent — safe to run every time, including fresh installs):
 -- adds payment_channel to EXISTING giving_records tables that were created
 -- before the column existed. Fresh installs already have it from the CREATE
 -- TABLE above, so the dynamic check simply no-ops.
--- -----------------------------------------------------------------------------
 SET @rtwc_col = (
   SELECT COUNT(*) FROM information_schema.COLUMNS
   WHERE TABLE_SCHEMA = DATABASE()
@@ -189,14 +217,14 @@ CREATE TABLE IF NOT EXISTS site_settings (
   UNIQUE KEY uq_site_settings_key (setting_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -----------------------------------------------------------------------------
 -- Seed sensible starting values for site_settings so the site is never blank.
 -- Uses INSERT ... ON DUPLICATE KEY UPDATE with a no-op so re-running the schema
 -- never overwrites admin edits.
--- -----------------------------------------------------------------------------
 INSERT INTO site_settings (setting_key, setting_value) VALUES
   ('welcome_message', 'Welcome to Royal Temple Worship Centre — a glorious assembly dedicated to holy living, spirit-filled worship, and global evangelism.'),
-  ('service_times', 'Sunday Worship Service: 8:00 AM – 11:30 AM\nWednesday Bible Study: 6:30 PM – 8:30 PM\nFriday Prayer Tower: 6:30 PM – 9:00 PM'),
+  ('service_times', 'Sunday Worship Service: 8:00 AM – 11:30 AM
+Wednesday Bible Study: 6:30 PM – 8:30 PM
+Friday Prayer Tower: 6:30 PM – 9:00 PM'),
   ('church_address', 'Royal Temple Worship Centre Complex, The Church of Pentecost'),
   ('phone_number', '+233 (0) 30 123 4567'),
   ('helpline_number', '+233 (0) 30 123 4567'),
@@ -206,4 +234,4 @@ INSERT INTO site_settings (setting_key, setting_value) VALUES
   ('hero_tagline', 'A House of Prayer, Worship and Evangelism')
 ON DUPLICATE KEY UPDATE setting_key = setting_key;
 
-SET FOREIGN_KEY_CHECKS = 1;
+SET FOREIGN_KEY_CHECKS = 1;

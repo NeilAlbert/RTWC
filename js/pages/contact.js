@@ -1,24 +1,35 @@
-// BACKEND REMOVED — see contact form and prayer request previously called /api/contact and /api/prayer-requests. Reconnect when backend is rebuilt.
-
-/**
- * THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
- * Contact & Prayer Request Page Specific JavaScript (js/pages/contact.js)
- */
+// THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
+// Contact & Prayer Request Page Specific JavaScript (js/pages/contact.js)
+// Connects to /api/contact and /api/prayer-requests backend endpoints.
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. General Contact Form Client-Side Validation & Handler
+  /* ==========================================================================
+     1. GENERAL CONTACT FORM
+     ========================================================================== */
   const contactForm = document.getElementById('contact-form');
   const nameInput = document.getElementById('contact-name');
   const emailInput = document.getElementById('contact-email');
   const messageInput = document.getElementById('contact-message');
-
   const errName = document.getElementById('err-name');
   const errEmail = document.getElementById('err-email');
   const errMessage = document.getElementById('err-message');
   const contactSuccessMsg = document.getElementById('contact-success-msg');
 
+  /* ==========================================================================
+     PRAYER REQUEST FORM
+     ========================================================================== */
+  const prayerForm = document.getElementById('prayer-form');
+  const prayerInput = document.getElementById('prayer-request');
+  const errPrayer = document.getElementById('err-prayer');
+  const prayerSuccessMsg = document.getElementById('prayer-success-msg');
+
+  const API_BASE = '';
+
+  /* ==========================================================================
+     GENERAL CONTACT FORM HANDLER
+     ========================================================================== */
   if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
+    contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       let isValid = true;
 
@@ -50,29 +61,43 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (isValid) {
-        /* 
-          BACKEND REMOVED NOTE:
-          This form currently displays an on-page confirmation message.
-          Reconnect to a real backend API (e.g. POST /api/contact) or a form service (e.g. Formspree) later.
-        */
-        contactForm.reset();
-        contactSuccessMsg.textContent = "Thank you, we'll be in touch.";
-        contactSuccessMsg.style.display = 'block';
-        setTimeout(() => {
-          contactSuccessMsg.style.display = 'none';
-        }, 8000);
+        try {
+          const response = await fetch(`${API_BASE}/api/contact`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: nameInput.value.trim(),
+              email: emailInput.value.trim(),
+              message: messageInput.value.trim()
+            })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Failed to send message');
+          }
+
+          contactForm.reset();
+          contactSuccessMsg.textContent = "Thank you — your message has been received.";
+          contactSuccessMsg.style.display = 'block';
+
+          // Hide success message after 8 seconds
+          setTimeout(() => {
+            contactSuccessMsg.style.display = 'none';
+          }, 8000);
+        } catch (err) {
+          showContactError(err.message || 'Something went wrong. Please try again.');
+        }
       }
     });
   }
 
-  // 2. Prayer Request Form Handler
-  const prayerForm = document.getElementById('prayer-form');
-  const prayerInput = document.getElementById('prayer-request');
-  const errPrayer = document.getElementById('err-prayer');
-  const prayerSuccessMsg = document.getElementById('prayer-success-msg');
-
+  /* ==========================================================================
+     PRAYER REQUEST FORM HANDLER
+     ========================================================================== */
   if (prayerForm) {
-    prayerForm.addEventListener('submit', (e) => {
+    prayerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       errPrayer.textContent = '';
 
@@ -81,17 +106,50 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      /* 
-        BACKEND REMOVED NOTE:
-        This form currently displays an on-page confirmation message.
-        Reconnect to a real backend API (e.g. POST /api/prayer-requests) or a form service (e.g. Formspree) later.
-      */
-      prayerForm.reset();
-      prayerSuccessMsg.textContent = "Thank you, we'll be in touch.";
-      prayerSuccessMsg.style.display = 'block';
-      setTimeout(() => {
-        prayerSuccessMsg.style.display = 'none';
-      }, 8000);
+      try {
+        const response = await fetch(`${API_BASE}/api/prayer-requests`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: prayerForm.querySelector('input[name="name"]').value.trim(),
+            request_text: prayerInput.value.trim(),
+            is_private: document.querySelector('input[name="is_private"]')?.checked || false
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || 'Failed to submit prayer request');
+        }
+
+        prayerForm.reset();
+        prayerSuccessMsg.textContent = "Thank you — your prayer request has been received.";
+        prayerSuccessMsg.style.display = 'block';
+
+        setTimeout(() => {
+          prayerSuccessMsg.style.display = 'none';
+        }, 8000);
+      } catch (err) {
+        showPrayerError(err.message || 'Something went wrong. Please try again.');
+      }
     });
   }
-});
+
+  /* ==========================================================================
+     ERROR HELPERS
+     ========================================================================== */
+  function showContactError(message) {
+    const errorBox = document.getElementById('contact-form-error');
+    if (!errorBox) return;
+    errorBox.textContent = message;
+    errorBox.hidden = false;
+  }
+
+  function showPrayerError(message) {
+    const errorBox = document.getElementById('prayer-form-error');
+    if (!errorBox) return;
+    errorBox.textContent = message;
+    errorBox.hidden = false;
+  }
+});

@@ -27,6 +27,15 @@ const prayerRequestsLimiter = rateLimit({
   message: { success: false, message: 'Too many requests. Please try again later.' },
 });
 
+/** Testimony submissions: max 5 requests per 15 minutes per IP. */
+const testimoniesLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders,
+  legacyHeaders,
+  message: { success: false, message: 'Too many requests. Please try again later.' },
+});
+
 /** Giving initiation: max 10 requests per 15 minutes per IP. */
 const givingLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -57,6 +66,7 @@ const authLimiter = rateLimit({
 module.exports = {
   contactLimiter,
   prayerRequestsLimiter,
+  testimoniesLimiter,
   givingLimiter,
   newsletterLimiter,
   authLimiter,
