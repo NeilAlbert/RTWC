@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Content Management | Admin — Royal Temple Worship Centre</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="admin-sidebar" id="admin-sidebar"></aside>
+    <div class="admin-main">
+      <header class="admin-topbar" id="admin-topbar"></header>
+      <main class="admin-content">
+        <div class="page-head content-page-head">
+          <div>
+            <h1 id="content-title">Content</h1>
+            <p id="content-description">Manage church website content.</p>
+          </div>
+          <button type="button" class="btn btn-primary" id="add-content">Add new</button>
+        </div>
+
+        <div class="alert alert-success" id="content-success" role="status" aria-live="polite"></div>
+        <div class="alert alert-error" id="content-error" role="alert"></div>
+
+        <section class="panel hidden" id="editor-panel" aria-labelledby="editor-title">
+          <h2 id="editor-title">Add item</h2>
+          <form id="content-form" novalidate>
+            <div class="form-grid" id="content-fields"></div>
+            <div class="form-actions content-form-actions">
+              <button type="submit" class="btn btn-primary" id="save-content">Save</button>
+              <button type="button" class="btn btn-outline" id="cancel-edit">Cancel</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="content-tools">
+            <label class="search-field" for="content-search">Search records
+              <input type="search" id="content-search" autocomplete="off">
+            </label>
+            <label class="status-filter hidden" for="status-filter">Status
+              <select id="status-filter"></select>
+            </label>
+          </div>
+          <p class="loading-row" id="content-loading">Loading records…</p>
+          <div class="table-wrap">
+            <table class="admin-table">
+              <thead id="content-head"></thead>
+              <tbody id="content-rows"></tbody>
+            </table>
+          </div>
+          <p class="empty-state hidden" id="content-empty">No matching records.</p>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="js/adminApi.js"></script>
+  <script src="js/adminAuth.js"></script>
+  <script src="js/pages/content.js"></script>
+</body>
+</html>

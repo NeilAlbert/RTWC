@@ -122,48 +122,61 @@
     <!-- LIVE STREAM PLAYER SECTION -->
     <section class="live-player-section">
       <div class="container">
-        <div class="live-player-layout">
-          
-          <!-- Main Player Container -->
-          <div class="player-main-card">
-            <!-- Dynamic State 1: LIVE BROADCAST SCREEN -->
-            <div class="stream-embed-container" id="live-stream-box">
-              <iframe
-                id="fb-live-iframe"
-                title="Royal Temple Worship Centre Facebook page embed"
-                src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fcop.rtwc&tabs=timeline&width=500&height=700&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=false"
-                width="100%"
-                height="100%"
-                class="fb-live-iframe"
-                scrolling="no"
-                frameborder="0"
-                allowfullscreen="true"
-                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share">
-              </iframe>
+        <div class="live-player-layout"><!-- Main Player Container -->
+            <div class="player-main-card">
+              <!-- Dynamic State 1: LIVE BROADCAST SCREEN -->
+              <div class="stream-embed-container" id="live-stream-box">
+                <!-- Platform selector for YouTube / Facebook -->
+                <div class="platform-selector" style="display: none; gap: 1rem; padding: 1rem; background: var(--bg-white); border-bottom: 1px solid var(--border-color);">
+                  <span>Select platform:</span>
+                  <select class="btn btn-outline" id="platform-select" aria-label="Select live stream platform">
+                    <option value="facebook">Facebook Live</option>
+                    <option value="youtube">YouTube Live</option>
+                  </select>
+                </div>
 
-              <!-- Fallback overlay shown when the service window is not active -->
-              <div class="stream-offline-overlay" id="stream-offline-overlay">
-                <div class="offline-content">
-                  <div class="offline-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                <!-- Facebook Embed -->
+                <div id="facebook-embed" class="fb-embed-container" style="display: block;">
+                  <iframe
+                    id="fb-live-iframe"
+                    title="Royal Temple Worship Centre Facebook page embed"
+                    src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fcop.rtwc&tabs=timeline&width=500&height=700&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=false"
+                    width="100%"
+                    height="100%"
+                    class="fb-live-iframe"
+                    scrolling="no"
+                    frameborder="0"
+                    allowfullscreen="true"
+                    allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share">
+                  </iframe>
+                </div>
+
+                <!-- YouTube Embed (hidden by default) -->
+                <div id="youtube-embed" class="yt-embed-container" style="display: none;">
+                  <p>Loading YouTube Live...</p>
+                  <div id="yt-embed-container"></div>
+                </div>
+
+                <!-- Fallback overlay shown when the service window is not active -->
+                <div class="stream-offline-overlay" id="stream-offline-overlay">
+                  <div class="offline-content">
+                    <div class="offline-icon">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+                    </div>
+                    <h3>Live Broadcast Is Currently Offline</h3>
+                    <p>Our next live service will appear here during service hours. <a href=\"https://www.facebook.com/cop.rtwc/live\" target=\"_blank\" rel=\"noopener noreferrer\">Watch on Facebook directly</a> or <a href=\"https://www.youtube.com/@RoyalTempleWorshipCentre\" target=\"_blank\" rel=\"noopener noreferrer\">visit YouTube channel</a>.</p>
+                    <a href="https://www.facebook.com/cop.rtwc/live" target="_blank" rel="noopener noreferrer" class="btn btn-primary margin-top-1">
+                      Watch on Facebook &rarr;
+                    </a>
                   </div>
-                  <h3>Live Broadcast Is Currently Offline</h3>
-                  <p>Our next live service will appear here during service hours. For the native Facebook experience, visit the live page directly.</p>
-                  <a href="https://www.facebook.com/cop.rtwc/live" target="_blank" rel="noopener noreferrer" class="btn btn-primary margin-top-1">
-                    Watch on Facebook &rarr;
-                  </a>
                 </div>
               </div>
-            </div>
 
             <!-- Stream Info Footer -->
             <div class="stream-info-bar">
-              <div>
-                <h2>Sunday Divine Worship & Word Service</h2>
-                <p>Royal Temple Worship Centre — The Church of Pentecost</p>
+              <div>                <h2>Sunday Divine Worship & Word Service</h2>                <p>Royal Temple Worship Centre — The Church of Pentecost</p>
               </div>
-              <div>
-                <a href="giving.html" class="btn btn-outline-gold">Online Offering & Tithes</a>
+              <div>                <a href="giving.html" class="btn btn-outline-gold">Online Offering & Tithes</a>
               </div>
             </div>
           </div>
