@@ -5,6 +5,7 @@
  */
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { randomUUID } = require('crypto');
 const Admin = require('../models/adminModel');
 const logger = require('../utils/logger');
 
@@ -27,11 +28,14 @@ async function login(req, res, next) {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
 
+    const sessionId = randomUUID();
     const token = jwt.sign(
       { sub: admin.id, name: admin.name, email: admin.email },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h', jwtid: sessionId }
     );
+    const { exp } = jwt.decode(token);
+    await Admin.createSession(sessionId, admin.id, new Date(exp * 1000));
 
     logger.info('Admin login', { adminId: admin.id, email: admin.email });
 
@@ -53,8 +57,13 @@ async function login(req, res, next) {
  * JWTs are stateless — the client discards the token. The endpoint exists so
  * the admin dashboard has a canonical logout call; no server state is needed.
  */
-function logout(req, res) {
-  return res.json({ success: true, message: 'Logged out successfully.' });
+async function logout(req, res, next) {
+  try {
+    await Admin.revokeSession(req.admin.sessionId, req.admin.id);
+    return res.json({ success: true, message: 'Logged out successfully.' });
+  } catch (err) {
+    return next(err);
+  }
 }
 
 module.exports = { login, logout };

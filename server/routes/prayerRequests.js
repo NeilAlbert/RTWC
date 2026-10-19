@@ -37,7 +37,7 @@ router.get(
   '/',
   authMiddleware,
   [
-    query('status').optional().isIn(['new', 'prayed_for']),
+    query('status').optional().isIn(['new', 'being_prayed_for', 'completed', 'archived']),
     query('page').optional().isInt({ min: 1 }),
     query('limit').optional().isInt({ min: 1, max: 50 }),
   ],

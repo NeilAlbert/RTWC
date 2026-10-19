@@ -81,9 +81,20 @@ const AdminAuth = (() => {
     return res.data.admin;
   }
 
-  /** Clear the token and redirect to login.html. */
-  function logout() {
+  /** Revoke the current server session, then clear local credentials. */
+  async function logout() {
+    const token = getToken();
     clearSession();
+    if (token) {
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch (err) {
+        // Local credentials are cleared even when the server cannot be reached.
+      }
+    }
     window.location.href = LOGIN_URL;
   }
 
@@ -102,11 +113,12 @@ const AdminAuth = (() => {
     { key: 'dashboard', label: 'Dashboard', icon: '▤', href: 'dashboard.html' },
     { key: 'settings', label: 'Settings', icon: '⚙', href: 'settings.html' },
     { key: 'leadership', label: 'Leadership', icon: '◉', href: 'leadership.html' },
-    { key: 'sermons', label: 'Sermons', icon: '▶', href: 'sermons.html' },
-    { key: 'events', label: 'Events', icon: '▣', href: 'events.html' },
-    { key: 'ministries', label: 'Ministries', icon: '✚', href: 'ministries.html' },
-    { key: 'messages', label: 'Messages', icon: '✉', href: 'messages.html' },
-    { key: 'prayer-requests', label: 'Prayer Requests', icon: '✝', href: 'prayer-requests.html' },
+    { key: 'sermons', label: 'Sermons', icon: '▶', href: 'content.html?type=sermons' },
+    { key: 'events', label: 'Events', icon: '▣', href: 'content.html?type=events' },
+    { key: 'ministries', label: 'Ministries', icon: '✚', href: 'content.html?type=ministries' },
+    { key: 'messages', label: 'Messages', icon: '✉', href: 'content.html?type=messages' },
+    { key: 'prayer-requests', label: 'Prayer Requests', icon: '✝', href: 'content.html?type=prayers' },
+    { key: 'testimonies', label: 'Testimonies', icon: '◉', href: 'content.html?type=testimonies' },
     { key: 'giving', label: 'Giving', icon: '₵', href: 'giving.html' },
     { key: 'newsletter', label: 'Newsletter', icon: '☰', href: 'newsletter.html' },
   ];
@@ -162,6 +174,8 @@ const AdminAuth = (() => {
           <button type="button" class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
         </div>
       `;
+      const userName = topbar.querySelector('.user-name');
+      if (userName) userName.textContent = admin && admin.name ? `Signed in as ${admin.name}` : '';
       const logoutBtn = document.getElementById('logout-btn');
       if (logoutBtn) logoutBtn.addEventListener('click', () => logout());
 

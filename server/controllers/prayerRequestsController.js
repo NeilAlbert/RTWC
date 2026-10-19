@@ -65,8 +65,8 @@ async function updateRequestStatus(req, res, next) {
     const { id } = req.params;
     const { status } = req.body;
 
-    if (!['new', 'prayed_for'].includes(status)) {
-      return next(new ValidationError('Status must be one of: new, prayed_for.'));
+    if (!['new', 'being_prayed_for', 'completed', 'archived'].includes(status)) {
+      return next(new ValidationError('Invalid prayer request status.'));
     }
 
     const existing = await PrayerRequest.findById(id);

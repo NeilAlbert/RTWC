@@ -185,6 +185,38 @@ h2 { font-size: 1.2rem; margin-bottom: 0.9rem; }
   gap: 1rem;
 }
 
+.dashboard-panels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.dashboard-panels .panel { min-width: 0; margin: 0; }
+
+.dashboard-list {
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+.dashboard-list-item {
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.dashboard-list-item h3 {
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.dashboard-list-item p {
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
 .stat-card {
   background: var(--panel);
   border: 1px solid var(--border);
@@ -538,6 +570,8 @@ input.invalid, select.invalid, textarea.invalid {
    --------------------------------------------------------------------------- */
 @media (max-width: 820px) {
   .sidebar-toggle { display: inline-block; }
+
+  .dashboard-panels { grid-template-columns: minmax(0, 1fr); }
 
   .admin-layout { flex-direction: column; }
 

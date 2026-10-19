@@ -37,7 +37,7 @@ router.get(
   '/',
   authMiddleware,
   [
-    query('status').optional().isIn(['new', 'read', 'responded']),
+    query('status').optional().isIn(['new', 'read', 'responded', 'archived']),
     query('page').optional().isInt({ min: 1 }),
     query('limit').optional().isInt({ min: 1, max: 50 }),
   ],
@@ -49,7 +49,10 @@ router.get(
 router.patch(
   '/:id/status',
   authMiddleware,
-  [param('id').isInt({ min: 1 }).withMessage('Invalid message id.')],
+  [
+    param('id').isInt({ min: 1 }).withMessage('Invalid message id.'),
+    body('status').isIn(['new', 'read', 'responded', 'archived']).withMessage('Invalid message status.'),
+  ],
   validateRequest,
   updateMessageStatus
 );

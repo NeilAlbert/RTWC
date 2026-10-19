@@ -1,11 +1,11 @@
 /**
  * =============================================================================
- * controllers/facebookLiveController.js — Facebook live-stream status.
+ * controllers/facebookLiveController.js — Facebook & YouTube live-stream status.
  *
- * Calls the Graph API server-side and caches results (60s status / 15min
- * latest). The access token NEVER leaves the server.
- * Graceful error handling: a Graph API failure never crashes the request —
- * we return a structured "unknown" state so the frontend can degrade.
+ * Server-side only: the Facebook Graph API and YouTube Data API calls run on the
+ * server. API keys / access tokens NEVER leave the server.
+ * Graceful error handling: a failed API call never crashes the request — we return
+ * a structured "unknown" state so the frontend can degrade.
  * =============================================================================
  */
 const cache = require('../utils/cache');
@@ -31,61 +31,159 @@ async function fetchGraph(path, params) {
   return res.json();
 }
 
-/** Determine whether the page is currently broadcasting live. */
-async function fetchLiveStatus() {
-  const data = await fetchGraph(`${process.env.PAGE_ID}/live_videos`, {
-    fields: 'id,status,title,permalink_url,thumbnail_url,created_time',
-    limit: '10',
-  });
+/** Determine the live status from Facebook. */
+async function fetchFacebookLiveStatus() {
+  let isLive = false;
+  let video = null;
+  let error = null;
 
-  const videos = data.data || [];
-  const liveVideo = videos.find((v) => v.status === 'LIVE') || null;
+  try {
+    const data = await fetchGraph(`${process.env.PAGE_ID}/live_videos`, {
+      fields: 'id,status,title,permalink_url,thumbnail_url,created_time',
+      limit: '10',
+    });
+
+    const videos = data.data || [];
+    const liveVideo = videos.find((v) => v.status === 'LIVE') || null;
+
+    if (liveVideo) {
+      isLive = true;
+      video = {
+        id: liveVideo.id,
+        title: liveVideo.title || 'Live Stream',
+        status: liveVideo.status,
+        permalinkUrl: liveVideo.permalink_url,
+        thumbnailUrl: liveVideo.thumbnail_url,
+        createdTime: liveVideo.created_time,
+      };
+    }
+  } catch (err) {
+    logger.warn('Facebook live status fetch failed', { message: err.message });
+    error = 'Facebook live status is temporarily unavailable.';
+  }
 
   return {
-    isLive: Boolean(liveVideo),
-    video: liveVideo
-      ? {
-          id: liveVideo.id,
-          title: liveVideo.title || 'Live Stream',
-          status: liveVideo.status,
-          permalinkUrl: liveVideo.permalink_url,
-          thumbnailUrl: liveVideo.thumbnail_url,
-          createdTime: liveVideo.created_time,
-        }
-      : null,
+    isLive,
+    video,
+    error,
     checkedAt: new Date().toISOString(),
   };
 }
 
-/** Fetch the most recent live/video on the page. */
-async function fetchLatestLive() {
-  const data = await fetchGraph(`${process.env.PAGE_ID}/videos`, {
-    fields: 'id,title,status,permalink_url,thumbnail_url,created_time,length',
-    limit: '5',
-  });
+/** Determine the live status from YouTube. */
+async function fetchYouTubeLiveStatus() {
+  let isLive = false;
+  let video = null;
+  let error = null;
 
-  const videos = data.data || [];
-  if (videos.length === 0) return null;
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  if (!apiKey) {
+    error = 'YouTube API key not configured; live detection is disabled.';
+    return { isLive, video, error };
+  }
 
-  const latest = videos[0];
+  const videoId = process.env.YOUTUBE_LIVE_VIDEO_ID || '';
+  const channelId = process.env.YOUTUBE_CHANNEL_ID || '';
+
+  try {
+    // If a specific live video ID is configured, check that video
+    if (videoId) {
+      const videoRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=status,snippet&id=${videoId}&key=${apiKey}`, {
+        signal: AbortSignal.timeout(10000),
+      });
+      if (!videoRes.ok) throw new Error('YouTube API error');
+      const videoData = await videoRes.json();
+      const items = videoData.items || [];
+      if (items.length > 0) {
+        const status = items[0].status;
+        isLive = status.privateVideo !== true && status.liveBroadcastStatus === 'live';
+        video = {
+          id: videoId,
+          title: items[0].snippet.title || 'YouTube Live',
+          permalinkUrl: 'https://www.youtube.com/watch?v=' + videoId,
+          thumbnailUrl: items[0].snippet.thumbnails.medium?.url || '',
+        };
+      }
+    } else if (channelId) {
+      // Check the channel's latest live broadcast
+      const channelRes = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q="+channelId&type=video&type=liveBroadcast&maxResults=5&key=${apiKey}`, {
+        signal: AbortSignal.timeout(10000),
+      });
+      if (!channelRes.ok) throw new Error('YouTube API error');
+      const channelData = await channelRes.json();
+      const items = channelData.items || [];
+      if (items.length > 0) {
+        const latest = items[0];
+        const videoIdFromApi = latest.id.videoId;
+        const statusRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=status,snippet&id=${videoIdFromApi}&key=${apiKey}`, {
+          signal: AbortSignal.timeout(10000),
+        });
+        if (!statusRes.ok) throw new Error('YouTube API error');
+        const statusData = await statusRes.json();
+        const items2 = statusData.items || [];
+        if (items2.length > 0) {
+          const status = items2[0].status;
+          isLive = status.privateVideo !== true && status.liveBroadcastStatus === 'live';
+          video = {
+            id: videoIdFromApi,
+            title: latest.snippet.title || 'YouTube Live',
+            permalinkUrl: 'https://www.youtube.com/watch?v=' + videoIdFromApi,
+            thumbnailUrl: latest.snippet.thumbnails.medium?.url || '',
+          };
+        }
+      }
+    } else {
+      error = 'No YouTube channel ID or live video ID configured.';
+    }
+  } catch (err) {
+    logger.warn('YouTube live status fetch failed', { message: err.message });
+    error = 'YouTube live status is temporarily unavailable.';
+  }
+
+  return { isLive, video, error };
+}
+
+/** Get combined live status from both Facebook and YouTube. */
+async function getCombinedLiveStatus() {
+  const [fbResult, ytResult] = await Promise.all([
+    fetchFacebookLiveStatus(),
+    fetchYouTubeLiveStatus(),
+  ]);
+
+  // If manual override is set, use it
+  const manualOverride = process.env.MANUAL_LIVE_OFFLINE_OVERRIDE || 'false';
+  if (manualOverride === 'true') {
+    // Manual override is handled on the frontend via settings; here we just return combined data
+  }
+
+  // Priority: if either platform is live, report it as live
+  if (fbResult.isLive || ytResult.isLive) {
+    return {
+      isLive: true,
+      ...(fbResult.video ? { fbVideo: fbResult.video } : {}),
+      ...(ytResult.video ? { ytVideo: ytResult.video } : {}),
+      fbError: fbResult.error,
+      ytError: ytResult.error,
+      checkedAt: new Date().toISOString(),
+    };
+  }
+
+  // Neither is live
   return {
-    id: latest.id,
-    title: latest.title || 'Recent Broadcast',
-    status: latest.status,
-    permalinkUrl: latest.permalink_url,
-    thumbnailUrl: latest.thumbnail_url,
-    createdTime: latest.created_time,
-    length: latest.length,
+    isLive: false,
+    fbError: fbResult.error,
+    ytError: ytResult.error,
+    checkedAt: new Date().toISOString(),
   };
 }
 
 /** GET /api/facebook/live-status — cached ~60 seconds */
 async function getLiveStatus(req, res, next) {
   try {
-    const data = await cache.remember('fb:live-status', STATUS_TTL, fetchLiveStatus);
+    const data = await cache.remember('fb:live-status-yt', STATUS_TTL, getCombinedLiveStatus);
     return res.json({ success: true, message: 'Live status fetched.', data });
   } catch (err) {
-    logger.warn('Facebook live-status fetch failed', { message: err.message });
+    logger.warn('Combined live-status fetch failed', { message: err.message });
     return res.json({
       success: true,
       message: 'Live status unavailable.',

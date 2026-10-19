@@ -21,6 +21,21 @@ CREATE TABLE IF NOT EXISTS admins (
   UNIQUE KEY uq_admins_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Revocable JWT sessions; rows expire with the token and are checked by the
+-- authentication middleware on every protected request.
+CREATE TABLE IF NOT EXISTS admin_sessions (
+  session_id CHAR(36) NOT NULL,
+  admin_id   INT UNSIGNED NOT NULL,
+  expires_at DATETIME NOT NULL,
+  revoked_at DATETIME NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (session_id),
+  KEY idx_admin_sessions_admin (admin_id),
+  KEY idx_admin_sessions_expiry (expires_at),
+  CONSTRAINT fk_admin_sessions_admin
+    FOREIGN KEY (admin_id) REFERENCES admins (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- -----------------------------------------------------------------------------
 -- sermons
 -- -----------------------------------------------------------------------------
@@ -65,7 +80,7 @@ CREATE TABLE IF NOT EXISTS testimonies (
   email         VARCHAR(255) NOT NULL,
   testimony     TEXT         NOT NULL,
   permission_to_publish TINYINT(1) NOT NULL DEFAULT 0,
-  status        ENUM('pending','approved','rejected','published') NOT NULL DEFAULT 'pending',
+  status        ENUM('pending','approved','rejected','published','archived') NOT NULL DEFAULT 'pending',
   created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY idx_testimony_status (status)
@@ -131,7 +146,7 @@ CREATE TABLE IF NOT EXISTS contact_messages (
   name       VARCHAR(150) NOT NULL,
   email      VARCHAR(255) NOT NULL,
   message    TEXT         NOT NULL,
-  status     ENUM('new','read','responded') NOT NULL DEFAULT 'new',
+  status     ENUM('new','read','responded','archived') NOT NULL DEFAULT 'new',
   created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY idx_contact_status (status)
@@ -145,7 +160,7 @@ CREATE TABLE IF NOT EXISTS prayer_requests (
   name         VARCHAR(150) NOT NULL,
   request_text TEXT         NOT NULL,
   is_private   TINYINT(1)   NOT NULL DEFAULT 0,
-  status       ENUM('new','prayed_for') NOT NULL DEFAULT 'new',
+  status       ENUM('new','being_prayed_for','completed','archived') NOT NULL DEFAULT 'new',
   created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY idx_prayer_status (status)
@@ -234,4 +249,4 @@ Friday Prayer Tower: 6:30 PM – 9:00 PM'),
   ('hero_tagline', 'A House of Prayer, Worship and Evangelism')
 ON DUPLICATE KEY UPDATE setting_key = setting_key;
 
-SET FOREIGN_KEY_CHECKS = 1;
+SET FOREIGN_KEY_CHECKS = 1;

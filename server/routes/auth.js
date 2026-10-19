@@ -31,6 +31,6 @@ router.post(
  * POST /api/auth/logout
  * Stateless logout — client discards the stored JWT.
  */
-router.post('/logout', logout);
+router.post('/logout', require('../middleware/authMiddleware'), logout);
 
 module.exports = router;

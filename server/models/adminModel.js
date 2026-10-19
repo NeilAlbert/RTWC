@@ -33,4 +33,26 @@ async function findById(id) {
   return rows[0] || null;
 }
 
-module.exports = { findByEmail, findById };
+async function createSession(sessionId, adminId, expiresAt) {
+  await pool.query(
+    'INSERT INTO admin_sessions (session_id, admin_id, expires_at) VALUES (?, ?, ?)',
+    [sessionId, adminId, expiresAt]
+  );
+}
+
+async function hasActiveSession(sessionId, adminId) {
+  const [rows] = await pool.query(
+    'SELECT session_id FROM admin_sessions WHERE session_id = ? AND admin_id = ? AND revoked_at IS NULL AND expires_at > UTC_TIMESTAMP() LIMIT 1',
+    [sessionId, adminId]
+  );
+  return rows.length > 0;
+}
+
+async function revokeSession(sessionId, adminId) {
+  await pool.query(
+    'UPDATE admin_sessions SET revoked_at = UTC_TIMESTAMP() WHERE session_id = ? AND admin_id = ? AND revoked_at IS NULL',
+    [sessionId, adminId]
+  );
+}
+
+module.exports = { findByEmail, findById, createSession, hasActiveSession, revokeSession };

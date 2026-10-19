@@ -80,7 +80,7 @@ async function updateTestimonyStatus(req, res, next) {
     const { id } = req.params;
     const { status } = req.body;
 
-    const allowed = ['pending', 'approved', 'rejected', 'published'];
+    const allowed = ['pending', 'approved', 'rejected', 'published', 'archived'];
     if (!allowed.includes(status)) {
       return next(new ValidationError('Status must be one of: pending, approved, rejected, published.'));
     }

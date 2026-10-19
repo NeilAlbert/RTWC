@@ -39,7 +39,7 @@ router.get(
   '/',
   authMiddleware,
   [
-    query('status').optional().isIn(['pending', 'approved', 'rejected', 'published']),
+    query('status').optional().isIn(['pending', 'approved', 'rejected', 'published', 'archived']),
     query('page').optional().isInt({ min: 1 }),
     query('limit').optional().isInt({ min: 1, max: 50 }),
   ],
@@ -53,7 +53,7 @@ router.patch(
   authMiddleware,
   [
     param('id').isInt({ min: 1 }).withMessage('Invalid testimony id.'),
-    body('status').isIn(['pending', 'approved', 'rejected', 'published']).withMessage('Invalid testimony status.'),
+    body('status').isIn(['pending', 'approved', 'rejected', 'published', 'archived']).withMessage('Invalid testimony status.'),
   ],
   validateRequest,
   updateTestimonyStatus

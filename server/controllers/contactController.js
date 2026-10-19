@@ -65,7 +65,7 @@ async function updateMessageStatus(req, res, next) {
     const { id } = req.params;
     const { status } = req.body;
 
-    const allowed = ['new', 'read', 'responded'];
+    const allowed = ['new', 'read', 'responded', 'archived'];
     if (!allowed.includes(status)) {
       return next(new ValidationError('Status must be one of: new, read, responded.'));
     }
