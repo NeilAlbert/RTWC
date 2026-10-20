@@ -25,7 +25,10 @@ async function getEvents(req, res, next) {
 
     const upcomingBool = upcoming === undefined ? undefined : upcoming === 'true';
 
-    const rows = await Event.findAll({ category, upcoming: upcomingBool });
+    const published = req.adminLibrary
+      ? (req.query.published === undefined ? undefined : req.query.published === 'true')
+      : true;
+    const rows = await Event.findAll({ category, upcoming: upcomingBool, search: req.query.q, published });
     const data = rows.map(formatEvent);
 
     return res.json({ success: true, message: 'Events fetched successfully.', data });
@@ -38,7 +41,7 @@ async function getEvents(req, res, next) {
 async function getEventById(req, res, next) {
   try {
     const event = await Event.findById(req.params.id);
-    if (!event) return next(new NotFoundError('Event not found.'));
+    if (!event || (!event.published && !req.admin)) return next(new NotFoundError('Event not found.'));
     return res.json({ success: true, message: 'Event fetched successfully.', data: formatEvent(event) });
   } catch (err) {
     return next(err);

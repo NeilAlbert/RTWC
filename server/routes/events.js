@@ -21,11 +21,24 @@ const router = express.Router();
 
 const CATEGORIES = ['convention', 'revival', 'camp_meeting', 'anniversary', 'other'];
 
+/** GET /api/events/manage — admin event library including drafts */
+router.get(
+  '/manage',
+  authMiddleware,
+  [query('q').optional().trim().isLength({ max: 255 }), query('published').optional().isIn(['true', 'false'])],
+  validateRequest,
+  (req, res, next) => {
+    req.adminLibrary = true;
+    getEvents(req, res, next);
+  }
+);
+
 /** GET /api/events — public, ?category=&upcoming=true|false */
 router.get(
   '/',
   [
     query('category').optional().isIn(CATEGORIES).withMessage('Invalid category.'),
+    query('q').optional().trim().isLength({ max: 255 }),
     query('upcoming').optional().isIn(['true', 'false']).withMessage('upcoming must be true or false.'),
   ],
   validateRequest,
@@ -52,6 +65,12 @@ router.post(
     body('event_time').optional().trim().isLength({ max: 50 }),
     body('location').optional().trim().isLength({ max: 255 }),
     body('category').isIn(CATEGORIES).withMessage('Invalid category.'),
+    body('start_time').optional().trim().isLength({ max: 20 }),
+    body('end_time').optional().trim().isLength({ max: 20 }),
+    body('image_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
+    body('registration_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
+    body('published').optional().isBoolean(),
+    body('featured').optional().isBoolean(),
   ],
   validateRequest,
   createEvent
@@ -70,6 +89,12 @@ router.put(
     body('event_time').optional().trim().isLength({ max: 50 }),
     body('location').optional().trim().isLength({ max: 255 }),
     body('category').isIn(CATEGORIES),
+    body('start_time').optional().trim().isLength({ max: 20 }),
+    body('end_time').optional().trim().isLength({ max: 20 }),
+    body('image_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
+    body('registration_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
+    body('published').optional().isBoolean(),
+    body('featured').optional().isBoolean(),
   ],
   validateRequest,
   updateEvent

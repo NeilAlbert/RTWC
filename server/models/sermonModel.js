@@ -9,30 +9,40 @@
  */
 const pool = require('../config/db');
 
-async function countAll({ speaker, date } = {}) {
+async function countAll({ speaker, date, search, published } = {}) {
   const where = [];
   const params = [];
 
   if (speaker) { where.push('speaker = ?'); params.push(speaker); }
   if (date) { where.push('sermon_date = ?'); params.push(date); }
+  if (search) {
+    where.push('(title LIKE ? OR speaker LIKE ? OR description LIKE ?)');
+    params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+  }
+  if (published !== undefined) { where.push('published = ?'); params.push(published ? 1 : 0); }
 
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
   const [rows] = await pool.query(`SELECT COUNT(*) AS total FROM sermons ${whereSql}`, params);
   return rows[0].total;
 }
 
-async function findAll({ speaker, date, limit, offset } = {}) {
+async function findAll({ speaker, date, search, published, limit, offset } = {}) {
   const where = [];
   const params = [];
 
   if (speaker) { where.push('speaker = ?'); params.push(speaker); }
   if (date) { where.push('sermon_date = ?'); params.push(date); }
+  if (search) {
+    where.push('(title LIKE ? OR speaker LIKE ? OR description LIKE ?)');
+    params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+  }
+  if (published !== undefined) { where.push('published = ?'); params.push(published ? 1 : 0); }
 
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
   params.push(limit, offset);
 
   const [rows] = await pool.query(
-    `SELECT id, title, speaker, description, video_url, thumbnail_url, sermon_date, created_at
+    `SELECT id, title, speaker, description, video_url, audio_url, thumbnail_url, scripture, category, tags, published, featured, sermon_date, created_at
      FROM sermons ${whereSql}
      ORDER BY sermon_date DESC, id DESC
      LIMIT ? OFFSET ?`,
@@ -43,27 +53,27 @@ async function findAll({ speaker, date, limit, offset } = {}) {
 
 async function findById(id) {
   const [rows] = await pool.query(
-    'SELECT id, title, speaker, description, video_url, thumbnail_url, sermon_date, created_at FROM sermons WHERE id = ? LIMIT 1',
+    'SELECT id, title, speaker, description, video_url, audio_url, thumbnail_url, scripture, category, tags, published, featured, sermon_date, created_at FROM sermons WHERE id = ? LIMIT 1',
     [id]
   );
   return rows[0] || null;
 }
 
-async function create({ title, speaker, description, video_url, thumbnail_url, sermon_date }) {
+async function create({ title, speaker, description, video_url, audio_url, thumbnail_url, scripture, category, tags, published, featured, sermon_date }) {
   const [result] = await pool.query(
-    `INSERT INTO sermons (title, speaker, description, video_url, thumbnail_url, sermon_date)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [title, speaker, description, video_url || null, thumbnail_url || null, sermon_date]
+    `INSERT INTO sermons (title, speaker, description, video_url, audio_url, thumbnail_url, scripture, category, tags, published, featured, sermon_date)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [title, speaker, description, video_url || null, audio_url || null, thumbnail_url || null, scripture || null, category || null, tags || null, published ? 1 : 0, featured ? 1 : 0, sermon_date]
   );
   return findById(result.insertId);
 }
 
-async function update(id, { title, speaker, description, video_url, thumbnail_url, sermon_date }) {
+async function update(id, { title, speaker, description, video_url, audio_url, thumbnail_url, scripture, category, tags, published, featured, sermon_date }) {
   await pool.query(
     `UPDATE sermons
-     SET title = ?, speaker = ?, description = ?, video_url = ?, thumbnail_url = ?, sermon_date = ?
+    SET title = ?, speaker = ?, description = ?, video_url = ?, audio_url = ?, thumbnail_url = ?, scripture = ?, category = ?, tags = ?, published = ?, featured = ?, sermon_date = ?
      WHERE id = ?`,
-    [title, speaker, description, video_url || null, thumbnail_url || null, sermon_date, id]
+      [title, speaker, description, video_url || null, audio_url || null, thumbnail_url || null, scripture || null, category || null, tags || null, published ? 1 : 0, featured ? 1 : 0, sermon_date, id]
   );
   return findById(id);
 }

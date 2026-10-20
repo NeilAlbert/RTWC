@@ -16,6 +16,10 @@ async function getSermons(req, res, next) {
     const filter = {
       speaker: req.query.speaker || undefined,
       date: req.query.date || undefined,
+      search: req.query.q || undefined,
+      published: req.adminLibrary
+        ? (req.query.published === undefined ? undefined : req.query.published === 'true')
+        : true,
     };
 
     const total = await Sermon.countAll(filter);
@@ -35,7 +39,7 @@ async function getSermons(req, res, next) {
 async function getSermonById(req, res, next) {
   try {
     const sermon = await Sermon.findById(req.params.id);
-    if (!sermon) return next(new NotFoundError('Sermon not found.'));
+    if (!sermon || (!sermon.published && !req.admin)) return next(new NotFoundError('Sermon not found.'));
     return res.json({ success: true, message: 'Sermon fetched successfully.', data: sermon });
   } catch (err) {
     return next(err);

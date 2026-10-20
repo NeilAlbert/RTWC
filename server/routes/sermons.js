@@ -19,11 +19,29 @@ const {
 
 const router = express.Router();
 
+/** GET /api/sermons/manage — admin library including drafts */
+router.get(
+  '/manage',
+  authMiddleware,
+  [
+    query('q').optional().trim().isLength({ max: 255 }),
+    query('published').optional().isIn(['true', 'false']),
+    query('page').optional().isInt({ min: 1 }),
+    query('limit').optional().isInt({ min: 1, max: 50 }),
+  ],
+  validateRequest,
+  (req, res, next) => {
+    req.adminLibrary = true;
+    getSermons(req, res, next);
+  }
+);
+
 /** GET /api/sermons — public, ?speaker=&date=&page=&limit= */
 router.get(
   '/',
   [
     query('speaker').optional().trim().isLength({ max: 120 }),
+    query('q').optional().trim().isLength({ max: 255 }),
     query('date').optional().isISO8601().withMessage('date must be YYYY-MM-DD'),
     query('page').optional().isInt({ min: 1 }),
     query('limit').optional().isInt({ min: 1, max: 50 }),
@@ -52,6 +70,12 @@ router.post(
     body('video_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
     body('thumbnail_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
     body('sermon_date').isISO8601().withMessage('sermon_date must be YYYY-MM-DD.'),
+    body('scripture').optional({ values: 'falsy' }).trim().isLength({ max: 255 }),
+    body('category').optional({ values: 'falsy' }).trim().isLength({ max: 120 }),
+    body('audio_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
+    body('tags').optional().isString().isLength({ max: 1000 }),
+    body('published').optional().isBoolean(),
+    body('featured').optional().isBoolean(),
   ],
   validateRequest,
   createSermon
@@ -70,6 +94,12 @@ router.put(
     body('video_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
     body('thumbnail_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
     body('sermon_date').isISO8601(),
+    body('scripture').optional({ values: 'falsy' }).trim().isLength({ max: 255 }),
+    body('category').optional({ values: 'falsy' }).trim().isLength({ max: 120 }),
+    body('audio_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
+    body('tags').optional().isString().isLength({ max: 1000 }),
+    body('published').optional().isBoolean(),
+    body('featured').optional().isBoolean(),
   ],
   validateRequest,
   updateSermon

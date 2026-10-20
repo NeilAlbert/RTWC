@@ -88,8 +88,8 @@ async function updateTestimonyStatus(req, res, next) {
     const existing = await Testimony.findById(id);
     if (!existing) return next(new NotFoundError('Testimony not found.'));
 
-    if (status === 'published' && !existing.permission_to_publish) {
-      return next(new ValidationError('This testimony cannot be published without permission.'));
+    if (status === 'published' && (!existing.permission_to_publish || existing.status !== 'approved')) {
+      return next(new ValidationError('Approve the testimony and confirm publication permission before publishing.'));
     }
 
     const updated = await Testimony.updateStatus(id, status);

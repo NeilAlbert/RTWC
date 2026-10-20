@@ -6,22 +6,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   const definitions = {
     sermons: {
       title: 'Sermons', description: 'Create and maintain the sermon library.',
-      endpoint: '/sermons', navKey: 'sermons', columns: ['title', 'speaker', 'sermon_date'],
+      endpoint: '/sermons', listPath: '/sermons/manage', navKey: 'sermons', columns: ['title', 'speaker', 'sermon_date', 'published', 'featured'],
       fields: [
         ['title', 'Title', 'text', true], ['speaker', 'Speaker', 'text', true],
-        ['sermon_date', 'Date', 'date', true], ['description', 'Description', 'textarea'],
-        ['thumbnail_url', 'Thumbnail URL', 'url'], ['video_url', 'Video URL', 'url'],
+        ['sermon_date', 'Date', 'date', true], ['scripture', 'Scripture', 'text'],
+        ['category', 'Category', 'text'], ['tags', 'Tags (comma separated)', 'text'],
+        ['description', 'Description', 'textarea'], ['thumbnail_url', 'Thumbnail URL', 'url'],
+        ['video_url', 'Video URL', 'url'], ['audio_url', 'Audio URL', 'url'],
+        ['published', 'Published', 'checkbox'], ['featured', 'Featured', 'checkbox'],
       ],
       items: (response) => response.data?.items || [],
     },
     events: {
       title: 'Events', description: 'Manage upcoming and past church events.',
-      endpoint: '/events', navKey: 'events', columns: ['title', 'event_date', 'event_time', 'location'],
+      endpoint: '/events', listPath: '/events/manage', navKey: 'events', columns: ['title', 'event_date', 'start_time', 'end_time', 'location', 'published', 'featured'],
       fields: [
         ['title', 'Title', 'text', true], ['event_date', 'Date', 'date', true],
-        ['event_time', 'Start time', 'text'], ['location', 'Location', 'text'],
+        ['start_time', 'Start time', 'text'], ['end_time', 'End time', 'text'], ['location', 'Location', 'text'],
+        ['image_url', 'Image URL', 'url'], ['registration_url', 'Registration URL', 'url'],
         ['category', 'Category', 'select', true, [['convention', 'Convention'], ['revival', 'Revival'], ['camp_meeting', 'Camp Meeting'], ['anniversary', 'Anniversary'], ['other', 'Other']]],
-        ['description', 'Description', 'textarea'],
+        ['description', 'Description', 'textarea'], ['published', 'Published', 'checkbox'], ['featured', 'Featured', 'checkbox'],
       ],
       items: (response) => Array.isArray(response.data) ? response.data : [],
     },
@@ -200,7 +204,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       input.id = `field-${name}`;
       input.name = name;
       input.required = Boolean(required);
-      input.value = record[name] == null ? (type === 'events' && name === 'category' ? 'other' : '') : String(record[name]);
+      if (kind === 'checkbox') {
+        input.checked = Boolean(record[name]);
+      } else {
+        input.value = record[name] == null ? (type === 'events' && name === 'category' ? 'other' : '') : String(record[name]);
+      }
       if (type === 'events' && name === 'category' && record[name]) {
         input.value = String(record[name]).toLocaleLowerCase().replaceAll(' ', '_');
       }
@@ -252,7 +260,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const params = new URLSearchParams({ page: '1', limit: '50' });
       if (statusFilter.value) params.set('status', statusFilter.value);
-      const response = await AdminApi.get(`${config.endpoint}?${params.toString()}`);
+      const response = await AdminApi.get(`${config.listPath || config.endpoint}?${params.toString()}`);
       records = config.items(response);
       renderRows();
     } catch (err) {
@@ -271,6 +279,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     event.preventDefault();
     if (!form.reportValidity()) return;
     const payload = Object.fromEntries(new FormData(form).entries());
+    config.fields.filter(([, , kind]) => kind === 'checkbox').forEach(([name]) => {
+      payload[name] = form.elements.namedItem(name).checked;
+    });
     if (type === 'events') {
       payload.category = payload.category || 'other';
     }

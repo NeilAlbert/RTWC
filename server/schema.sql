@@ -43,10 +43,16 @@ CREATE TABLE IF NOT EXISTS sermons (
   id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
   title         VARCHAR(255) NOT NULL,
   speaker       VARCHAR(120) NOT NULL,
+  scripture     VARCHAR(255),
+  category      VARCHAR(120),
+  tags          VARCHAR(1000),
   description   TEXT,
   video_url     VARCHAR(500),
+  audio_url     VARCHAR(500),
   thumbnail_url VARCHAR(500),
   sermon_date   DATE         NOT NULL,
+  published     TINYINT(1)   NOT NULL DEFAULT 0,
+  featured      TINYINT(1)   NOT NULL DEFAULT 0,
   created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY idx_sermons_speaker (speaker),
@@ -62,9 +68,15 @@ CREATE TABLE IF NOT EXISTS events (
   description TEXT,
   event_date  DATE         NOT NULL,
   event_time  VARCHAR(50),
+  start_time  VARCHAR(20),
+  end_time    VARCHAR(20),
   location    VARCHAR(255),
+  image_url   VARCHAR(500),
+  registration_url VARCHAR(500),
   category    ENUM('convention','revival','camp_meeting','anniversary','other')
               NOT NULL DEFAULT 'other',
+  published   TINYINT(1)   NOT NULL DEFAULT 0,
+  featured    TINYINT(1)   NOT NULL DEFAULT 0,
   created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY idx_events_date (event_date),
@@ -246,7 +258,65 @@ Friday Prayer Tower: 6:30 PM – 9:00 PM'),
   ('email', 'info@royaltemple.org'),
   ('mission_statement', 'To glorify God through holy living, spirit-filled worship, and the evangelisation of every nation.'),
   ('vision_statement', 'A glorious, spirit-filled assembly raising believers who transform their communities for Christ.'),
-  ('hero_tagline', 'A House of Prayer, Worship and Evangelism')
+  ('hero_tagline', 'A House of Prayer, Worship and Evangelism'),
+  ('youtube_channel_url', ''),
+  ('youtube_live_video_id', ''),
+  ('facebook_live_url', ''),
+  ('preferred_default_platform', 'facebook'),
+  ('manual_live_offline_override', 'false'),
+  ('next_service_title', 'Sunday Divine Worship & Word Service'),
+  ('next_service_date', ''),
+  ('next_service_time', '8:00 AM GMT'),
+  ('previous_broadcast_url', '')
 ON DUPLICATE KEY UPDATE setting_key = setting_key;
+
+-- -----------------------------------------------------------------------------
+-- Idempotent upgrades for databases created before content publishing fields.
+-- Existing sermons/events are retained as published; new records default to drafts.
+-- -----------------------------------------------------------------------------
+SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'sermons' AND COLUMN_NAME = 'scripture');
+SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE sermons ADD COLUMN scripture VARCHAR(255) NULL', 'SELECT 1');
+PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
+SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'sermons' AND COLUMN_NAME = 'category');
+SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE sermons ADD COLUMN category VARCHAR(120) NULL', 'SELECT 1');
+PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
+SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'sermons' AND COLUMN_NAME = 'tags');
+SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE sermons ADD COLUMN tags VARCHAR(1000) NULL', 'SELECT 1');
+PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
+SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'sermons' AND COLUMN_NAME = 'audio_url');
+SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE sermons ADD COLUMN audio_url VARCHAR(500) NULL', 'SELECT 1');
+PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
+SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'sermons' AND COLUMN_NAME = 'published');
+SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE sermons ADD COLUMN published TINYINT(1) NOT NULL DEFAULT 1', 'SELECT 1');
+PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
+SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'sermons' AND COLUMN_NAME = 'featured');
+SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE sermons ADD COLUMN featured TINYINT(1) NOT NULL DEFAULT 0', 'SELECT 1');
+PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
+
+SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'events' AND COLUMN_NAME = 'start_time');
+SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE events ADD COLUMN start_time VARCHAR(20) NULL', 'SELECT 1');
+PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
+SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'events' AND COLUMN_NAME = 'end_time');
+SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE events ADD COLUMN end_time VARCHAR(20) NULL', 'SELECT 1');
+PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
+SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'events' AND COLUMN_NAME = 'image_url');
+SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE events ADD COLUMN image_url VARCHAR(500) NULL', 'SELECT 1');
+PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
+SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'events' AND COLUMN_NAME = 'registration_url');
+SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE events ADD COLUMN registration_url VARCHAR(500) NULL', 'SELECT 1');
+PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
+SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'events' AND COLUMN_NAME = 'published');
+SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE events ADD COLUMN published TINYINT(1) NOT NULL DEFAULT 1', 'SELECT 1');
+PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
+SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'events' AND COLUMN_NAME = 'featured');
+SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE events ADD COLUMN featured TINYINT(1) NOT NULL DEFAULT 0', 'SELECT 1');
+PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
+
+-- Upgrade moderation enums without losing the previous prayed_for value.
+ALTER TABLE prayer_requests MODIFY status ENUM('new','prayed_for','being_prayed_for','completed','archived') NOT NULL DEFAULT 'new';
+UPDATE prayer_requests SET status = 'being_prayed_for' WHERE status = 'prayed_for';
+ALTER TABLE prayer_requests MODIFY status ENUM('new','being_prayed_for','completed','archived') NOT NULL DEFAULT 'new';
+ALTER TABLE contact_messages MODIFY status ENUM('new','read','responded','archived') NOT NULL DEFAULT 'new';
+ALTER TABLE testimonies MODIFY status ENUM('pending','approved','rejected','published','archived') NOT NULL DEFAULT 'pending';
 
 SET FOREIGN_KEY_CHECKS = 1;
