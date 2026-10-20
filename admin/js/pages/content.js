@@ -42,6 +42,31 @@ document.addEventListener('DOMContentLoaded', async () => {
       ],
       items: (response) => Array.isArray(response.data) ? response.data : [],
     },
+    leadership: {
+      title: 'Leadership', description: 'Manage leadership records using confirmed church information.',
+      endpoint: '/leadership', listPath: '/leadership/manage', navKey: 'leadership',
+      columns: ['name', 'position', 'bio', 'display_order', 'published'],
+      fields: [
+        ['name', 'Name', 'text', true], ['position', 'Position', 'text', true],
+        ['bio', 'Biography', 'textarea'], ['photo_url', 'Photo URL', 'url'],
+        ['display_order', 'Display order', 'number'], ['published', 'Published', 'checkbox'],
+      ],
+      items: (response) => Array.isArray(response.data) ? response.data : [],
+    },
+    giving: {
+      title: 'Giving Records', description: 'Review payment records returned by the payment provider.',
+      endpoint: '/giving/history', navKey: 'giving',
+      columns: ['name', 'email', 'amount', 'currency', 'category', 'payment_status', 'payment_channel', 'payment_reference', 'created_at'],
+      filterParam: 'category',
+      filters: [['tithe', 'Tithe'], ['offering', 'Offering'], ['building_fund', 'Building Fund'], ['thanksgiving', 'Thanksgiving'], ['seed_offering', 'Seed Offering']],
+      items: (response) => response.data?.items || [],
+    },
+    newsletter: {
+      title: 'Newsletter Subscribers', description: 'View current newsletter subscribers.',
+      endpoint: '/newsletter/subscribers', navKey: 'newsletter',
+      columns: ['email', 'name', 'is_active', 'subscribed_at', 'unsubscribed_at'],
+      items: (response) => response.data?.items || [],
+    },
     messages: {
       title: 'Contact Messages', description: 'Review and archive visitor messages.',
       endpoint: '/contact', navKey: 'messages', columns: ['name', 'email', 'phone', 'subject', 'message', 'status', 'created_at'],
@@ -83,6 +108,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+  if (['giving', 'newsletter'].includes(type) && !['super_admin', 'admin'].includes(AdminAuth.getAdmin()?.role)) {
+    window.location.replace('dashboard.html');
+    return;
+  }
+
   AdminAuth.initShell(config.navKey, config.title);
   document.title = `${config.title} | Admin — Royal Temple Worship Centre`;
   document.getElementById('content-title').textContent = config.title;
@@ -105,9 +135,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   let records = [];
   let editingId = null;
 
-  if (config.statuses) {
+  if (config.statuses || config.filters) {
     document.querySelector('.status-filter').classList.remove('hidden');
-    [['', 'All statuses'], ...config.statuses].forEach(([value, label]) => {
+    const filterOptions = config.statuses
+      ? [['', 'All statuses'], ...config.statuses]
+      : [['', 'All categories'], ...config.filters];
+    filterOptions.forEach(([value, label]) => {
       const option = document.createElement('option');
       option.value = value;
       option.textContent = label;
@@ -276,7 +309,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadingEl.classList.remove('hidden');
     try {
       const params = new URLSearchParams({ page: '1', limit: '50' });
-      if (statusFilter.value) params.set('status', statusFilter.value);
+      if (statusFilter.value) params.set(config.statuses ? 'status' : config.filterParam, statusFilter.value);
       const response = await AdminApi.get(`${config.listPath || config.endpoint}?${params.toString()}`);
       records = config.items(response);
       renderRows();

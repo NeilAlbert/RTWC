@@ -19,7 +19,10 @@ const {
 
 const router = express.Router();
 
-const ROLES = ['pastor', 'pastors_wife', 'presiding_elder', 'secretary', 'elder', 'deacon', 'deaconess', 'ministry_leader'];
+router.get('/manage', authMiddleware, authorizeRoles('super_admin', 'admin', 'editor'), (req, res, next) => {
+  req.adminLibrary = true;
+  getLeadership(req, res, next);
+});
 
 /** GET /api/leadership — public, grouped by role */
 router.get('/', getLeadership);
@@ -32,11 +35,11 @@ router.post(
   sanitizeBody(['name', 'bio'], { maxLength: 5000 }),
   [
     body('name').trim().isLength({ min: 1, max: 150 }).withMessage('Name is required.'),
-    body('role').isIn(ROLES).withMessage('Invalid role.'),
-    body('ministry_id').optional({ values: 'null' }).isInt({ min: 1 }),
+    body('position').trim().isLength({ min: 1, max: 150 }).withMessage('Position is required.'),
     body('photo_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
     body('bio').optional().isString().isLength({ max: 5000 }),
     body('display_order').optional().isInt({ min: 0 }),
+    body('published').optional().isBoolean(),
   ],
   validateRequest,
   createMember
@@ -51,11 +54,11 @@ router.put(
   [
     param('id').isInt({ min: 1 }),
     body('name').trim().isLength({ min: 1, max: 150 }),
-    body('role').isIn(ROLES),
-    body('ministry_id').optional({ values: 'null' }).isInt({ min: 1 }),
+    body('position').trim().isLength({ min: 1, max: 150 }),
     body('photo_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
     body('bio').optional().isString().isLength({ max: 5000 }),
     body('display_order').optional().isInt({ min: 0 }),
+    body('published').optional().isBoolean(),
   ],
   validateRequest,
   updateMember

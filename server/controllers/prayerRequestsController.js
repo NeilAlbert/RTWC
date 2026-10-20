@@ -17,6 +17,10 @@ async function submitPrayerRequest(req, res, next) {
       || req.body.is_private === true || req.body.is_private === 'true'
       || req.body.is_private === 1 || req.body.is_private === '1';
 
+    if (!is_private && (!name || name.trim().length < 2)) {
+      return next(new ValidationError('Please provide your name or choose anonymous submission.'));
+    }
+
     const prayer = await PrayerRequest.create({
       name: is_private ? null : name,
       email: is_private ? null : email,
@@ -29,7 +33,7 @@ async function submitPrayerRequest(req, res, next) {
     try {
       await sendMail({
         subject: 'New Prayer Request — Royal Temple Website',
-        text: `Name: ${is_private ? 'Anonymous' : (name || 'Not provided')}\nPrivacy: ${prayer.is_private ? 'Private' : 'Not anonymous'}\n\nRequest:\n${request_text}`,
+        text: `Name: ${is_private ? 'Anonymous' : name}\nPrivacy: ${prayer.is_private ? 'Anonymous submission' : 'Name may be used for follow-up'}\n\nRequest:\n${request_text}`,
       });
     } catch (mailErr) {
       logger.error('Prayer request notification email failed', { message: mailErr.message });

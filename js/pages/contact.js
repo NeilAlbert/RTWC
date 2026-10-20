@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const contactForm = document.getElementById('contact-form');
   const nameInput = document.getElementById('contact-name');
   const emailInput = document.getElementById('contact-email');
+  const subjectInput = document.getElementById('contact-subject');
   const messageInput = document.getElementById('contact-message');
   const errName = document.getElementById('err-name');
   const errEmail = document.getElementById('err-email');
@@ -68,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
             body: JSON.stringify({
               name: nameInput.value.trim(),
               email: emailInput.value.trim(),
+              subject: subjectInput?.value.trim() || '',
               message: messageInput.value.trim()
             })
           });
@@ -113,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify({
             name: prayerForm.querySelector('input[name="name"]').value.trim(),
             request_text: prayerInput.value.trim(),
-            is_private: document.querySelector('input[name="is_private"]')?.checked || false
+            is_anonymous: document.getElementById('prayer-anonymous')?.checked || false
           })
         });
 
@@ -152,4 +154,4 @@ document.addEventListener('DOMContentLoaded', () => {
     errorBox.textContent = message;
     errorBox.hidden = false;
   }
-});
+});

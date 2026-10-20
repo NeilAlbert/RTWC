@@ -48,6 +48,85 @@ document.addEventListener('DOMContentLoaded', () => {
     accordionHeaders[0].click();
   }
 
+  const leadershipGroups = [
+    ['pastoral-pair-container', 'pastoralPair'],
+    ['executive-leadership-container', 'executive'],
+    ['elders-container', 'elders'],
+    ['deacons-container', 'deaconsDeaconesses'],
+    ['ministry-leaders-container', 'ministryLeaders'],
+  ];
+
+  function renderLeadershipCard(member, className = 'leader-card') {
+    const card = document.createElement('article');
+    card.className = className;
+    const imageUrl = window.safePublicUrl(member.photoUrl);
+    if (imageUrl) {
+      const imageBox = document.createElement('div');
+      imageBox.className = 'leader-image-box';
+      const image = document.createElement('img');
+      image.className = 'leader-img';
+      image.src = imageUrl;
+      image.alt = member.name || 'Church leader';
+      image.loading = 'lazy';
+      imageBox.append(image);
+      card.append(imageBox);
+    }
+
+    const body = document.createElement('div');
+    body.className = 'leader-card-body';
+    const name = document.createElement('h3');
+    name.className = 'leader-name';
+    name.textContent = member.name || 'Name not listed';
+    const role = document.createElement('div');
+    role.className = 'leader-title';
+    role.textContent = member.position || member.role || '';
+    body.append(name, role);
+    if (member.bio) {
+      const bio = document.createElement('p');
+      bio.className = 'leader-bio';
+      bio.textContent = member.bio;
+      body.append(bio);
+    }
+    card.append(body);
+    return card;
+  }
+
+  fetch('/api/leadership')
+    .then((response) => {
+      if (!response.ok) throw new Error('Leadership request failed.');
+      return response.json();
+    })
+    .then((response) => {
+      const groups = response.data || {};
+      leadershipGroups.forEach(([containerId, groupKey]) => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.replaceChildren();
+        const members = Array.isArray(groups[groupKey]) ? groups[groupKey] : [];
+        if (!members.length) {
+          const empty = document.createElement('p');
+          empty.className = 'empty-state';
+          empty.textContent = 'Leadership information is being updated.';
+          container.append(empty);
+          return;
+        }
+        members.forEach((member) => container.append(renderLeadershipCard(member)));
+      });
+    })
+    .catch(() => {
+      leadershipGroups.forEach(([containerId]) => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.replaceChildren();
+        const error = document.createElement('p');
+        error.className = 'empty-state';
+        error.textContent = 'Leadership information is temporarily unavailable.';
+        container.append(error);
+      });
+    });
+
+  return;
+
   // ==========================================================================
   // 2. Leadership Section Static Data & Renderer
   // ==========================================================================

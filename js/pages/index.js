@@ -1,92 +1,92 @@
-// BACKEND REMOVED — see upcoming events previously referenced for /api/events/upcoming. Reconnect when backend is rebuilt.
-
 /**
  * THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
  * Home Page Specific JavaScript (js/pages/index.js)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  /* ==========================================================================
-     STATIC LOCAL UPCOMING EVENTS DATA
-     ========================================================================== */
-  const upcomingEventsData = [
-    {
-      id: 1,
-      title: "Mid-Year Spiritual Awakening Revival",
-      month: "AUG",
-      day: "14",
-      time: "6:30 PM - 9:00 PM",
-      location: "Main Sanctuary, RTWC",
-      category: "Revival",
-      description: "Join us for 3 nights of power-packed prayers, prophetic worship, and supernatural breakthroughs under the theme 'Overcoming by the Word'."
-    },
-    {
-      id: 2,
-      title: "Annual National Youth Conference 2026",
-      month: "AUG",
-      day: "28",
-      time: "9:00 AM - 4:00 PM",
-      location: "Royal Temple Auditorium & Online",
-      category: "Convention",
-      description: "A monumental gathering of young believers across the district seeking empowerment for kingdom influence, leadership, and divine impact."
-    },
-    {
-      id: 3,
-      title: "Covenant Praise & Thanksgiving Service",
-      month: "SEP",
-      day: "06",
-      time: "8:00 AM - 11:30 AM",
-      location: "Main Sanctuary, RTWC",
-      category: "Special Service",
-      description: "A glorious Sunday of high praise, testimonies, and joyful sacrifice as we celebrate God's unwavering faithfulness and covenant blessings."
-    }
-  ];
-
-  // Render Upcoming Events Cards into container
   const eventsContainer = document.getElementById('upcoming-events-container');
-
   if (eventsContainer) {
-    eventsContainer.innerHTML = upcomingEventsData.map(event => `
-      <article class="event-preview-card">
-        <div class="event-card-header">
-          <div class="event-date-badge">
-            <span class="event-date-month">${event.month}</span>
-            <span class="event-date-day">${event.day}</span>
-          </div>
-          <div>
-            <span class="event-card-category">${event.category}</span>
-          </div>
-        </div>
-        <div class="event-card-body">
-          <h3 class="event-card-title">${event.title}</h3>
-          <div class="event-card-meta">
-            <div class="event-meta-line">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              <span>${event.time}</span>
-            </div>
-            <div class="event-meta-line">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-              </svg>
-              <span>${event.location}</span>
-            </div>
-          </div>
-          <p class="event-card-desc">${event.description}</p>
-          <a href="events.html#event-${event.id}" class="btn btn-outline-gold" style="width:100%; padding:0.6rem;">Event Details & Calendar</a>
-        </div>
-      </article>
-    `).join('');
+    fetch('/api/events?upcoming=true')
+      .then((response) => {
+        if (!response.ok) throw new Error('Events are temporarily unavailable.');
+        return response.json();
+      })
+      .then((response) => {
+        const events = Array.isArray(response.data) ? response.data.slice(0, 3) : [];
+        if (!events.length) {
+          eventsContainer.textContent = 'No upcoming events at the moment.';
+          return;
+        }
+        eventsContainer.innerHTML = events.map((event) => {
+          const date = new Date(`${event.event_date}T00:00:00`);
+          const month = Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString('en', { month: 'short' }).toUpperCase();
+          const day = Number.isNaN(date.getTime()) ? '' : String(date.getDate()).padStart(2, '0');
+          return `
+            <article class="event-preview-card">
+              <div class="event-card-header">
+                <div class="event-date-badge">
+                  <span class="event-date-month">${window.escapeHtml(month)}</span>
+                  <span class="event-date-day">${window.escapeHtml(day)}</span>
+                </div>
+                <span class="event-card-category">${window.escapeHtml(event.category || 'Event')}</span>
+              </div>
+              <div class="event-card-body">
+                <h3 class="event-card-title">${window.escapeHtml(event.title)}</h3>
+                <div class="event-card-meta">
+                  <div class="event-meta-line"><span>${window.escapeHtml(event.start_time || 'Time to be announced')}</span></div>
+                  <div class="event-meta-line"><span>${window.escapeHtml(event.location || 'Location to be announced')}</span></div>
+                </div>
+                <p class="event-card-desc">${window.escapeHtml(event.description || '')}</p>
+                <a href="events.html#event-${window.escapeHtml(event.id)}" class="btn btn-outline-gold btn-full-width">Event Details</a>
+              </div>
+            </article>`;
+        }).join('');
+      })
+      .catch(() => {
+        eventsContainer.textContent = 'Upcoming events could not be loaded right now.';
+      });
   }
 
-  // Featured Sermon Overlay Play Handler
+  const featuredTitle = document.getElementById('featured-sermon-title');
+  const featuredSpeaker = document.getElementById('featured-sermon-speaker');
+  const featuredDate = document.getElementById('featured-sermon-date');
+  const featuredDescription = document.getElementById('featured-sermon-description');
+  const featuredThumbnail = document.getElementById('featured-sermon-thumbnail');
   const playOverlayBtn = document.querySelector('.play-overlay-btn');
+  let featuredVideoUrl = '';
+
+  fetch('/api/sermons?limit=1')
+    .then((response) => {
+      if (!response.ok) throw new Error('Sermons are temporarily unavailable.');
+      return response.json();
+    })
+    .then((response) => {
+      const items = Array.isArray(response.data) ? response.data : response.data?.items || [];
+      const sermon = items[0];
+      if (!sermon) {
+        if (featuredDescription) featuredDescription.textContent = 'No sermons have been published yet.';
+        return;
+      }
+      if (featuredTitle) featuredTitle.textContent = sermon.title || 'Latest Sermon';
+      if (featuredSpeaker) featuredSpeaker.textContent = sermon.speaker || 'Speaker not listed';
+      if (featuredDate) {
+        const date = sermon.sermon_date ? new Date(`${sermon.sermon_date}T00:00:00`) : null;
+        featuredDate.textContent = date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString() : '';
+      }
+      if (featuredDescription) featuredDescription.textContent = sermon.description || '';
+      const thumbnailUrl = window.safePublicUrl(sermon.thumbnail_url);
+      if (featuredThumbnail && thumbnailUrl) featuredThumbnail.src = thumbnailUrl;
+      if (featuredThumbnail) featuredThumbnail.alt = sermon.title || 'Latest published sermon';
+      featuredVideoUrl = window.safePublicUrl(sermon.video_url);
+      if (playOverlayBtn && featuredVideoUrl) playOverlayBtn.hidden = false;
+    })
+    .catch(() => {
+      if (featuredDescription) featuredDescription.textContent = 'The sermon library could not be loaded right now.';
+    });
+
   if (playOverlayBtn) {
     playOverlayBtn.addEventListener('click', () => {
-      window.location.href = 'live.html';
+      if (featuredVideoUrl) window.open(featuredVideoUrl, '_blank', 'noopener,noreferrer');
     });
   }
 });

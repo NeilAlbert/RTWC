@@ -1,7 +1,7 @@
 // THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
 // Ministries Page Specific JavaScript (js/pages/ministries.js)
 // Connects to /api/ministries backend endpoint for live data.
-// Falls back to static data if the API call fails.
+// Shows an empty state when the API is unavailable; never substitutes unverified ministry details.
 
 document.addEventListener('DOMContentLoaded', () => {
   /* ==========================================================================
@@ -21,20 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       return data.data || [];
     } catch (err) {
-      logger.warn('Failed to fetch ministries from API, falling back to static data', { error: err.message });
-      // Return static fallback data
-      return [
-        {
-          id: 1,
-          name: "Men's Ministry (PEMEM)",
-          tag: "PEMEM",
-          summary: "Building godly men, faithful husbands, exemplary fathers, and visionary kingdom leaders.",
-          leader: "Elder Kwame Asante",
-          meetingTime: "1st & 3rd Saturday @ 7:00 AM",
-          photo: "assets/images/hero.jpg"
-        },
-        // ... static fallback ministries
-      ];
+      console.warn('Ministry directory is unavailable.', err);
+      return [];
     }
   }
 

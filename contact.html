@@ -159,7 +159,7 @@
 
             <!-- 
               BACKEND / FORM SERVICE SUBMISSION NOTE:
-              Form operates client-side only for now. Reconnect to a real backend API (POST /api/contact) or a form service like Formspree later.
+              Contact messages are delivered securely to the church administration team.
             -->
             <form id="contact-form" class="contact-form" action="#" method="POST" novalidate>
               <div class="form-group">
@@ -206,7 +206,7 @@
 
             <!-- 
               BACKEND / FORM SERVICE SUBMISSION NOTE:
-              Form operates client-side only for now. Reconnect to a real backend API (POST /api/prayer-requests) or a form service like Formspree later.
+              Prayer requests are delivered securely to the pastoral team.
             -->
             <form id="prayer-form" class="contact-form" action="#" method="POST" novalidate>
               <div class="form-group">
@@ -222,8 +222,8 @@
 
               <div class="form-group checkbox-group">
                 <label class="checkbox-label">
-                  <input type="checkbox" id="prayer-private" name="keep_private" checked>
-                  <span>Keep this request strictly private (Pastoral Team only)</span>
+                  <input type="checkbox" id="prayer-anonymous" name="is_anonymous">
+                  <span>Submit anonymously</span>
                 </label>
               </div>
 

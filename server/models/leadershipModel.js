@@ -3,53 +3,44 @@
  * models/leadershipModel.js — SQL query functions for the leadership table.
  * All queries use parameterized placeholders (?) — never string concatenation.
  *
- * create/update accept snake_case keys matching the DB columns and the
- * route-validated body fields (ministry_id, photo_url, display_order).
+ * create/update accept fields matching the current leadership table.
  * =============================================================================
  */
 const pool = require('../config/db');
 
-const SELECT_COLUMNS = `
-  l.id, l.name, l.role, l.ministry_id, l.photo_url, l.bio, l.display_order, l.created_at,
-  m.name AS ministry_name, m.slug AS ministry_slug
-`;
+const SELECT_COLUMNS = 'id, name, position, photo_url, bio, display_order, published, created_at';
 
-async function findAll() {
+async function findAll({ includeUnpublished = false } = {}) {
+  const where = includeUnpublished ? '' : 'WHERE published = 1';
   const [rows] = await pool.query(
-    `SELECT ${SELECT_COLUMNS}
-     FROM leadership l
-     LEFT JOIN ministries m ON m.id = l.ministry_id
-     ORDER BY l.display_order ASC, l.id ASC`
+    `SELECT ${SELECT_COLUMNS} FROM leadership ${where} ORDER BY display_order ASC, id ASC`
   );
   return rows;
 }
 
 async function findById(id) {
   const [rows] = await pool.query(
-    `SELECT ${SELECT_COLUMNS}
-     FROM leadership l
-     LEFT JOIN ministries m ON m.id = l.ministry_id
-     WHERE l.id = ? LIMIT 1`,
+    `SELECT ${SELECT_COLUMNS} FROM leadership WHERE id = ? LIMIT 1`,
     [id]
   );
   return rows[0] || null;
 }
 
-async function create({ name, role, ministry_id, photo_url, bio, display_order }) {
+async function create({ name, position, photo_url, bio, display_order, published }) {
   const [result] = await pool.query(
-    `INSERT INTO leadership (name, role, ministry_id, photo_url, bio, display_order)
+    `INSERT INTO leadership (name, position, photo_url, bio, display_order, published)
      VALUES (?, ?, ?, ?, ?, ?)`,
-    [name, role, ministry_id || null, photo_url || null, bio || null, display_order ?? 0]
+    [name, position, photo_url || null, bio || null, display_order ?? 0, published === false || published === 0 ? 0 : 1]
   );
   return findById(result.insertId);
 }
 
-async function update(id, { name, role, ministry_id, photo_url, bio, display_order }) {
+async function update(id, { name, position, photo_url, bio, display_order, published }) {
   await pool.query(
     `UPDATE leadership
-     SET name = ?, role = ?, ministry_id = ?, photo_url = ?, bio = ?, display_order = ?
+     SET name = ?, position = ?, photo_url = ?, bio = ?, display_order = ?, published = ?
      WHERE id = ?`,
-    [name, role, ministry_id || null, photo_url || null, bio || null, display_order ?? 0, id]
+    [name, position, photo_url || null, bio || null, display_order ?? 0, published ? 1 : 0, id]
   );
   return findById(id);
 }

@@ -14,22 +14,32 @@ const Leadership = require('../models/leadershipModel');
 const { NotFoundError } = require('../utils/errors');
 
 function formatMember(row) {
+  const position = String(row.position || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  const role = position === 'resident_pastor' ? 'pastor'
+    : ['pastor_s_wife', 'wife_of_pastor'].includes(position) ? 'pastors_wife'
+      : position.includes('ministry') && position.endsWith('leader') ? 'ministry_leader'
+        : position;
   return {
     id: row.id,
     name: row.name,
-    role: row.role,
-    ministry: row.ministry_name || null,
-    ministrySlug: row.ministry_slug || null,
+    role,
+    position: row.position,
+    ministry: null,
+    ministrySlug: null,
     photoUrl: row.photo_url,
     bio: row.bio,
     displayOrder: row.display_order,
+    published: Boolean(row.published),
   };
 }
 
 /** GET /api/leadership — public, grouped by role */
 async function getLeadership(req, res, next) {
   try {
-    const rows = await Leadership.findAll();
+    const rows = await Leadership.findAll({ includeUnpublished: Boolean(req.adminLibrary) });
+    if (req.adminLibrary) {
+      return res.json({ success: true, message: 'Leadership fetched successfully.', data: rows });
+    }
 
     const groups = {
       pastoralPair: [],
@@ -37,13 +47,15 @@ async function getLeadership(req, res, next) {
       elders: [],
       deaconsDeaconesses: [],
       ministryLeaders: [],
+      other: [],
     };
 
     rows.forEach((row) => {
       const member = formatMember(row);
-      switch (row.role) {
+      switch (member.role) {
         case 'pastor':
         case 'pastors_wife':
+        case 'resident_pastor_wife':
           groups.pastoralPair.push(member);
           break;
         case 'presiding_elder':
@@ -61,6 +73,7 @@ async function getLeadership(req, res, next) {
           groups.ministryLeaders.push(member);
           break;
         default:
+          groups.other.push(member);
           break;
       }
     });

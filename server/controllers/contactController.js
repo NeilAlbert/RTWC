@@ -18,7 +18,7 @@ async function submitContact(req, res, next) {
   try {
     const { name, email, phone, subject, message } = req.body;
 
-  const contact = await ContactMessage.create({ name, email, phone, subject, message });
+    const contact = await ContactMessage.create({ name, email, phone, subject, message });
 
     // Notification email — best-effort; a failure must not fail the request.
     try {
@@ -67,7 +67,7 @@ async function updateMessageStatus(req, res, next) {
 
     const allowed = ['unread', 'read', 'archived'];
     if (!allowed.includes(status)) {
-      return next(new ValidationError('Status must be one of: new, read, responded.'));
+      return next(new ValidationError('Status must be one of: unread, read, archived.'));
     }
 
     const existing = await ContactMessage.findById(id);

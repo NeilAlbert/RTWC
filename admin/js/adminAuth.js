@@ -112,7 +112,7 @@ const AdminAuth = (() => {
   const NAV_ITEMS = [
     { key: 'dashboard', label: 'Dashboard', icon: '▤', href: 'dashboard.html' },
     { key: 'settings', label: 'Settings', icon: '⚙', href: 'settings.html' },
-    { key: 'leadership', label: 'Leadership', icon: '◉', href: 'leadership.html' },
+    { key: 'leadership', label: 'Leadership', icon: '◉', href: 'content.html?type=leadership' },
     { key: 'sermons', label: 'Sermons', icon: '▶', href: 'content.html?type=sermons' },
     { key: 'events', label: 'Events', icon: '▣', href: 'content.html?type=events' },
     { key: 'ministries', label: 'Ministries', icon: '✚', href: 'content.html?type=ministries' },
@@ -120,8 +120,8 @@ const AdminAuth = (() => {
     { key: 'prayer-requests', label: 'Prayer Requests', icon: '✝', href: 'content.html?type=prayers' },
     { key: 'testimonies', label: 'Testimonies', icon: '◉', href: 'content.html?type=testimonies' },
     { key: 'announcements', label: 'Announcements', icon: '!', href: 'content.html?type=announcements' },
-    { key: 'giving', label: 'Giving', icon: '₵', href: 'giving.html' },
-    { key: 'newsletter', label: 'Newsletter', icon: '☰', href: 'newsletter.html' },
+    { key: 'giving', label: 'Giving', icon: '₵', href: 'content.html?type=giving', roles: ['super_admin', 'admin'] },
+    { key: 'newsletter', label: 'Newsletter', icon: '☰', href: 'content.html?type=newsletter', roles: ['super_admin', 'admin'] },
   ];
 
   /**
@@ -134,7 +134,9 @@ const AdminAuth = (() => {
 
     const sidebar = document.getElementById('admin-sidebar');
     if (sidebar) {
-      const nav = NAV_ITEMS.map((item) => {
+      const admin = getAdmin();
+      const visibleItems = NAV_ITEMS.filter((item) => !item.roles || item.roles.includes(admin?.role));
+      const nav = visibleItems.map((item) => {
         const active = item.key === activeKey ? ' active' : '';
         const ariaCurrent = item.key === activeKey ? ' aria-current="page"' : '';
         return `<a href="${item.href}" class="nav-item${active}"${ariaCurrent}>

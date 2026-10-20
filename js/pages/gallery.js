@@ -1,7 +1,6 @@
 // THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
 // Photo Gallery Specific JavaScript (js/pages/gallery.js)
-// Connects to /api/facebook/gallery backend endpoint for real photos.
-// Falls back to static data if API call fails.
+// Loads cursor-paginated photos from the church's configured Facebook page.
 
 document.addEventListener('DOMContentLoaded', () => {
   /* ==========================================================================
@@ -16,40 +15,38 @@ document.addEventListener('DOMContentLoaded', () => {
   const lightboxDate = document.getElementById('lightboxDate');
   const lightboxClose = document.getElementById('lightboxClose');
   const noResultsMsg = document.getElementById('no-gallery-msg');
+  const loadMoreButton = document.getElementById('loadMoreButton');
+  let nextCursor = null;
+  let hasMore = false;
 
   /* ==========================================================================
    FETCH GALLERY IMAGES FROM BACKEND
    ========================================================================== */
-  async function fetchGalleryImages() {
+  async function fetchGalleryImages(cursor = null) {
     try {
-      const response = await fetch(`${API_BASE}/api/facebook/gallery`);
+      const query = cursor ? `?after=${encodeURIComponent(cursor)}` : '';
+      const response = await fetch(`${API_BASE}/api/facebook/photos${query}`);
       if (!response.ok) throw new Error('Failed to fetch gallery images');
       const data = await response.json();
-      return data.data || [];
+      return data.data || { photos: [], nextCursor: null, hasMore: false };
     } catch (err) {
-      logger.warn('Failed to fetch gallery from API, falling back to static data', { error: err.message });
-      // Return static fallback data
-      return [
-        {
-          imageUrl: 'assets/images/hero.jpg',
-          altText: 'Main Sanctuary Service',
-          title: 'Sunday Worship Service',
-          dateText: 'July 2026'
-        },
-        // ... static fallback images
-      ];
+      console.warn('Gallery photos are unavailable.', err);
+      return { photos: [], nextCursor: null, hasMore: false, error: true };
     }
   }
 
   /* ==========================================================================
    INITIALIZE GALLERY WITH DATA (API or fallback)
    ========================================================================== */
-  fetchGalleryImages().then(imagesData => {
-    initGallery(imagesData);
+  fetchGalleryImages().then((page) => {
+    initGallery(page);
   });
 
-  function initGallery(imagesData) {
-    loadGalleryPage(imagesData);
+  function initGallery(page) {
+    nextCursor = page.nextCursor;
+    hasMore = page.hasMore;
+    loadGalleryPage(page.photos, page.error);
+    updateLoadMoreButton();
 
     // Lightbox handlers
     if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);
@@ -73,31 +70,42 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ==========================================================================
    LOAD GALLERY PAGE
    ========================================================================== */
-  function loadGalleryPage(images) {
+  function loadGalleryPage(images, hasError = false) {
     if (!galleryGrid) return;
 
     galleryGrid.innerHTML = '';
 
     if (images.length === 0) {
-      if (galleryStatus) galleryStatus.textContent = 'No gallery images available.';
+      if (galleryStatus) galleryStatus.textContent = hasError
+        ? 'The gallery could not be loaded right now.'
+        : 'No gallery images are available right now.';
       if (noResultsMsg) noResultsMsg.style.display = 'block';
       return;
     }
 
     if (noResultsMsg) noResultsMsg.style.display = 'none';
 
-    galleryStatus.textContent = `Showing ${images.length} photos from the church gallery.`;
+    if (galleryStatus) galleryStatus.textContent = `Showing ${galleryGrid.children.length + images.length} photos from the church gallery.`;
 
     images.forEach((photo) => {
+      const imageUrl = window.safePublicUrl(photo.imageUrl);
+      if (!imageUrl) return;
       const card = document.createElement('article');
       card.className = 'gallery-card';
-      card.innerHTML = `
-        <img src="${photo.imageUrl}" alt="${photo.altText}" loading="lazy" />
-        <div class="gallery-card-body">
-          <div class="gallery-card-title">${photo.title}</div>
-          <div class="gallery-card-meta">${photo.dateText}</div>
-        </div>
-      `;
+      const image = document.createElement('img');
+      image.src = imageUrl;
+      image.alt = photo.altText || photo.title || 'Church gallery photo';
+      image.loading = 'lazy';
+      const body = document.createElement('div');
+      body.className = 'gallery-card-body';
+      const title = document.createElement('div');
+      title.className = 'gallery-card-title';
+      title.textContent = photo.title || 'Church photo';
+      const date = document.createElement('div');
+      date.className = 'gallery-card-meta';
+      date.textContent = photo.dateText || '';
+      body.append(title, date);
+      card.append(image, body);
       card.addEventListener('click', () => openLightbox(photo));
       galleryGrid.appendChild(card);
     });
@@ -107,7 +115,9 @@ document.addEventListener('DOMContentLoaded', () => {
    LIGHTBOX HANDLERS
    ========================================================================== */
   function openLightbox(photo) {
-    lightboxImage.src = photo.imageUrl;
+    const imageUrl = window.safePublicUrl(photo.imageUrl);
+    if (!imageUrl) return;
+    lightboxImage.src = imageUrl;
     lightboxImage.alt = photo.altText;
     lightboxCaption.textContent = photo.title;
     lightboxDate.textContent = photo.dateText;
@@ -119,4 +129,23 @@ document.addEventListener('DOMContentLoaded', () => {
     lightbox.classList.add('hidden');
     document.body.style.overflow = '';
   }
-});
+
+  function updateLoadMoreButton() {
+    if (loadMoreButton) loadMoreButton.classList.toggle('hidden', !hasMore);
+  }
+
+  if (loadMoreButton) {
+    loadMoreButton.addEventListener('click', async () => {
+      loadMoreButton.disabled = true;
+      try {
+        const page = await fetchGalleryImages(nextCursor);
+        nextCursor = page.nextCursor;
+        hasMore = page.hasMore;
+        loadGalleryPage(page.photos, page.error);
+        updateLoadMoreButton();
+      } finally {
+        loadMoreButton.disabled = false;
+      }
+    });
+  }
+});

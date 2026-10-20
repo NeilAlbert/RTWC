@@ -1,7 +1,7 @@
 // THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
 // Events Page Specific JavaScript (js/pages/events.js)
 // Connects to /api/events backend endpoint for live data.
-// Falls back to static data if the API call fails.
+// Shows an empty state when the API is unavailable; never substitutes unverified events.
 
 document.addEventListener('DOMContentLoaded', () => {
   /* ==========================================================================
@@ -31,21 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       return data.data || [];
     } catch (err) {
-      logger.warn('Failed to fetch events from API, falling back to static data', { error: err.message });
-      // Return static fallback data
-      return [
-        {
-          id: 1,
-          title: "Watch Night Service & Covenant Prayers",
-          description: "A solemn crossover service of thanksgiving, covenant declarations, and intercession as we entered the new year together.",
-          event_date: "2024-12-31",
-          event_time: "9:00 PM - 1:00 AM",
-          location: "Main Sanctuary, Royal Temple",
-          category: "Convention",
-          photo: "assets/images/welcome-pastor.jpg"
-        },
-        // ... static fallback events (same as original)
-      ];
+      console.warn('Event calendar is unavailable.', err);
+      return [];
     }
   }
 

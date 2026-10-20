@@ -1,7 +1,7 @@
 // THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
 // Sermons Page Specific JavaScript (js/pages/sermons.js)
 // Connects to /api/sermons backend endpoint with filtering, pagination, and modal playback.
-// Falls back to static data if API call fails.
+// Shows an empty state when the API is unavailable; never substitutes unverified records.
 
 document.addEventListener('DOMContentLoaded', () => {
   /* ==========================================================================
@@ -32,24 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       return Array.isArray(data.data) ? data.data : (data.data?.items || []);
     } catch (err) {
-      logger.warn('Failed to fetch sermons from API, falling back to static data', { error: err.message });
-      // Return static fallback data
-      return [
-        {
-          id: 1,
-          title: "Walking in Divine Purpose & Dominion",
-          speaker: "Pastor Emmanuel K. Ofori",
-          sermon_date: "July 26, 2026",
-          date: "July 26, 2026",
-          category: "Sunday Worship",
-          thumbnail_url: "assets/images/sermon-latest.jpg",
-          thumbnail: "assets/images/sermon-latest.jpg",
-          video_url: "https://www.facebook.com/cop.rtwc/videos",
-          description: "Discover how to align your daily walk with God's sovereign blueprint.",
-          summary: "Discover how to align your daily walk with God's sovereign blueprint."
-        },
-        // ... static fallback sermons
-      ];
+      console.warn('Sermon library is unavailable.', err);
+      return [];
     }
   }
 
