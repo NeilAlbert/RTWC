@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+yarn.lock
+package-lock.lock
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+
+# Runtime temp files
+/uploads/
+/tmp/
+
+# Database dumps
+*.sql.dump
+
+# Production build (if applicable)
+/dist/
+/build/
+
+# Server runtime
+.hot-reload/
+runtime/
+
+# Admin dashboard specific
+/admin/.next/
+/admin/dist/
