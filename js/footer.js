@@ -1,85 +1,220 @@
 /**
- * THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
- * Shared Footer Module (js/footer.js)
+ * ROYAL TEMPLE WORSHIP CENTRE - SHARED FOOTER MODULE
  * Renders identical footer markup into <footer id="site-footer"> on every page
+ * vanilla JS, no dependencies, no icon libraries, no CDNs
+ * Icons sourced from /assets/icons/ (icons8.com, consistent style, colored white)
  */
 
-// Footer data - church information and social links
-const footerData = {
-  churchName: 'Royal Temple Worship Centre',
-  tagline: 'The Church of Pentecost',
-  description: 'A glorious assembly dedicated to holy living, vibrant worship, and global evangelism under God\'s grace.',
-  
+// =============================================================================
+// CONFIGURATION — single source of truth for all editable footer data
+// =============================================================================
+
+const footerConfig = {
+  // Church description — edit this one line
+  description:
+    'A glorious assembly dedicated to holy living, vibrant worship, and global evangelism under God\'s grace.',
+
+  // Service times — edit these values; one object, one place to change them
   serviceTimes: [
     { name: 'Sunday Divine Service', time: '8:00 AM – 11:30 AM' },
     { name: 'Wednesday Midweek Service', time: '6:30 PM – 8:30 PM' },
     { name: 'Friday Prayer Tower', time: '6:30 PM – 9:00 PM' }
   ],
-  
+
+  // Contact information — edit these values; one object, one place to change them
   contact: {
     address: 'Royal Temple Worship Centre,\nThe Church of Pentecost.',
     phone: '+233 (0) 30 123 4567',
     email: 'info@royaltemple.org'
   },
-  
-  // Social links - only include platforms with real URLs
-  // Commented-out examples show where other platforms would go
+
+  // Social links — only include platforms with real URLs
+  // Facebook has a real URL; other platforms commented out until real URLs are available
   socials: [
-    { name: 'Facebook', url: 'https://www.facebook.com/cop.rtwc', aria: 'Royal Temple Worship Centre on Facebook', icon: 'facebook' },
-    // { name: 'YouTube', url: 'https://www.youtube.com/c/RoyalTempleWC', aria: 'Royal Temple Worship Centre on YouTube', icon: 'youtube' }, // commented out - no real URL
-    // { name: 'X', url: 'https://x.com/royaltemplewc', aria: 'Royal Temple Worship Centre on X', icon: 'x' }, // commented out - no real URL
-    // { name: 'WhatsApp', url: 'https://wa.me/233301234567', aria: 'Royal Temple Worship Centre on WhatsApp', icon: 'whatsapp' }, // commented out - no real URL
-    { name: 'Instagram', url: 'https://www.instagram.com/royaltemple_wc', aria: 'Royal Temple Worship Centre on Instagram', icon: 'instagram' }
-  ]
+    { name: 'Facebook', url: 'https://www.facebook.com/cop.rtwc', icon: 'facebook', aria: 'Royal Temple Worship Centre on Facebook' }
+    // { name: 'YouTube', url: '', icon: 'youtube', aria: '' }, // real URL needed
+    // { name: 'X', url: '', icon: 'x', aria: '' }, // real URL needed
+    // { name: 'Instagram', url: '', icon: 'instagram', aria: '' }, // real URL needed
+    // { name: 'WhatsApp', url: '', icon: 'whatsapp', aria: '' } // real URL needed
+  ],
+
+  // Icons8 attribution (required by free license)
+  icons8: {
+    name: 'Icons by Icons8',
+    url: 'https://icons8.com',
+    openNewTab: true
+  }
+}
+
+// =============================================================================
+// ICON PATH MAP — maps icon names to their file paths in /assets/icons/
+// =============================================================================
+
+const iconMap = {
+  facebook: 'assets/icons/facebook.svg',
+  phone: 'assets/icons/phone.png',
+  email: 'assets/icons/email.png',
+  location: 'assets/icons/location.png',
+  clock: 'assets/icons/clock.svg',
+  instagram: 'assets/icons/instagram.svg'
 };
 
-// Attribution data
-const attributionData = {
-  icons8Link: 'https://icons8.com',
-  icons8Text: 'Icons by Icons8'
-};
+// =============================================================================
+// TEMPLATE LITERAL — builds the complete footer HTML string
+// =============================================================================
 
-/**
- * Render the footer HTML and insert it into the page
- */
+function buildFooterHTML() {
+  const year = new Date().getFullYear();
+
+  // --- Column 1: About ---
+  const aboutColumn = `
+    <div class="footer-col about-col">
+      <h3>Royal Temple Worship Centre</h3>
+      <div class="sub-tagline">The Church of Pentecost</div>
+      <p>${footerConfig.description}</p>
+    </div>`;
+
+  // --- Column 2: Quick Links ---
+  const quickLinksColumn = `
+    <div class="footer-col quick-links-col">
+      <h4>Quick Links</h4>
+      <ul class="footer-link-list">
+        ${['Home', 'About', 'Ministries', 'Sermons', 'Events', 'Live', 'Gallery', 'Giving', 'Contact']
+          .map(
+            (link) => `<li><a href="${link.toLowerCase().replace(/\s+/g, '-')}.html">${link}</a></li>`
+          )
+          .join('\n')}</ul>`;
+
+  // --- Column 3: Service Times ---
+  const serviceTimesColumn = `
+    <div class="footer-col service-times-col">
+      <h4>Service Times</h4>
+      ${footerConfig.serviceTimes
+        .map(
+          (st) => `<div class="service-item"><span class="service-day">${st.name.split(' ')[0]}</span><span class="service-time">${st.time}</span></div>`
+        )
+        .join('\n')}</div>`;
+
+  // --- Column 4: Contact ---
+  const contactColumn = `
+    <div class="footer-col contact-col">
+      <h4>Contact</h4>
+      <div class="contact-info">
+        <div class="contact-row">
+          <img src="${iconMap.location}" alt="Location icon" class="contact-icon">
+          <span class="contact-address">${footerConfig.contact.address}</span>
+        </div>
+        <div class="contact-row">
+          <img src="${iconMap.phone}" alt="Phone icon" class="contact-icon">
+          <a href="tel:${footerConfig.contact.phone}" class="contact-phone">${footerConfig.contact.phone}</a>
+        </div>
+        <div class="contact-row">
+          <img src="${iconMap.email}" alt="Email icon" class="contact-icon">
+          <a href="mailto:${footerConfig.contact.email}" class="contact-email">${footerConfig.contact.email}</a>
+        </div>
+      </div>`;
+
+  // --- Social icons (bottom bar) ---
+  const socialIconsHTML = footerConfig.socials
+    .map(
+      (social) => `
+      <a href="${social.url}" class="social-icon" target="_blank" rel="noopener noreferrer" aria-label="${social.aria}">
+        <img src="${iconMap[social.icon]}" alt="${social.name} icon" width="24" height="24">
+      </a>`
+    )
+    .join('\n');
+
+  // --- Copyright & Icons8 attribution ---
+  const icons8Link = footerConfig.icons8.url;
+  const icons8Text = footerConfig.icons8.name;
+  const icons8Target = footerConfig.icons8.openNewTab ? 'target="_blank" rel="noopener noreferrer"' : '';
+
+  const copyrightHTML = `
+    <div class="copyright-bar">
+      &copy; <span id="footer-current-year">${year}</span> Royal Temple Worship Centre — The Church of Pentecost. All Rights Reserved.
+      <a href="${icons8Link}" ${icons8Target} style="color: rgba(255,255,255,0.7); font-size: 0.75rem; text-decoration: none;">
+        ${icons8Text}
+      </a>
+    </div>`;
+
+  // --- Full footer markup ---
+  const footerHTML = `
+    <footer id="site-footer" class="site-footer" role="contentinfo">
+      <div class="footer-container">
+        <div class="footer-grid">
+          ${aboutColumn}
+          ${quickLinksColumn}
+          ${serviceTimesColumn}
+          ${contactColumn}
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="footer-bottom-inner">
+          <div class="social-icons-left">
+            ${socialIconsHTML}
+          </div>
+          ${copyrightHTML}
+        </div>
+      </div>
+    </footer>`;
+
+  return footerHTML;
+}
+
+// =============================================================================
+// RENDERER — inserts the footer into the page
+// =============================================================================
+
 function renderFooter() {
-  const footerContainer = document.getElementById('site-footer');
-  if (!footerContainer) {
+  const container = document.getElementById('site-footer');
+  if (!container) {
     console.warn('Footer container <footer id="site-footer"> not found in page');
     return;
   }
-  
-  // Build the footer HTML
-  const html = buildFooterHTML();
-  footerContainer.innerHTML = html;
-  
-  // Add event listeners for social icon hover/focus
-  initFooterInteractions();
-}/**
- * Build the complete footer HTML string
- */
-function buildFooterHTML() {  const year = new Date().getFullYear();
-  
-  // Build social links HTML  const socialsHTML = footerData.socials.map((social, index) => {    const iconFile = getIconFile(social.icon);
-    const isExternal = social.url.startsWith('http');
-    const targetBlank = isExternal ? 'target="_blank" rel="noopener noreferrer"' : '';
-    
-    return `      <a href="${social.url}" class="social-icon-btn" ${targetBlank} aria-label="${social.aria}">        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <use href="#icon-${social.icon}"></use>        </svg>      </a>`;  }).join('\n');
-  
-  // Build contact info HTML  const contactHTML = `    <div class="contact-row">      <span class="contact-icon">        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">          <use href="#icon-location"></use>        </svg>      </span>      <span class="contact-text">${footerData.contact.address}</span>    </div>    <div class="contact-row">      <span class="contact-icon">        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">          <use href="#icon-phone"></use>        </svg>      </span>      <span class="contact-text">${footerData.contact.phone}</span>    </div>    <div class="contact-row">      <span class="contact-icon">        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">          <use href="#icon-email"></use>        </svg>      </span>      <span class="contact-text">${footerData.contact.email}</span>    </div>`;
-  
-  // Build service times HTML  const servicesHTML = footerData.serviceTimes.map((service, index) => {    return `        <div class="service-time-item">          <span class="service-time-name">${service.name}</span>          <span class="service-time-clock">${service.time}</span>        </div>`;  }).join('\n');
-  
-  const footerHTML = `    <footer id="site-footer" class="site-footer" role="contentinfo">      <div class="container">        <div class="footer-grid">          <!-- Column 1: Brand Info -->          <div class="footer-col footer-col-brand">            <div class="footer-logo">              <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">                <use href="#icon-facebook"></use>              </svg>            </div>            <h3>${footerData.churchName}</h3>            <div class="tagline">${footerData.tagline}</div>            <p>${footerData.description}</p>          </div>          
-          <!-- Column 2: Service Times -->          <div class="footer-col">            <h4 class="footer-h4">Service Times</h4>            ${servicesHTML}          </div>          
-          <!-- Column 3: Contact -->          <div class="footer-col">            <h4 class="footer-h4">Contact</h4>            ${contactHTML}          </div>        </div>      </div>      
-      <!-- Footer Bottom Bar -->      <div class="footer-bottom">        <div class="container footer-bottom-content">          <!-- Social Icons -->          <div class="social-icons">            ${socialsHTML}          </div>          
-          <!-- Copyright & Attribution -->          <div class="copyright-bar"> &copy; <span id="footer-current-year">${year}</span> Royal Temple Worship Centre — The Church of Pentecost. All Rights Reserved.            <a href="${attributionData.icons8Link}" target="_blank" rel="noopener noreferrer" class="icons8-attribution" style="color: rgba(255,255,255,0.7); font-size: 0.75rem;">Icons by Icons8</a>          </div>        </div>      </div>    </footer>`;  return footerHTML;}/**
- * Get the SVG file path for a given icon name */function getIconFile(iconName) {  const iconMap = {    facebook: 'assets/icons/facebook.svg',    phone: 'assets/icons/phone.svg',    email: 'assets/icons/email.svg',    location: 'assets/icons/location.svg',    clock: 'assets/icons/clock.svg'  };  return (iconMap[iconName] || 'assets/icons/facebook.svg');}/**
- * Initialize footer interaction event listeners */function initFooterInteractions() {  // Social icon hover/focus: reduce opacity to 0.8 and show gold outline  const socialBtns = document.querySelectorAll('.social-icon-btn');  socialBtns.forEach(btn => {    btn.addEventListener('mouseover', () => {      btn.style.opacity = '0.8';      btn.style.borderBottom = '1px solid var(--accent-gold)';    });    btn.addEventListener('mouseout', () => {      btn.style.opacity = '';      btn.style.borderBottom = '';    });    btn.addEventListener('focus', () => {      btn.style.opacity = '0.8';      btn.style.borderBottom = '1px solid var(--accent-gold)';      btn.style.outline = 'none';    });    btn.addEventListener('blur', () => {      btn.style.opacity '';      btn.style.borderBottom = '';      btn.style.outline = '';    });  });}
 
-// Initialize footer on DOMContentLoaded
-document.addEventListener('DOMContentLoaded', () => {
-  renderFooter();
-});
+  container.innerHTML = buildFooterHTML();
+
+  // Initialize focus-visible styles for social icons
+  initSocialIconFocus();
+}
+
+// =============================================================================
+// SOCIAL ICON FOCUS INITIALIZATION
+// =============================================================================
+
+function initSocialIconFocus() {
+  const socialIcons = document.querySelectorAll('.social-icon');
+  socialIcons.forEach((icon) => {
+    icon.addEventListener('mouseover', () => {
+      icon.style.opacity = '0.8';
+      icon.style.outline = '1px solid var(--accent-gold)';
+      icon.style.outlineOffset = '2px';
+    });
+
+    icon.addEventListener('mouseout', () => {
+      icon.style.opacity '';
+      icon.style.outline '';
+      icon.style.outlineOffset '';
+    });
+
+    icon.addEventListener('focus', () => {
+      icon.style.opacity = '0.8';
+      icon.style.outline = '1px solid var(--accent-gold)';
+      icon.style.outlineOffset = '2px';
+      icon.style.background 'none';
+    });
+
+    icon.addEventListener('blur', () => {
+      icon.style.opacity '';
+      icon.style.outline '';
+      icon.style.outlineOffset '';
+    });
+  });
+}
+
+// =============================================================================
+// AUTO-INITIALIZATION — run when DOM is ready
+// =============================================================================
+
+if (typeof window !== 'undefined') {
+  doc
