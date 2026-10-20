@@ -44,7 +44,7 @@ async function findById(id) {
 
 /** UPDATE testimony status (admin only) */
 async function updateStatus(id, status) {
-  const allowed = ['pending', 'approved', 'rejected', 'published'];
+  const allowed = ['pending', 'approved', 'rejected', 'published', 'archived'];
   if (!allowed.includes(status)) {
     throw new Error('Status must be one of: pending, approved, rejected, published');
   }

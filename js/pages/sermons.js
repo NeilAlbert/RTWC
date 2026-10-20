@@ -145,27 +145,27 @@ document.addEventListener('DOMContentLoaded', () => {
     container.innerHTML = items.map(item => `
       <article class="sermon-card">
         <div class="sermon-thumb-box">
-          <img src="${item.thumbnail}" alt="${item.title}" class="sermon-thumb-img">
-          <span class="sermon-category-tag">${item.category}</span>
-          <button class="sermon-play-overlay" data-id="${item.id}" aria-label="Play ${item.title}">
+          <img src="${window.escapeHtml(window.safePublicUrl(item.thumbnail_url || item.thumbnail) || 'assets/images/sermon-latest.jpg')}" alt="${window.escapeHtml(item.title)}" class="sermon-thumb-img" loading="lazy">
+          <span class="sermon-category-tag">${window.escapeHtml(item.category || 'Sermon')}</span>
+          <button class="sermon-play-overlay" data-id="${window.escapeHtml(item.id)}" aria-label="Play ${window.escapeHtml(item.title)}">
             <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           </button>
         </div>
         <div class="sermon-card-body">
-          <h3 class="sermon-card-title">${item.title}</h3>
+            <h3 class="sermon-card-title">${window.escapeHtml(item.title)}</h3>
           <div class="sermon-card-meta">
             <div class="sermon-meta-row">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-              <span>${item.speaker}</span>
+              <span>${window.escapeHtml(item.speaker)}</span>
             </div>
             <div class="sermon-meta-row">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-              <span>${item.date}</span>
+              <span>${window.escapeHtml(item.date || item.sermon_date)}</span>
             </div>
           </div>
-          <p class="sermon-card-desc">${item.summary}</p>
+          <p class="sermon-card-desc">${window.escapeHtml(item.summary || item.description)}</p>
           <div class="sermon-card-actions">
-            <button class="btn btn-primary btn-play-sermon btn-full-width" data-id="${item.id}">
+            <button class="btn btn-primary btn-play-sermon btn-full-width" data-id="${window.escapeHtml(item.id)}">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
               Watch / Listen Message
             </button>
@@ -188,4 +188,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initial Render
   // (Already called in initSermons above after fetch)
-});
+});

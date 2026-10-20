@@ -139,15 +139,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const isUpcoming = currentView === 'upcoming';
 
     // Small photo recap strip for past events when a photo is available.
-    const photoBlock = (event.photo && !isUpcoming) ? `
+    const photoUrl = window.safePublicUrl(event.image_url || event.photo);
+    const safeEventId = window.escapeHtml(event.id);
+    const photoBlock = (photoUrl && !isUpcoming) ? `
       <div class="event-photo-box">
-        <img src="${event.photo}" alt="${event.title}" class="event-photo">
+        <img src="${window.escapeHtml(photoUrl)}" alt="${window.escapeHtml(event.title)}" class="event-photo" loading="lazy">
       </div>
     ` : '';
 
     const footerBlock = isUpcoming
       ? `
-        <button class="btn btn-outline btn-add-cal btn-full-width" data-title="${event.title}">
+        <button class="btn btn-outline btn-add-cal btn-full-width" data-title="${window.escapeHtml(event.title)}">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           Add to Calendar (.ics)
         </button>
@@ -160,17 +162,17 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
 
     return `
-      <article class="event-item-card" id="event-${event.id}">
+      <article class="event-item-card" id="event-${safeEventId}">
         ${photoBlock}
         <div class="event-item-header">
           <div class="event-date-pill">
             <span class="event-date-month">${parts.month}</span>
             <span class="event-date-day">${parts.day}</span>
           </div>
-          <span class="event-type-badge">${event.category}</span>
+          <span class="event-type-badge">${window.escapeHtml(event.category)}</span>
         </div>
         <div class="event-item-body">
-          <h3 class="event-item-title">${event.title}</h3>
+          <h3 class="event-item-title">${window.escapeHtml(event.title)}</h3>
           <div class="event-item-meta">
             <div class="event-meta-row">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
@@ -178,14 +180,14 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="event-meta-row">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-              <span>${event.event_time}</span>
+              <span>${window.escapeHtml(event.start_time || event.event_time || 'Time not listed')}</span>
             </div>
             <div class="event-meta-row">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-              <span>${event.location}</span>
+              <span>${window.escapeHtml(event.location || 'Location not listed')}</span>
             </div>
           </div>
-          <p class="event-item-desc">${event.description}</p>
+          <p class="event-item-desc">${window.escapeHtml(event.description)}</p>
           <div class="event-item-footer">
             ${footerBlock}
           </div>
@@ -237,4 +239,4 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
-});
+});

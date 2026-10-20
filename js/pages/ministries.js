@@ -83,26 +83,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (noResultsMsg) noResultsMsg.style.display = 'none';
 
     ministriesGrid.innerHTML = items.map(ministry => `
-      <article class="ministry-card" id="ministry-${ministry.id}">
+      <article class="ministry-card" id="ministry-${window.escapeHtml(ministry.id)}">
         <div class="ministry-card-header">
           <div class="ministry-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           </div>
           <div class="ministry-title-box">
-            <span class="ministry-tag">${ministry.tag}</span>
-            <h3 class="ministry-name">${ministry.name}</h3>
+            <span class="ministry-tag">${window.escapeHtml(ministry.tag || ministry.slug || 'Ministry')}</span>
+            <h3 class="ministry-name">${window.escapeHtml(ministry.name)}</h3>
           </div>
         </div>
-        <p class="ministry-summary">${ministry.summary}</p>
+        <p class="ministry-summary">${window.escapeHtml(ministry.summary || ministry.description)}</p>
         <button class="btn-expand-ministry" aria-expanded="false">
           <span>Learn More Details</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </button>
         <div class="ministry-details">
-          <p>${ministry.details || 'More information about ' + ministry.name + ' ministry.'}</p>
+          <p>${window.escapeHtml(ministry.details || ministry.description || 'More information is not available yet.')}</p>
           <div class="ministry-meta">
-            <strong>Meeting Time:</strong> ${ministry.meetingTime || 'Weekly'}<br>
-            <strong>Leader:</strong> ${ministry.leader || 'TBD'}
+            <strong>Meeting Time:</strong> ${window.escapeHtml(ministry.meetingTime || ministry.meeting_information || 'Not provided')}<br>
+            <strong>Leader:</strong> ${window.escapeHtml(ministry.leader || ministry.leader_name || 'Not listed')}
           </div>
         </div>
       </article>
@@ -127,4 +127,4 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
-});
+});

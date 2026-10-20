@@ -3,6 +3,23 @@
  * Shared JavaScript (js/main.js)
  */
 
+window.escapeHtml = (value) => String(value ?? '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
+
+window.safePublicUrl = (value) => {
+  if (typeof value !== 'string' || !value.trim()) return '';
+  try {
+    const url = new URL(value, window.location.href);
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+  } catch (err) {
+    return '';
+  }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Footer Copyright Year
   const yearElement = document.getElementById('current-year');

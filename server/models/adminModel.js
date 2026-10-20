@@ -34,9 +34,10 @@ async function findById(id) {
 }
 
 async function createSession(sessionId, adminId, expiresAt) {
+  const expiresAtUtc = expiresAt.toISOString().slice(0, 19).replace('T', ' ');
   await pool.query(
     'INSERT INTO admin_sessions (session_id, admin_id, expires_at) VALUES (?, ?, ?)',
-    [sessionId, adminId, expiresAt]
+    [sessionId, adminId, expiresAtUtc]
   );
 }
 

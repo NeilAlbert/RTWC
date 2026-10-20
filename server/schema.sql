@@ -1,3 +1,4 @@
+-- language: mysql
 -- ============================================================================
 -- ROYAL TEMPLE WORSHIP CENTRE (THE CHURCH OF PENTECOST) — DATABASE SCHEMA
 -- Run against the Aiven MySQL database, e.g.:

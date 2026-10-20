@@ -20,11 +20,13 @@ async function login(req, res, next) {
     const admin = await Admin.findByEmail(email);
     if (!admin) {
       // Generic message — do not reveal whether the email exists.
+      logger.warn('Admin login failed', { email, ip: req.ip });
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
 
     const passwordMatches = await bcrypt.compare(password, admin.password_hash);
     if (!passwordMatches) {
+      logger.warn('Admin login failed', { email, ip: req.ip });
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
 
