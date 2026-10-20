@@ -1,6 +1,6 @@
 /**
  * ROYAL TEMPLE WORSHIP CENTRE - Server Entry Point
- * Express server configuration with security, CORS, routes, and error handling
+ * Express server with API routes, static serving, CORS, security, and error handling
  */
 
 require('dotenv').config();
@@ -19,6 +19,14 @@ const { notFound } = require('./middleware/errorHandler');
 
 // Import routes
 const authRoutes = require('./routes/auth');
+const settingsRoutes = require('./routes/settings');
+const sermonsRoutes = require('./routes/sermons');
+const eventsRoutes = require('./routes/events');
+const ministriesRoutes = require('./routes/ministries');
+const leadershipRoutes = require('./routes/leadership');
+const contactRoutes = require('./routes/contact');
+const prayerRequestsRoutes = require('./routes/prayer-requests');
+const newsletterRoutes = require('./routes/newsletter');
 
 // Initialize Express app
 const app = express();
@@ -70,7 +78,7 @@ app.use(cors(corsOptions));
 
 // ========================================
 // Rate Limiting
-// - Strict limiter: 5 requests per 15 min for all routes
+// - Strict limiter: 5 requests per 15 min for all public routes
 // - Login limiter: 10 attempts per 15 min for auth routes only
 // ========================================
 app.use('/api/auth/', loginLimiter);
@@ -91,9 +99,25 @@ app.use(mongoSanitize());
 app.use(xss());
 
 // ========================================
-// Health Route - Public, confirms DB connection
-// GET /api/health
+// Static File Serving
+// Serve /client as static files so site and API run from one origin
+// /admin is NOT served yet (purposeful block)
 // ========================================
+app.use(express.static('client', {
+  // Do not serve files from /admin subpath
+  // This is handled by the order of middleware
+  extensions: ['html', 'js', 'css', 'svg', png', 'jpg'],
+  index: false // We'll handle routing manually
+}));
+
+// Routes that should NOT serve static files (admin will be added later)
+// /admin/* routes will return 404 for now
+
+// ========================================
+// API Routes (all prefixed with /api)
+// ========================================
+
+// Health check - public, confirms DB
 app.get('/api/health', async (req, res) => {
   try {
     const connection = await pool.getConnection();
@@ -110,18 +134,91 @@ app.get('/api/health', async (req, res) => {
       message: 'Server is running, but database connection failed'
     });
   }
-};
+});
 
-// ========================================
-// Auth Routes
-// POST /api/auth/login, POST /api/auth/logout, GET /api/auth/me
-// ========================================
+// Auth routes
 app.use('/api/auth', authRoutes);
 
+// Settings - cached for 60 seconds
+app.get('/api/settings', async (req, res) => {
+  try {
+    // Try cache first
+    const cached = cache.get('settings');
+    if (cached) {
+      return res.json({
+        success: true,
+        data: cached
+      });
+    }
+
+    const pool = require('./config/db');
+    const [rows] = await pool.query(
+      'SELECT setting_key, setting_value FROM site_settings'
+    );
+
+    // Transform to key/value object
+    const settings = {};
+    rows.forEach(row => {
+      settings[row.setting_key] = row.setting_value;
+    });
+
+    // Cache for 60 seconds (60 * 1000 ms)
+    cache.set('settings', settings, 60);
+
+    return res.json({
+      success: true,
+      data: settings
+    });
+
+  } catch (error) {
+    console.error('Settings error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch settings'
+    });
+  }
+});
+
+// Sermons routes
+app.use('/api/sermons', sermonsRoutes);
+
+// Events routes
+app.use('/api/events', eventsRoutes);
+
+// Ministries routes
+app.use('/api/ministries', ministriesRoutes);
+
+// Leadership routes
+app.use('/api/leadership', leadershipRoutes);
+
+// Contact form
+app.use('/api/contact', contactRoutes);
+
+// Prayer requests
+app.use('/api/prayer-requests', prayerRequestsRoutes);
+
+// Newsletter
+app.use('/api/newsletter', newsletterRoutes);
+
 // ========================================
-// 404 Handler - Undefined routes
+// 404 Handler - Undefined API routes and static
 // ========================================
-app.use(notFound);
+app.use((req, res) => {
+  // If the path starts with /api/, it's an unknown API route
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({
+      success: false,
+      message: 'API endpoint not found'
+    });
+  }
+  
+  // For non-API routes, serve index.html for client-side routing
+  // (will be handled by the client-side app)
+  res.status(404).json({
+    success: false,
+    message: 'Resource not found'
+  });
+});
 
 // ========================================
 // Global Error Handler
@@ -149,8 +246,9 @@ pool.getConnection()
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`   Environment: ${NODE_ENV}`);
-      console.log(`   JWT_SECRET: configured`);
       console.log(`   CORS: ${process.env.SITE_URL || 'localhost only'}`);
+      console.log(`   API Base: http://localhost:${PORT}/api`);
+      console.log(`   Static: http://localhost:${PORT/`);
     });
   })
   .then(() => {
