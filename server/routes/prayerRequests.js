@@ -7,6 +7,7 @@ const express = require('express');
 const { body, param, query } = require('express-validator');
 
 const authMiddleware = require('../middleware/authMiddleware');
+const authorizeRoles = require('../middleware/authorizeRoles');
 const validateRequest = require('../middleware/validateRequest');
 const { sanitizeBody } = require('../middleware/sanitizeInput');
 const { prayerRequestsLimiter } = require('../middleware/rateLimiter');
@@ -23,6 +24,7 @@ router.post(
   '/',
   prayerRequestsLimiter,
   sanitizeBody(['name', 'request_text'], { maxLength: 5000 }),
+  sanitizeBody(['name', 'request_text'], { maxLength: 5000 }),
   [
     body('name').trim().isLength({ min: 2, max: 150 }).withMessage('Please provide your name.'),
     body('request_text').trim().isLength({ min: 5, max: 5000 }).withMessage('Please describe your prayer request.'),
@@ -36,8 +38,10 @@ router.post(
 router.get(
   '/',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin'),
   [
     query('status').optional().isIn(['new', 'being_prayed_for', 'completed', 'archived']),
+      query('status').optional().isIn(['new', 'being_prayed_for', 'completed', 'archived']),
     query('page').optional().isInt({ min: 1 }),
     query('limit').optional().isInt({ min: 1, max: 50 }),
   ],
@@ -49,7 +53,12 @@ router.get(
 router.patch(
   '/:id/status',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin'),
   [param('id').isInt({ min: 1 }).withMessage('Invalid request id.')],
+    [
+      param('id').isInt({ min: 1 }).withMessage('Invalid request id.'),
+      body('status').isIn(['new', 'being_prayed_for', 'completed', 'archived']).withMessage('Invalid prayer request status.'),
+    ],
   validateRequest,
   updateRequestStatus
 );

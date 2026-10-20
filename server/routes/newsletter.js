@@ -7,6 +7,7 @@ const express = require('express');
 const { body, query } = require('express-validator');
 
 const authMiddleware = require('../middleware/authMiddleware');
+const authorizeRoles = require('../middleware/authorizeRoles');
 const validateRequest = require('../middleware/validateRequest');
 const { newsletterLimiter } = require('../middleware/rateLimiter');
 const { subscribe, getSubscribers } = require('../controllers/newsletterController');
@@ -26,6 +27,7 @@ router.post(
 router.get(
   '/subscribers',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin'),
   [
     query('page').optional().isInt({ min: 1 }),
     query('limit').optional().isInt({ min: 1, max: 100 }),

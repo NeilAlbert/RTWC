@@ -18,7 +18,7 @@ async function login(req, res, next) {
     const { email, password } = req.body;
 
     const admin = await Admin.findByEmail(email);
-    if (!admin) {
+    if (!admin || !admin.is_active) {
       // Generic message — do not reveal whether the email exists.
       logger.warn('Admin login failed', { email, ip: req.ip });
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
@@ -32,7 +32,7 @@ async function login(req, res, next) {
 
     const sessionId = randomUUID();
     const token = jwt.sign(
-      { sub: admin.id, name: admin.name, email: admin.email },
+      { sub: admin.id, name: admin.name, email: admin.email, role: admin.role },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '24h', jwtid: sessionId }
     );
@@ -46,7 +46,7 @@ async function login(req, res, next) {
       message: 'Login successful.',
       data: {
         token,
-        admin: { id: admin.id, name: admin.name, email: admin.email }, // never the hash
+        admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role }, // never the hash
       },
     });
   } catch (err) {

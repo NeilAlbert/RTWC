@@ -16,15 +16,15 @@ const logger = require('../utils/logger');
 /** POST /api/contact — public (rate-limited) */
 async function submitContact(req, res, next) {
   try {
-    const { name, email, message } = req.body;
+    const { name, email, phone, subject, message } = req.body;
 
-    const contact = await ContactMessage.create({ name, email, message });
+  const contact = await ContactMessage.create({ name, email, phone, subject, message });
 
     // Notification email — best-effort; a failure must not fail the request.
     try {
       await sendMail({
         subject: 'New Contact Form Message — Royal Temple Website',
-        text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+        text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone || 'Not provided'}\nSubject: ${subject || 'General enquiry'}\n\nMessage:\n${message}`,
       });
     } catch (mailErr) {
       logger.error('Contact notification email failed', { message: mailErr.message });
@@ -65,7 +65,7 @@ async function updateMessageStatus(req, res, next) {
     const { id } = req.params;
     const { status } = req.body;
 
-    const allowed = ['new', 'read', 'responded', 'archived'];
+    const allowed = ['unread', 'read', 'archived'];
     if (!allowed.includes(status)) {
       return next(new ValidationError('Status must be one of: new, read, responded.'));
     }

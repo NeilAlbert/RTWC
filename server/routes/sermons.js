@@ -7,6 +7,7 @@ const express = require('express');
 const { body, param, query } = require('express-validator');
 
 const authMiddleware = require('../middleware/authMiddleware');
+const authorizeRoles = require('../middleware/authorizeRoles');
 const validateRequest = require('../middleware/validateRequest');
 const { sanitizeBody } = require('../middleware/sanitizeInput');
 const {
@@ -23,6 +24,7 @@ const router = express.Router();
 router.get(
   '/manage',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin', 'editor'),
   [
     query('q').optional().trim().isLength({ max: 255 }),
     query('published').optional().isIn(['true', 'false']),
@@ -62,6 +64,7 @@ router.get(
 router.post(
   '/',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin', 'editor'),
   sanitizeBody(['title', 'speaker', 'description'], { maxLength: 5000 }),
   [
     body('title').trim().isLength({ min: 1, max: 255 }).withMessage('Title is required.'),
@@ -85,6 +88,7 @@ router.post(
 router.put(
   '/:id',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin', 'editor'),
   sanitizeBody(['title', 'speaker', 'description'], { maxLength: 5000 }),
   [
     param('id').isInt({ min: 1 }),
@@ -109,6 +113,7 @@ router.put(
 router.delete(
   '/:id',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin', 'editor'),
   [param('id').isInt({ min: 1 }).withMessage('Invalid sermon id.')],
   validateRequest,
   deleteSermon

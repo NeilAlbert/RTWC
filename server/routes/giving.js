@@ -7,6 +7,7 @@ const express = require('express');
 const { body, query, param } = require('express-validator');
 
 const authMiddleware = require('../middleware/authMiddleware');
+const authorizeRoles = require('../middleware/authorizeRoles');
 const validateRequest = require('../middleware/validateRequest');
 const { sanitizeBody } = require('../middleware/sanitizeInput');
 const { givingLimiter } = require('../middleware/rateLimiter');
@@ -68,6 +69,7 @@ router.get(
 router.get(
   '/history',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin'),
   [
     query('category').optional().isIn(CATEGORIES),
     query('from').optional().isISO8601().withMessage('from must be YYYY-MM-DD.'),

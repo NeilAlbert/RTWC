@@ -12,19 +12,24 @@ const logger = require('../utils/logger');
 /** POST /api/prayer-requests — public (rate-limited) */
 async function submitPrayerRequest(req, res, next) {
   try {
-    const { name, request_text, is_private } = req.body;
+    const { name, email, phone, request_text } = req.body;
+    const is_private = req.body.is_anonymous === true || req.body.is_anonymous === 'true'
+      || req.body.is_private === true || req.body.is_private === 'true'
+      || req.body.is_private === 1 || req.body.is_private === '1';
 
     const prayer = await PrayerRequest.create({
-      name,
+      name: is_private ? null : name,
+      email: is_private ? null : email,
+      phone: is_private ? null : phone,
       request_text,
-      is_private: is_private === true || is_private === 'true' || is_private === 1 || is_private === '1',
+      is_private,
     });
 
     // Notification email — best-effort.
     try {
       await sendMail({
         subject: 'New Prayer Request — Royal Temple Website',
-        text: `Name: ${name}\nPrivacy: ${prayer.is_private ? 'Private' : 'May be shared'}\n\nRequest:\n${request_text}`,
+        text: `Name: ${is_private ? 'Anonymous' : (name || 'Not provided')}\nPrivacy: ${prayer.is_private ? 'Private' : 'Not anonymous'}\n\nRequest:\n${request_text}`,
       });
     } catch (mailErr) {
       logger.error('Prayer request notification email failed', { message: mailErr.message });

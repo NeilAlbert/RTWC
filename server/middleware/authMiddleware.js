@@ -24,12 +24,12 @@ async function authMiddleware(req, res, next) {
     if (!decoded.jti || !decoded.sub) {
       return res.status(401).json({ success: false, message: 'Invalid or expired token.' });
     }
-    const sessionIsActive = await Admin.hasActiveSession(decoded.jti, decoded.sub);
-    if (!sessionIsActive) {
+    const admin = await Admin.findActiveSession(decoded.jti, decoded.sub);
+    if (!admin) {
       return res.status(401).json({ success: false, message: 'Session expired. Please log in again.' });
     }
     // Attach the admin identity for downstream handlers.
-    req.admin = { id: decoded.sub, name: decoded.name, email: decoded.email, sessionId: decoded.jti };
+    req.admin = { ...admin, sessionId: decoded.jti };
     return next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {

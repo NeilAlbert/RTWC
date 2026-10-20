@@ -1,323 +1,434 @@
 -- language: mysql
--- ============================================================================
--- ROYAL TEMPLE WORSHIP CENTRE (THE CHURCH OF PENTECOST) — DATABASE SCHEMA
--- Run against the Aiven MySQL database, e.g.:
---   mysql --host=$DB_HOST --port=$DB_PORT --user=$DB_USER --password=$DB_PASSWORD $DB_NAME < schema.sql
--- ============================================================================
+-- RTWC (Royal Temple Worship Centre)
+-- Fresh MySQL/MariaDB schema for phpMyAdmin
+-- Import this file directly in phpMyAdmin.
+--
+-- IMPORTANT:
+-- 1. This is MySQL/MariaDB SQL, NOT Microsoft SQL Server/T-SQL.
+-- 2. Create/select your database in phpMyAdmin before importing.
+-- 3. No real passwords, API keys, or streaming secrets belong in this file.
 
+SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';
+SET time_zone = '+00:00';
 SET NAMES utf8mb4;
+
 SET FOREIGN_KEY_CHECKS = 0;
 
--- -----------------------------------------------------------------------------
--- admins — the single administrator account(s) for the /admin dashboard.
--- Seeded via scripts/seedAdmin.js (bcrypt hash; never store plain passwords).
--- -----------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS admins (
-  id            INT UNSIGNED     NOT NULL AUTO_INCREMENT,
-  name          VARCHAR(120)     NOT NULL,
-  email         VARCHAR(255)     NOT NULL,
-  password_hash VARCHAR(255)     NOT NULL,
-  created_at    TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  UNIQUE KEY uq_admins_email (email)
+-- =========================================================
+-- ADMINISTRATION
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS admins(
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(150) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('super_admin','admin','editor') NOT NULL DEFAULT 'admin',
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    last_login_at DATETIME NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_admins_email (email),
+    KEY idx_admins_role (role),
+    KEY idx_admins_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Revocable JWT sessions; rows expire with the token and are checked by the
--- authentication middleware on every protected request.
 CREATE TABLE IF NOT EXISTS admin_sessions (
-  session_id CHAR(36) NOT NULL,
-  admin_id   INT UNSIGNED NOT NULL,
-  expires_at DATETIME NOT NULL,
-  revoked_at DATETIME NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (session_id),
-  KEY idx_admin_sessions_admin (admin_id),
-  KEY idx_admin_sessions_expiry (expires_at),
-  CONSTRAINT fk_admin_sessions_admin
-    FOREIGN KEY (admin_id) REFERENCES admins (id) ON DELETE CASCADE
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    admin_id INT UNSIGNED NOT NULL,
+    session_token_hash VARCHAR(255) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    ip_address VARCHAR(45) NULL,
+    user_agent VARCHAR(500) NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_admin_sessions_token (session_token_hash),
+    KEY idx_admin_sessions_admin (admin_id),
+    KEY idx_admin_sessions_expires (expires_at),
+    CONSTRAINT fk_admin_sessions_admin
+        FOREIGN KEY (admin_id) REFERENCES admins(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -----------------------------------------------------------------------------
--- sermons
--- -----------------------------------------------------------------------------
+-- =========================================================
+-- SERMONS
+-- =========================================================
+
 CREATE TABLE IF NOT EXISTS sermons (
-  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  title         VARCHAR(255) NOT NULL,
-  speaker       VARCHAR(120) NOT NULL,
-  scripture     VARCHAR(255),
-  category      VARCHAR(120),
-  tags          VARCHAR(1000),
-  description   TEXT,
-  video_url     VARCHAR(500),
-  audio_url     VARCHAR(500),
-  thumbnail_url VARCHAR(500),
-  sermon_date   DATE         NOT NULL,
-  published     TINYINT(1)   NOT NULL DEFAULT 0,
-  featured      TINYINT(1)   NOT NULL DEFAULT 0,
-  created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  KEY idx_sermons_speaker (speaker),
-  KEY idx_sermons_date (sermon_date)
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    speaker VARCHAR(150) NULL,
+    sermon_date DATE NULL,
+    scripture VARCHAR(255) NULL,
+    category VARCHAR(100) NULL,
+    description TEXT NULL,
+    thumbnail_url VARCHAR(1000) NULL,
+    video_url VARCHAR(1000) NULL,
+    audio_url VARCHAR(1000) NULL,
+    tags VARCHAR(500) NULL,
+    published TINYINT(1) NOT NULL DEFAULT 0,
+    featured TINYINT(1) NOT NULL DEFAULT 0,
+    created_by INT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_sermons_date (sermon_date),
+    KEY idx_sermons_category (category),
+    KEY idx_sermons_published (published),
+    KEY idx_sermons_featured (featured),
+    KEY idx_sermons_speaker (speaker),
+    CONSTRAINT fk_sermons_created_by
+        FOREIGN KEY (created_by) REFERENCES admins(id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -----------------------------------------------------------------------------
--- events
--- -----------------------------------------------------------------------------
+-- =========================================================
+-- EVENTS
+-- =========================================================
+
 CREATE TABLE IF NOT EXISTS events (
-  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  title       VARCHAR(255) NOT NULL,
-  description TEXT,
-  event_date  DATE         NOT NULL,
-  event_time  VARCHAR(50),
-  start_time  VARCHAR(20),
-  end_time    VARCHAR(20),
-  location    VARCHAR(255),
-  image_url   VARCHAR(500),
-  registration_url VARCHAR(500),
-  category    ENUM('convention','revival','camp_meeting','anniversary','other')
-              NOT NULL DEFAULT 'other',
-  published   TINYINT(1)   NOT NULL DEFAULT 0,
-  featured    TINYINT(1)   NOT NULL DEFAULT 0,
-  created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  KEY idx_events_date (event_date),
-  KEY idx_events_category (category)
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NULL,
+    event_date DATE NOT NULL,
+    start_time TIME NULL,
+    end_time TIME NULL,
+    location VARCHAR(255) NULL,
+    image_url VARCHAR(1000) NULL,
+    category VARCHAR(100) NULL,
+    registration_url VARCHAR(1000) NULL,
+    published TINYINT(1) NOT NULL DEFAULT 0,
+    featured TINYINT(1) NOT NULL DEFAULT 0,
+    created_by INT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_events_date (event_date),
+    KEY idx_events_category (category),
+    KEY idx_events_published (published),
+    KEY idx_events_featured (featured),
+    CONSTRAINT fk_events_created_by
+        FOREIGN KEY (created_by) REFERENCES admins(id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -----------------------------------------------------------------------------
--- testimonies — user-submitted testimonies with moderation workflow
--- -----------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS testimonies (
-  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  name          VARCHAR(150) NOT NULL,
-  email         VARCHAR(255) NOT NULL,
-  testimony     TEXT         NOT NULL,
-  permission_to_publish TINYINT(1) NOT NULL DEFAULT 0,
-  status        ENUM('pending','approved','rejected','published','archived') NOT NULL DEFAULT 'pending',
-  created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  KEY idx_testimony_status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- =========================================================
+-- MINISTRIES
+-- =========================================================
 
--- -----------------------------------------------------------------------------
--- announcements — admin-created announcements with publish/expiry dates
--- -----------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS announcements (
-  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  title         VARCHAR(255) NOT NULL,
-  content       TEXT         NOT NULL,
-  image_url     VARCHAR(500),
-  publish_date  DATETIME     NOT NULL,
-  expiry_date   DATETIME,
-  priority      ENUM('low','normal','high') NOT NULL DEFAULT 'normal',
-  published     TINYINT(1)   NOT NULL DEFAULT 0,
-  created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  KEY idx_announcement_published (published),
-  KEY idx_announcement_expiry (expiry_date)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- -----------------------------------------------------------------------------
--- ministries
--- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS ministries (
-  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  name        VARCHAR(150) NOT NULL,
-  slug        VARCHAR(160) NOT NULL,
-  description TEXT,
-  icon_url    VARCHAR(500),
-  created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  UNIQUE KEY uq_ministries_slug (slug)
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(200) NOT NULL,
+    slug VARCHAR(220) NOT NULL,
+    description TEXT NULL,
+    image_url VARCHAR(1000) NULL,
+    meeting_day VARCHAR(100) NULL,
+    meeting_time VARCHAR(100) NULL,
+    meeting_location VARCHAR(255) NULL,
+    leader_name VARCHAR(150) NULL,
+    contact_phone VARCHAR(50) NULL,
+    contact_email VARCHAR(255) NULL,
+    published TINYINT(1) NOT NULL DEFAULT 1,
+    featured TINYINT(1) NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_ministries_slug (slug),
+    KEY idx_ministries_published (published),
+    KEY idx_ministries_featured (featured)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -----------------------------------------------------------------------------
--- leadership — linked to ministries via nullable FK.
--- -----------------------------------------------------------------------------
+-- =========================================================
+-- LEADERSHIP
+-- =========================================================
+
 CREATE TABLE IF NOT EXISTS leadership (
-  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  name          VARCHAR(150) NOT NULL,
-  role          ENUM('pastor','pastors_wife','presiding_elder','secretary',
-              'elder','deacon','deaconess','ministry_leader') NOT NULL,
-  ministry_id   INT UNSIGNED NULL,
-  photo_url     VARCHAR(500),
-  bio           TEXT,
-  display_order INT          NOT NULL DEFAULT 0,
-  created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  KEY idx_leadership_role (role),
-  KEY idx_leadership_ministry (ministry_id),
-  CONSTRAINT fk_leadership_ministry
-    FOREIGN KEY (ministry_id) REFERENCES ministries (id) ON DELETE SET NULL
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(150) NOT NULL,
+    position VARCHAR(150) NOT NULL,
+    bio TEXT NULL,
+    photo_url VARCHAR(1000) NULL,
+    display_order INT NOT NULL DEFAULT 0,
+    published TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_leadership_order (display_order),
+    KEY idx_leadership_published (published)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -----------------------------------------------------------------------------
--- contact_messages — public contact form submissions.
--- -----------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS contact_messages (
-  id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  name       VARCHAR(150) NOT NULL,
-  email      VARCHAR(255) NOT NULL,
-  message    TEXT         NOT NULL,
-  status     ENUM('new','read','responded','archived') NOT NULL DEFAULT 'new',
-  created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  KEY idx_contact_status (status)
+-- =========================================================
+-- GALLERY
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS gallery_albums (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    slug VARCHAR(280) NOT NULL,
+    description TEXT NULL,
+    cover_image_url VARCHAR(1000) NULL,
+    published TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_gallery_albums_slug (slug),
+    KEY idx_gallery_albums_published (published)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -----------------------------------------------------------------------------
--- prayer_requests — is_private honors the submitter's privacy preference.
--- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS gallery_images (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    album_id INT UNSIGNED NULL,
+    title VARCHAR(255) NULL,
+    image_url VARCHAR(1000) NOT NULL,
+    alt_text VARCHAR(255) NULL,
+    caption VARCHAR(500) NULL,
+    display_order INT NOT NULL DEFAULT 0,
+    featured TINYINT(1) NOT NULL DEFAULT 0,
+    published TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_gallery_images_album (album_id),
+    KEY idx_gallery_images_order (display_order),
+    KEY idx_gallery_images_featured (featured),
+    CONSTRAINT fk_gallery_images_album
+        FOREIGN KEY (album_id) REFERENCES gallery_albums(id)
+        ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =========================================================
+-- ANNOUNCEMENTS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS announcements (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    image_url VARCHAR(1000) NULL,
+    priority ENUM('normal','important','urgent') NOT NULL DEFAULT 'normal',
+    published TINYINT(1) NOT NULL DEFAULT 0,
+    featured TINYINT(1) NOT NULL DEFAULT 0,
+    published_at DATETIME NULL,
+    expires_at DATETIME NULL,
+    created_by INT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_announcements_published (published),
+    KEY idx_announcements_featured (featured),
+    KEY idx_announcements_expiry (expires_at),
+    CONSTRAINT fk_announcements_created_by
+        FOREIGN KEY (created_by) REFERENCES admins(id)
+        ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =========================================================
+-- TESTIMONIALS
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS testimonials (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(150) NOT NULL,
+    email VARCHAR(255) NULL,
+    message TEXT NOT NULL,
+    permission_to_publish TINYINT(1) NOT NULL DEFAULT 0,
+    photo_url VARCHAR(1000) NULL,
+    status ENUM('pending','approved','rejected','published','archived') NOT NULL DEFAULT 'pending',
+    admin_notes TEXT NULL,
+    reviewed_by INT UNSIGNED NULL,
+    reviewed_at DATETIME NULL,
+    published_at DATETIME NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_testimonials_status (status),
+    KEY idx_testimonials_created (created_at),
+    CONSTRAINT fk_testimonials_reviewer
+        FOREIGN KEY (reviewed_by) REFERENCES admins(id)
+        ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =========================================================
+-- PRAYER REQUESTS
+-- =========================================================
+
 CREATE TABLE IF NOT EXISTS prayer_requests (
-  id           INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  name         VARCHAR(150) NOT NULL,
-  request_text TEXT         NOT NULL,
-  is_private   TINYINT(1)   NOT NULL DEFAULT 0,
-  status       ENUM('new','being_prayed_for','completed','archived') NOT NULL DEFAULT 'new',
-  created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  KEY idx_prayer_status (status)
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(150) NULL,
+    email VARCHAR(255) NULL,
+    phone VARCHAR(50) NULL,
+    request TEXT NOT NULL,
+    status ENUM('new','being_prayed_for','completed','archived') NOT NULL DEFAULT 'new',
+    is_anonymous TINYINT(1) NOT NULL DEFAULT 0,
+    admin_notes TEXT NULL,
+    assigned_to INT UNSIGNED NULL,
+    completed_at DATETIME NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_prayer_status (status),
+    KEY idx_prayer_created (created_at),
+    CONSTRAINT fk_prayer_assigned_to
+        FOREIGN KEY (assigned_to) REFERENCES admins(id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -----------------------------------------------------------------------------
--- giving_records — payment_reference is UNIQUE for idempotency: the webhook
--- must never double-record a donation for the same reference.
--- -----------------------------------------------------------------------------
+-- =========================================================
+-- CONTACT MESSAGES
+-- =========================================================
+
+CREATE TABLE IF NOT EXISTS contact_messages (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(150) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(50) NULL,
+    subject VARCHAR(255) NULL,
+    message TEXT NOT NULL,
+    status ENUM('unread','read','archived') NOT NULL DEFAULT 'unread',
+    replied_at DATETIME NULL,
+    replied_by INT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_contact_status (status),
+    KEY idx_contact_created (created_at),
+    KEY idx_contact_email (email),
+    CONSTRAINT fk_contact_replied_by
+        FOREIGN KEY (replied_by) REFERENCES admins(id)
+        ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =========================================================
+-- GIVING RECORDS
+-- =========================================================
+
 CREATE TABLE IF NOT EXISTS giving_records (
-  id                INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  name              VARCHAR(150) NOT NULL,
-  email             VARCHAR(255) NOT NULL,
-  amount            DECIMAL(12,2) NOT NULL,
-  category          ENUM('tithe','offering','building_fund','thanksgiving',
-                         'seed_offering') NOT NULL,
-  payment_status    ENUM('pending','completed','failed') NOT NULL DEFAULT 'pending',
-  -- payment_channel — Paystack metadata stored on webhook completion
-  -- (e.g. 'card', 'mobile_money', 'bank', 'ussd'). Nullable; informational only.
-  payment_channel   VARCHAR(50)   NULL,
-  payment_reference VARCHAR(100) NOT NULL,
-  created_at        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  UNIQUE KEY uq_giving_reference (payment_reference),
-  KEY idx_giving_category (category),
-  KEY idx_giving_created (created_at)
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    donor_name VARCHAR(150) NULL,
+    donor_email VARCHAR(255) NULL,
+    amount DECIMAL(12,2) NOT NULL,
+    currency CHAR(3) NOT NULL DEFAULT 'GHS',
+    payment_channel ENUM('online','mobile_money','bank','cash','other') NOT NULL DEFAULT 'online',
+    reference VARCHAR(255) NULL,
+    payment_status ENUM('pending','successful','failed','cancelled','refunded') NOT NULL DEFAULT 'pending',
+    purpose VARCHAR(255) NULL,
+    transaction_date DATETIME NULL,
+    notes TEXT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_giving_reference (reference),
+    KEY idx_giving_status (payment_status),
+    KEY idx_giving_date (transaction_date),
+    KEY idx_giving_channel (payment_channel)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Migration (idempotent — safe to run every time, including fresh installs):
--- adds payment_channel to EXISTING giving_records tables that were created
--- before the column existed. Fresh installs already have it from the CREATE
--- TABLE above, so the dynamic check simply no-ops.
-SET @rtwc_col = (
-  SELECT COUNT(*) FROM information_schema.COLUMNS
-  WHERE TABLE_SCHEMA = DATABASE()
-    AND TABLE_NAME = 'giving_records'
-    AND COLUMN_NAME = 'payment_channel'
-);
-SET @rtwc_sql = IF(
-  @rtwc_col = 0,
-  'ALTER TABLE giving_records ADD COLUMN payment_channel VARCHAR(50) NULL AFTER payment_status',
-  'SELECT 1'
-);
-PREPARE rtwc_stmt FROM @rtwc_sql;
-EXECUTE rtwc_stmt;
-DEALLOCATE PREPARE rtwc_stmt;
+-- =========================================================
+-- NEWSLETTER
+-- =========================================================
 
--- -----------------------------------------------------------------------------
--- newsletter_subscribers
--- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS newsletter_subscribers (
-  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  email         VARCHAR(255) NOT NULL,
-  subscribed_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  UNIQUE KEY uq_newsletter_email (email)
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    email VARCHAR(255) NOT NULL,
+    name VARCHAR(150) NULL,
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    subscribed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    unsubscribed_at DATETIME NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_newsletter_email (email),
+    KEY idx_newsletter_active (is_active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -----------------------------------------------------------------------------
--- site_settings — editable key/value content shown on the public site
--- (welcome message, service times, contact info, mission/vision, hero tagline).
--- -----------------------------------------------------------------------------
+-- =========================================================
+-- LIVE STREAMING / SITE SETTINGS
+-- =========================================================
+
 CREATE TABLE IF NOT EXISTS site_settings (
-  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  setting_key   VARCHAR(100) NOT NULL,
-  setting_value TEXT,
-  updated_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  UNIQUE KEY uq_site_settings_key (setting_key)
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    setting_key VARCHAR(150) NOT NULL,
+    setting_value TEXT NULL,
+    setting_type ENUM('text','number','boolean','json','url') NOT NULL DEFAULT 'text',
+    description VARCHAR(500) NULL,
+    updated_by INT UNSIGNED NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_site_settings_key (setting_key),
+    KEY idx_site_settings_type (setting_type),
+    CONSTRAINT fk_site_settings_updated_by
+        FOREIGN KEY (updated_by) REFERENCES admins(id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Seed sensible starting values for site_settings so the site is never blank.
--- Uses INSERT ... ON DUPLICATE KEY UPDATE with a no-op so re-running the schema
--- never overwrites admin edits.
-INSERT INTO site_settings (setting_key, setting_value) VALUES
-  ('welcome_message', 'Welcome to Royal Temple Worship Centre — a glorious assembly dedicated to holy living, spirit-filled worship, and global evangelism.'),
-  ('service_times', 'Sunday Worship Service: 8:00 AM – 11:30 AM
-Wednesday Bible Study: 6:30 PM – 8:30 PM
-Friday Prayer Tower: 6:30 PM – 9:00 PM'),
-  ('church_address', 'Royal Temple Worship Centre Complex, The Church of Pentecost'),
-  ('phone_number', '+233 (0) 30 123 4567'),
-  ('helpline_number', '+233 (0) 30 123 4567'),
-  ('email', 'info@royaltemple.org'),
-  ('mission_statement', 'To glorify God through holy living, spirit-filled worship, and the evangelisation of every nation.'),
-  ('vision_statement', 'A glorious, spirit-filled assembly raising believers who transform their communities for Christ.'),
-  ('hero_tagline', 'A House of Prayer, Worship and Evangelism'),
-  ('youtube_channel_url', ''),
-  ('youtube_live_video_id', ''),
-  ('facebook_live_url', ''),
-  ('preferred_default_platform', 'facebook'),
-  ('manual_live_offline_override', 'false'),
-  ('next_service_title', 'Sunday Divine Worship & Word Service'),
-  ('next_service_date', ''),
-  ('next_service_time', '8:00 AM GMT'),
-  ('previous_broadcast_url', '')
-ON DUPLICATE KEY UPDATE setting_key = setting_key;
+-- =========================================================
+-- STREAMING-SPECIFIC SETTINGS
+-- =========================================================
 
--- -----------------------------------------------------------------------------
--- Idempotent upgrades for databases created before content publishing fields.
--- Existing sermons/events are retained as published; new records default to drafts.
--- -----------------------------------------------------------------------------
-SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'sermons' AND COLUMN_NAME = 'scripture');
-SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE sermons ADD COLUMN scripture VARCHAR(255) NULL', 'SELECT 1');
-PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
-SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'sermons' AND COLUMN_NAME = 'category');
-SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE sermons ADD COLUMN category VARCHAR(120) NULL', 'SELECT 1');
-PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
-SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'sermons' AND COLUMN_NAME = 'tags');
-SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE sermons ADD COLUMN tags VARCHAR(1000) NULL', 'SELECT 1');
-PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
-SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'sermons' AND COLUMN_NAME = 'audio_url');
-SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE sermons ADD COLUMN audio_url VARCHAR(500) NULL', 'SELECT 1');
-PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
-SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'sermons' AND COLUMN_NAME = 'published');
-SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE sermons ADD COLUMN published TINYINT(1) NOT NULL DEFAULT 1', 'SELECT 1');
-PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
-SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'sermons' AND COLUMN_NAME = 'featured');
-SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE sermons ADD COLUMN featured TINYINT(1) NOT NULL DEFAULT 0', 'SELECT 1');
-PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
+INSERT INTO site_settings
+    (setting_key, setting_value, setting_type, description)
+VALUES
+    ('youtube_channel_url', '', 'url', 'Official RTWC YouTube channel URL'),
+    ('youtube_live_video_id', '', 'text', 'Current YouTube Live video ID'),
+    ('facebook_live_url', '', 'url', 'Current RTWC Facebook Live URL'),
+    ('preferred_default_platform', 'youtube', 'text', 'Default live-stream platform: youtube or facebook'),
+    ('manual_live_offline_override', 'false', 'boolean', 'Manual override for live/offline state'),
+    ('live_status', 'offline', 'text', 'Current stream status: live or offline'),
+    ('current_service_title', '', 'text', 'Title of the current live service'),
+    ('current_service_description', '', 'text', 'Description of the current live service'),
+    ('next_service_title', '', 'text', 'Next scheduled service title'),
+    ('next_service_date', '', 'text', 'Next scheduled service date'),
+    ('next_service_time', '', 'text', 'Next scheduled service time'),
+    ('previous_broadcast_url', '', 'url', 'URL of the previous broadcast'),
+    ('live_chat_enabled', 'true', 'boolean', 'Whether live chat UI should be enabled'),
+    ('stream_share_enabled', 'true', 'boolean', 'Whether sharing controls should be displayed')
+ON DUPLICATE KEY UPDATE
+    description = VALUES(description);
 
-SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'events' AND COLUMN_NAME = 'start_time');
-SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE events ADD COLUMN start_time VARCHAR(20) NULL', 'SELECT 1');
-PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
-SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'events' AND COLUMN_NAME = 'end_time');
-SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE events ADD COLUMN end_time VARCHAR(20) NULL', 'SELECT 1');
-PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
-SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'events' AND COLUMN_NAME = 'image_url');
-SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE events ADD COLUMN image_url VARCHAR(500) NULL', 'SELECT 1');
-PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
-SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'events' AND COLUMN_NAME = 'registration_url');
-SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE events ADD COLUMN registration_url VARCHAR(500) NULL', 'SELECT 1');
-PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
-SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'events' AND COLUMN_NAME = 'published');
-SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE events ADD COLUMN published TINYINT(1) NOT NULL DEFAULT 1', 'SELECT 1');
-PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
-SET @rtwc_col = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'events' AND COLUMN_NAME = 'featured');
-SET @rtwc_sql = IF(@rtwc_col = 0, 'ALTER TABLE events ADD COLUMN featured TINYINT(1) NOT NULL DEFAULT 0', 'SELECT 1');
-PREPARE rtwc_stmt FROM @rtwc_sql; EXECUTE rtwc_stmt; DEALLOCATE PREPARE rtwc_stmt;
+-- =========================================================
+-- BASIC SITE SETTINGS
+-- =========================================================
 
--- Upgrade moderation enums without losing the previous prayed_for value.
-ALTER TABLE prayer_requests MODIFY status ENUM('new','prayed_for','being_prayed_for','completed','archived') NOT NULL DEFAULT 'new';
-UPDATE prayer_requests SET status = 'being_prayed_for' WHERE status = 'prayed_for';
-ALTER TABLE prayer_requests MODIFY status ENUM('new','being_prayed_for','completed','archived') NOT NULL DEFAULT 'new';
-ALTER TABLE contact_messages MODIFY status ENUM('new','read','responded','archived') NOT NULL DEFAULT 'new';
-ALTER TABLE testimonies MODIFY status ENUM('pending','approved','rejected','published','archived') NOT NULL DEFAULT 'pending';
+INSERT INTO site_settings
+    (setting_key, setting_value, setting_type, description)
+VALUES
+    ('site_name', 'Royal Temple Worship Centre', 'text', 'Website/church name'),
+    ('site_tagline', '', 'text', 'Church tagline'),
+    ('contact_email', '', 'text', 'Public contact email'),
+    ('contact_phone', '', 'text', 'Public contact phone'),
+    ('address', '', 'text', 'Church address'),
+    ('facebook_url', '', 'url', 'Official Facebook page URL'),
+    ('youtube_url', '', 'url', 'Official YouTube channel URL'),
+    ('instagram_url', '', 'url', 'Official Instagram URL'),
+    ('whatsapp_url', '', 'url', 'Official WhatsApp URL')
+ON DUPLICATE KEY UPDATE
+    description = VALUES(description);
+
+-- =========================================================
+-- OPTIONAL SEED ADMIN
+-- =========================================================
+-- Do NOT insert a real password here.
+-- Create the first administrator through the application's
+-- secure setup process, or insert a bcrypt/Argon2 hash generated
+-- by the backend.
+--
+-- Example structure:
+--
+-- INSERT INTO admins (name, email, password_hash, role)
+-- VALUES ('RTWC Administrator', 'admin@example.com', '<HASH>', 'super_admin');
+
+-- =========================================================
+-- OPTIONAL SEED CONTENT
+-- =========================================================
+-- Real church content should be entered through the admin dashboard.
+-- No fabricated pastors, leaders, service times, phone numbers,
+-- addresses, banking details, or other church information are inserted.
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- =========================================================
+-- VERIFICATION QUERIES
+-- Run these separately in phpMyAdmin if desired.
+-- =========================================================
+-- SHOW TABLES;
+-- SELECT setting_key, setting_value FROM site_settings ORDER BY setting_key;

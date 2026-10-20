@@ -6,6 +6,7 @@
 const express = require('express');
 
 const authMiddleware = require('../middleware/authMiddleware');
+const authorizeRoles = require('../middleware/authorizeRoles');
 const validateRequest = require('../middleware/validateRequest');
 const { sanitizeBody } = require('../middleware/sanitizeInput');
 const { getSettings, updateSettings } = require('../controllers/siteSettingsController');
@@ -26,6 +27,7 @@ router.get('/', getSettings);
 router.put(
   '/',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin'),
   sanitizeBody([
     'welcome_message',
     'service_times',

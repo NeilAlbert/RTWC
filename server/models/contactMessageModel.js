@@ -6,10 +6,10 @@
  */
 const pool = require('../config/db');
 
-async function create({ name, email, message }) {
+async function create({ name, email, phone, subject, message }) {
   const [result] = await pool.query(
-    'INSERT INTO contact_messages (name, email, message) VALUES (?, ?, ?)',
-    [name, email, message]
+    'INSERT INTO contact_messages (name, email, phone, subject, message) VALUES (?, ?, ?, ?, ?)',
+    [name, email, phone || null, subject || null, message]
   );
   return findById(result.insertId);
 }
@@ -34,7 +34,7 @@ async function findAll({ status, limit, offset } = {}) {
   }
   params.push(limit, offset);
   const [rows] = await pool.query(
-    `SELECT id, name, email, message, status, created_at
+    `SELECT id, name, email, phone, subject, message, status, created_at
      FROM contact_messages ${whereSql}
      ORDER BY created_at DESC, id DESC
      LIMIT ? OFFSET ?`,
@@ -45,7 +45,7 @@ async function findAll({ status, limit, offset } = {}) {
 
 async function findById(id) {
   const [rows] = await pool.query(
-    'SELECT id, name, email, message, status, created_at FROM contact_messages WHERE id = ? LIMIT 1',
+    'SELECT id, name, email, phone, subject, message, status, created_at FROM contact_messages WHERE id = ? LIMIT 1',
     [id]
   );
   return rows[0] || null;

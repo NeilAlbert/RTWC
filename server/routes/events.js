@@ -7,6 +7,7 @@ const express = require('express');
 const { body, param, query } = require('express-validator');
 
 const authMiddleware = require('../middleware/authMiddleware');
+const authorizeRoles = require('../middleware/authorizeRoles');
 const validateRequest = require('../middleware/validateRequest');
 const { sanitizeBody } = require('../middleware/sanitizeInput');
 const {
@@ -25,6 +26,7 @@ const CATEGORIES = ['convention', 'revival', 'camp_meeting', 'anniversary', 'oth
 router.get(
   '/manage',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin', 'editor'),
   [query('q').optional().trim().isLength({ max: 255 }), query('published').optional().isIn(['true', 'false'])],
   validateRequest,
   (req, res, next) => {
@@ -57,6 +59,7 @@ router.get(
 router.post(
   '/',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin', 'editor'),
   sanitizeBody(['title', 'description', 'location'], { maxLength: 5000 }),
   [
     body('title').trim().isLength({ min: 1, max: 255 }).withMessage('Title is required.'),
@@ -65,8 +68,8 @@ router.post(
     body('event_time').optional().trim().isLength({ max: 50 }),
     body('location').optional().trim().isLength({ max: 255 }),
     body('category').isIn(CATEGORIES).withMessage('Invalid category.'),
-    body('start_time').optional().trim().isLength({ max: 20 }),
-    body('end_time').optional().trim().isLength({ max: 20 }),
+    body('start_time').optional({ values: 'falsy' }).matches(/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/),
+    body('end_time').optional({ values: 'falsy' }).matches(/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/),
     body('image_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
     body('registration_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
     body('published').optional().isBoolean(),
@@ -80,6 +83,7 @@ router.post(
 router.put(
   '/:id',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin', 'editor'),
   sanitizeBody(['title', 'description', 'location'], { maxLength: 5000 }),
   [
     param('id').isInt({ min: 1 }),
@@ -89,8 +93,8 @@ router.put(
     body('event_time').optional().trim().isLength({ max: 50 }),
     body('location').optional().trim().isLength({ max: 255 }),
     body('category').isIn(CATEGORIES),
-    body('start_time').optional().trim().isLength({ max: 20 }),
-    body('end_time').optional().trim().isLength({ max: 20 }),
+    body('start_time').optional({ values: 'falsy' }).matches(/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/),
+    body('end_time').optional({ values: 'falsy' }).matches(/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/),
     body('image_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
     body('registration_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
     body('published').optional().isBoolean(),
@@ -104,6 +108,7 @@ router.put(
 router.delete(
   '/:id',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin', 'editor'),
   [param('id').isInt({ min: 1 }).withMessage('Invalid event id.')],
   validateRequest,
   deleteEvent

@@ -119,6 +119,7 @@ const AdminAuth = (() => {
     { key: 'messages', label: 'Messages', icon: '✉', href: 'content.html?type=messages' },
     { key: 'prayer-requests', label: 'Prayer Requests', icon: '✝', href: 'content.html?type=prayers' },
     { key: 'testimonies', label: 'Testimonies', icon: '◉', href: 'content.html?type=testimonies' },
+    { key: 'announcements', label: 'Announcements', icon: '!', href: 'content.html?type=announcements' },
     { key: 'giving', label: 'Giving', icon: '₵', href: 'giving.html' },
     { key: 'newsletter', label: 'Newsletter', icon: '☰', href: 'newsletter.html' },
   ];

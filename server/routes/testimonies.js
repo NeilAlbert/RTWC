@@ -2,6 +2,7 @@ const express = require('express');
 const { body, param, query } = require('express-validator');
 
 const authMiddleware = require('../middleware/authMiddleware');
+const authorizeRoles = require('../middleware/authorizeRoles');
 const validateRequest = require('../middleware/validateRequest');
 const { sanitizeBody } = require('../middleware/sanitizeInput');
 const { testimoniesLimiter } = require('../middleware/rateLimiter');
@@ -38,6 +39,7 @@ router.get(
 router.get(
   '/',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin'),
   [
     query('status').optional().isIn(['pending', 'approved', 'rejected', 'published', 'archived']),
     query('page').optional().isInt({ min: 1 }),
@@ -51,6 +53,7 @@ router.get(
 router.patch(
   '/:id/status',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin'),
   [
     param('id').isInt({ min: 1 }).withMessage('Invalid testimony id.'),
     body('status').isIn(['pending', 'approved', 'rejected', 'published', 'archived']).withMessage('Invalid testimony status.'),

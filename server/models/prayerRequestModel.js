@@ -9,10 +9,10 @@
  */
 const pool = require('../config/db');
 
-async function create({ name, request_text, is_private }) {
+async function create({ name, email, phone, request_text, is_private }) {
   const [result] = await pool.query(
-    'INSERT INTO prayer_requests (name, request_text, is_private) VALUES (?, ?, ?)',
-    [name, request_text, is_private ? 1 : 0]
+    'INSERT INTO prayer_requests (name, email, phone, request, is_anonymous) VALUES (?, ?, ?, ?, ?)',
+    [name || null, email || null, phone || null, request_text, is_private ? 1 : 0]
   );
   return findById(result.insertId);
 }
@@ -37,7 +37,7 @@ async function findAll({ status, limit, offset } = {}) {
   }
   params.push(limit, offset);
   const [rows] = await pool.query(
-    `SELECT id, name, request_text, is_private, status, created_at
+    `SELECT id, name, email, phone, request AS request_text, is_anonymous AS is_private, status, created_at
      FROM prayer_requests ${whereSql}
      ORDER BY created_at DESC, id DESC
      LIMIT ? OFFSET ?`,
@@ -48,7 +48,7 @@ async function findAll({ status, limit, offset } = {}) {
 
 async function findById(id) {
   const [rows] = await pool.query(
-    'SELECT id, name, request_text, is_private, status, created_at FROM prayer_requests WHERE id = ? LIMIT 1',
+    'SELECT id, name, email, phone, request AS request_text, is_anonymous AS is_private, status, created_at FROM prayer_requests WHERE id = ? LIMIT 1',
     [id]
   );
   return rows[0] || null;

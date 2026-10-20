@@ -7,6 +7,7 @@ const express = require('express');
 const { body, param } = require('express-validator');
 
 const authMiddleware = require('../middleware/authMiddleware');
+const authorizeRoles = require('../middleware/authorizeRoles');
 const validateRequest = require('../middleware/validateRequest');
 const { sanitizeBody } = require('../middleware/sanitizeInput');
 const {
@@ -27,6 +28,7 @@ router.get('/', getLeadership);
 router.post(
   '/',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin'),
   sanitizeBody(['name', 'bio'], { maxLength: 5000 }),
   [
     body('name').trim().isLength({ min: 1, max: 150 }).withMessage('Name is required.'),
@@ -44,6 +46,7 @@ router.post(
 router.put(
   '/:id',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin'),
   sanitizeBody(['name', 'bio'], { maxLength: 5000 }),
   [
     param('id').isInt({ min: 1 }),
@@ -62,6 +65,7 @@ router.put(
 router.delete(
   '/:id',
   authMiddleware,
+  authorizeRoles('super_admin', 'admin'),
   [param('id').isInt({ min: 1 }).withMessage('Invalid member id.')],
   validateRequest,
   deleteMember

@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       endpoint: '/events', listPath: '/events/manage', navKey: 'events', columns: ['title', 'event_date', 'start_time', 'end_time', 'location', 'published', 'featured'],
       fields: [
         ['title', 'Title', 'text', true], ['event_date', 'Date', 'date', true],
-        ['start_time', 'Start time', 'text'], ['end_time', 'End time', 'text'], ['location', 'Location', 'text'],
+        ['start_time', 'Start time', 'time'], ['end_time', 'End time', 'time'], ['location', 'Location', 'text'],
         ['image_url', 'Image URL', 'url'], ['registration_url', 'Registration URL', 'url'],
         ['category', 'Category', 'select', true, [['convention', 'Convention'], ['revival', 'Revival'], ['camp_meeting', 'Camp Meeting'], ['anniversary', 'Anniversary'], ['other', 'Other']]],
         ['description', 'Description', 'textarea'], ['published', 'Published', 'checkbox'], ['featured', 'Featured', 'checkbox'],
@@ -31,23 +31,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     },
     ministries: {
       title: 'Ministries', description: 'Manage ministry directory entries.',
-      endpoint: '/ministries', navKey: 'ministries', columns: ['name', 'slug', 'description'],
+      endpoint: '/ministries', listPath: '/ministries/manage', navKey: 'ministries', columns: ['name', 'slug', 'description', 'leader_name', 'published', 'featured'],
       fields: [
         ['name', 'Name', 'text', true], ['slug', 'URL slug', 'text', true],
-        ['description', 'Description', 'textarea'], ['icon_url', 'Image URL', 'url'],
+        ['description', 'Description', 'textarea'], ['image_url', 'Image URL', 'url'],
+        ['meeting_day', 'Meeting day', 'text'], ['meeting_time', 'Meeting time', 'text'],
+        ['meeting_location', 'Meeting location', 'text'], ['leader_name', 'Ministry leader', 'text'],
+        ['contact_phone', 'Ministry phone', 'text'], ['contact_email', 'Ministry email', 'email'],
+        ['published', 'Published', 'checkbox'], ['featured', 'Featured', 'checkbox'],
       ],
       items: (response) => Array.isArray(response.data) ? response.data : [],
     },
     messages: {
       title: 'Contact Messages', description: 'Review and archive visitor messages.',
-      endpoint: '/contact', navKey: 'messages', columns: ['name', 'email', 'message', 'status', 'created_at'],
+      endpoint: '/contact', navKey: 'messages', columns: ['name', 'email', 'phone', 'subject', 'message', 'status', 'created_at'],
       statusEndpoint: (item) => `/contact/${item.id}/status`,
-      statuses: [['new', 'New'], ['read', 'Read'], ['responded', 'Responded'], ['archived', 'Archived']],
+      statuses: [['unread', 'Unread'], ['read', 'Read'], ['archived', 'Archived']],
       items: (response) => response.data?.items || [],
     },
     prayers: {
       title: 'Prayer Requests', description: 'Review requests and update their prayer status.',
-      endpoint: '/prayer-requests', navKey: 'prayer-requests', columns: ['name', 'request_text', 'status', 'created_at'],
+      endpoint: '/prayer-requests', navKey: 'prayer-requests', columns: ['name', 'request_text', 'is_private', 'status', 'created_at'],
       statusEndpoint: (item) => `/prayer-requests/${item.id}/status`,
       statuses: [['new', 'New'], ['being_prayed_for', 'Being Prayed For'], ['completed', 'Completed'], ['archived', 'Archived']],
       items: (response) => response.data?.items || [],
@@ -57,6 +61,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       endpoint: '/testimonies', navKey: 'testimonies', columns: ['name', 'testimony', 'permission_to_publish', 'status', 'created_at'],
       statusEndpoint: (item) => `/testimonies/${item.id}/status`,
       statuses: [['pending', 'Pending'], ['approved', 'Approved'], ['rejected', 'Rejected'], ['published', 'Published'], ['archived', 'Archived']],
+      items: (response) => response.data?.items || [],
+    },
+    announcements: {
+      title: 'Announcements', description: 'Publish timely church updates and set when they expire.',
+      endpoint: '/announcements', listPath: '/announcements/manage', navKey: 'announcements',
+      columns: ['title', 'priority', 'published', 'featured', 'expires_at'],
+      fields: [
+        ['title', 'Title', 'text', true], ['content', 'Content', 'textarea', true],
+        ['image_url', 'Image URL', 'url'],
+        ['priority', 'Priority', 'select', true, [['normal', 'Normal'], ['important', 'Important'], ['urgent', 'Urgent']]],
+        ['expires_at', 'Expiry date', 'date'], ['published', 'Published', 'checkbox'], ['featured', 'Featured', 'checkbox'],
+      ],
       items: (response) => response.data?.items || [],
     },
   };
@@ -208,6 +224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         input.checked = Boolean(record[name]);
       } else {
         input.value = record[name] == null ? (type === 'events' && name === 'category' ? 'other' : '') : String(record[name]);
+        if (kind === 'date' && record[name]) input.value = String(record[name]).slice(0, 10);
       }
       if (type === 'events' && name === 'category' && record[name]) {
         input.value = String(record[name]).toLocaleLowerCase().replaceAll(' ', '_');

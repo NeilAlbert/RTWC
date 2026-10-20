@@ -30,7 +30,7 @@ async function findAll({ category, upcoming, search, published } = {}) {
     : 'ORDER BY event_date ASC, id ASC';   // upcoming/unspecified: soonest first
 
   const [rows] = await pool.query(
-    `SELECT id, title, description, event_date, event_time, start_time, end_time, location, image_url, registration_url, category, published, featured, created_at
+    `SELECT id, title, description, event_date, start_time, end_time, location, image_url, registration_url, category, published, featured, created_at
      FROM events ${whereSql} ${orderSql}`,
     params
   );
@@ -39,7 +39,7 @@ async function findAll({ category, upcoming, search, published } = {}) {
 
 async function findById(id) {
   const [rows] = await pool.query(
-    'SELECT id, title, description, event_date, event_time, start_time, end_time, location, image_url, registration_url, category, published, featured, created_at FROM events WHERE id = ? LIMIT 1',
+    'SELECT id, title, description, event_date, start_time, end_time, location, image_url, registration_url, category, published, featured, created_at FROM events WHERE id = ? LIMIT 1',
     [id]
   );
   return rows[0] || null;
@@ -47,9 +47,9 @@ async function findById(id) {
 
 async function create({ title, description, event_date, event_time, start_time, end_time, location, image_url, registration_url, category, published, featured }) {
   const [result] = await pool.query(
-    `INSERT INTO events (title, description, event_date, event_time, start_time, end_time, location, image_url, registration_url, category, published, featured)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [title, description, event_date, event_time || start_time || null, start_time || event_time || null, end_time || null, location || null, image_url || null, registration_url || null, category, published ? 1 : 0, featured ? 1 : 0]
+    `INSERT INTO events (title, description, event_date, start_time, end_time, location, image_url, registration_url, category, published, featured)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [title, description, event_date, start_time || event_time || null, end_time || null, location || null, image_url || null, registration_url || null, category, published ? 1 : 0, featured ? 1 : 0]
   );
   return findById(result.insertId);
 }
@@ -57,9 +57,9 @@ async function create({ title, description, event_date, event_time, start_time, 
 async function update(id, { title, description, event_date, event_time, start_time, end_time, location, image_url, registration_url, category, published, featured }) {
   await pool.query(
     `UPDATE events
-    SET title = ?, description = ?, event_date = ?, event_time = ?, start_time = ?, end_time = ?, location = ?, image_url = ?, registration_url = ?, category = ?, published = ?, featured = ?
+    SET title = ?, description = ?, event_date = ?, start_time = ?, end_time = ?, location = ?, image_url = ?, registration_url = ?, category = ?, published = ?, featured = ?
      WHERE id = ?`,
-      [title, description, event_date, event_time || start_time || null, start_time || event_time || null, end_time || null, location || null, image_url || null, registration_url || null, category, published ? 1 : 0, featured ? 1 : 0, id]
+      [title, description, event_date, start_time || event_time || null, end_time || null, location || null, image_url || null, registration_url || null, category, published ? 1 : 0, featured ? 1 : 0, id]
   );
   return findById(id);
 }

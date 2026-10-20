@@ -92,7 +92,7 @@ async function updateTestimonyStatus(req, res, next) {
       return next(new ValidationError('Approve the testimony and confirm publication permission before publishing.'));
     }
 
-    const updated = await Testimony.updateStatus(id, status);
+    const updated = await Testimony.updateStatus(id, status, req.admin.id);
     return res.json({ success: true, message: 'Testimony status updated.', data: updated });
   } catch (err) {
     return next(err);

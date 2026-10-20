@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await fetch(`${API_BASE}/api/sermons`);
       if (!response.ok) throw new Error('Failed to fetch sermons');
       const data = await response.json();
-      return data.data || [];
+      return Array.isArray(data.data) ? data.data : (data.data?.items || []);
     } catch (err) {
       logger.warn('Failed to fetch sermons from API, falling back to static data', { error: err.message });
       // Return static fallback data
@@ -73,9 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Modal handlers
     function openSermonModal(sermon) {
       modalSermonTitle.textContent = sermon.title;
-      modalSermonMeta.textContent = `${sermon.speaker} | ${sermon.date}`;
+      modalSermonMeta.textContent = `${sermon.speaker || ''} | ${sermon.date || sermon.sermon_date || ''}`;
       modalTitleDisplay.textContent = sermon.title;
-      modalDescDisplay.textContent = sermon.summary;
+      modalDescDisplay.textContent = sermon.summary || sermon.description || '';
 
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
@@ -116,9 +116,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const category = seriesSelect.value;
 
     const filtered = sermonsData.filter(item => {
-      const matchesQuery = item.title.toLowerCase().includes(query) ||
-        item.summary.toLowerCase().includes(query) ||
-        item.speaker.toLowerCase().includes(query);
+      const matchesQuery = String(item.title || '').toLowerCase().includes(query) ||
+        String(item.summary || item.description || '').toLowerCase().includes(query) ||
+        String(item.speaker || '').toLowerCase().includes(query);
       const matchesSpeaker = speaker === 'all' || item.speaker === speaker;
       const matchesCategory = category === 'all' || item.category === category;
 

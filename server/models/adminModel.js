@@ -15,7 +15,7 @@ const pool = require('../config/db');
  */
 async function findByEmail(email) {
   const [rows] = await pool.query(
-    'SELECT id, name, email, password_hash, created_at FROM admins WHERE email = ? LIMIT 1',
+    'SELECT id, name, email, password_hash, role, is_active, created_at FROM admins WHERE email = ? LIMIT 1',
     [email]
   );
   return rows[0] || null;
@@ -34,26 +34,34 @@ async function findById(id) {
 }
 
 async function createSession(sessionId, adminId, expiresAt) {
+  const sessionTokenHash = require('crypto').createHash('sha256').update(sessionId).digest('hex');
   const expiresAtUtc = expiresAt.toISOString().slice(0, 19).replace('T', ' ');
   await pool.query(
-    'INSERT INTO admin_sessions (session_id, admin_id, expires_at) VALUES (?, ?, ?)',
-    [sessionId, adminId, expiresAtUtc]
+    'INSERT INTO admin_sessions (admin_id, session_token_hash, expires_at) VALUES (?, ?, ?)',
+    [adminId, sessionTokenHash, expiresAtUtc]
   );
 }
 
-async function hasActiveSession(sessionId, adminId) {
+async function findActiveSession(sessionId, adminId) {
+  const sessionTokenHash = require('crypto').createHash('sha256').update(sessionId).digest('hex');
   const [rows] = await pool.query(
-    'SELECT session_id FROM admin_sessions WHERE session_id = ? AND admin_id = ? AND revoked_at IS NULL AND expires_at > UTC_TIMESTAMP() LIMIT 1',
-    [sessionId, adminId]
+    `SELECT admins.id, admins.name, admins.email, admins.role
+     FROM admin_sessions
+     INNER JOIN admins ON admins.id = admin_sessions.admin_id
+     WHERE admin_sessions.session_token_hash = ? AND admin_sessions.admin_id = ?
+       AND admin_sessions.expires_at > UTC_TIMESTAMP() AND admins.is_active = 1
+     LIMIT 1`,
+    [sessionTokenHash, adminId]
   );
-  return rows.length > 0;
+  return rows[0] || null;
 }
 
 async function revokeSession(sessionId, adminId) {
+  const sessionTokenHash = require('crypto').createHash('sha256').update(sessionId).digest('hex');
   await pool.query(
-    'UPDATE admin_sessions SET revoked_at = UTC_TIMESTAMP() WHERE session_id = ? AND admin_id = ? AND revoked_at IS NULL',
-    [sessionId, adminId]
+    'DELETE FROM admin_sessions WHERE session_token_hash = ? AND admin_id = ?',
+    [sessionTokenHash, adminId]
   );
 }
 
-module.exports = { findByEmail, findById, createSession, hasActiveSession, revokeSession };
+module.exports = { findByEmail, findById, createSession, findActiveSession, revokeSession };

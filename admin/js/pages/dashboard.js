@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (!AdminAuth.checkAuth()) return;
 
   AdminAuth.initShell('dashboard', 'Dashboard'); // initShell wires the 401 handler
+  const canReviewPrivateItems = ['super_admin', 'admin'].includes(AdminAuth.getAdmin()?.role);
 
   const cards = {
     sermons: document.getElementById('stat-sermons'),
@@ -18,7 +19,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     prayers: document.getElementById('stat-prayers'),
     testimonies: document.getElementById('stat-testimonies'),
     gallery: document.getElementById('stat-gallery'),
+    announcements: document.getElementById('stat-announcements'),
   };
+
+  if (!canReviewPrivateItems) {
+    ['messages', 'prayers', 'testimonies'].forEach((key) => {
+      if (cards[key]) cards[key].classList.add('hidden');
+      const list = document.getElementById(`recent-${key}`);
+      if (list) list.closest('.panel')?.classList.add('hidden');
+    });
+  }
 
   // Grab the numeric value span inside each card.
   const valueEls = {};
@@ -68,28 +78,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function loadDashboard() {
     try {
-      const [sermonsResponse, eventsResponse, messagesResponse, prayersResponse, testimoniesResponse, galleryResponse] = await Promise.all([
+      const [sermonsResponse, eventsResponse, galleryResponse, announcementsResponse] = await Promise.all([
         AdminApi.get('/sermons?page=1&limit=1'),
         AdminApi.get('/events?upcoming=true'),
-        AdminApi.get('/contact?status=new&page=1&limit=5'),
-        AdminApi.get('/prayer-requests?status=new&page=1&limit=5'),
-        AdminApi.get('/testimonies?status=pending&page=1&limit=5'),
         AdminApi.get('/facebook/photos'),
+        AdminApi.get('/announcements/manage?page=1&limit=1'),
       ]);
+      const [messagesResponse, prayersResponse, testimoniesResponse] = canReviewPrivateItems
+        ? await Promise.all([
+          AdminApi.get('/contact?status=unread&page=1&limit=5'),
+          AdminApi.get('/prayer-requests?status=new&page=1&limit=5'),
+          AdminApi.get('/testimonies?status=pending&page=1&limit=5'),
+        ])
+        : [null, null, null];
 
       const sermons = sermonsResponse.data?.items || [];
-      const messages = messagesResponse.data?.items || [];
-      const prayers = prayersResponse.data?.items || [];
-      const testimonies = testimoniesResponse.data?.items || [];
+      const messages = messagesResponse?.data?.items || [];
+      const prayers = prayersResponse?.data?.items || [];
+      const testimonies = testimoniesResponse?.data?.items || [];
       const events = eventsResponse.data || [];
       const photos = galleryResponse.data?.photos || [];
 
       setValue('sermons', sermonsResponse.data?.pagination?.total ?? 0);
       setValue('events', events.length);
-      setValue('messages', messagesResponse.data?.pagination?.total ?? 0);
-      setValue('prayers', prayersResponse.data?.pagination?.total ?? 0);
-      setValue('testimonies', testimoniesResponse.data?.pagination?.total ?? 0);
+      if (canReviewPrivateItems) {
+        setValue('messages', messagesResponse.data?.pagination?.total ?? 0);
+        setValue('prayers', prayersResponse.data?.pagination?.total ?? 0);
+        setValue('testimonies', testimoniesResponse.data?.pagination?.total ?? 0);
+      }
       setValue('gallery', photos.length);
+      setValue('announcements', announcementsResponse.data?.pagination?.total ?? 0);
 
       renderList('recent-messages', messages, 'No new contact messages.',
         (item) => item.subject || item.name,

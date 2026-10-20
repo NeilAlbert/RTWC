@@ -9,7 +9,7 @@ const { NotFoundError } = require('../utils/errors');
 /** GET /api/ministries — public */
 async function getMinistries(req, res, next) {
   try {
-    const data = await Ministry.findAll();
+    const data = await Ministry.findAll({ includeUnpublished: Boolean(req.adminLibrary) });
     return res.json({ success: true, message: 'Ministries fetched successfully.', data });
   } catch (err) {
     return next(err);
