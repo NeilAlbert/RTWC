@@ -55,9 +55,8 @@ app.use(
   })
 );
 
-// Capture the RAW body bytes so the Paystack webhook can verify its HMAC-SHA512
-// signature over the exact bytes Paystack sent (parsed JSON alone would break
-// the signature check). req.rawBody is a Buffer available to all handlers.
+// Capture the RAW body bytes for admin settings and other requests.
+// req.rawBody is a Buffer available to all handlers.
 app.use(express.json({
   limit: '1mb',
   verify: (req, res, buf) => {
