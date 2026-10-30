@@ -30,10 +30,6 @@ const ALLOWED_KEYS = [
   'next_service_date',
   'next_service_time',
   'previous_broadcast_url',
-  'giving_intro',
-  'giving_momo',
-  'giving_bank',
-  'giving_note',
 ];
 
 /** Reduce DB rows into a plain { key: value } object. */

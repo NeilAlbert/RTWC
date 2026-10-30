@@ -1,9 +1,8 @@
-/**
- * =============================================================================
- * middleware/rateLimiter.js — shared rate-limit configurations for public
- * POST endpoints. All limits are per-IP.
- * =============================================================================
+/** 
+ * middleware/rateLimiter.js — shared rate-limit configurations for public 
+ * POST endpoints. All limits are per-IP. 
  */
+
 const rateLimit = require('express-rate-limit');
 
 const standardHeaders = true;
@@ -22,15 +21,6 @@ const contactLimiter = rateLimit({
 const prayerRequestsLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 5,
-  standardHeaders,
-  legacyHeaders,
-  message: { success: false, message: 'Too many requests. Please try again later.' },
-});
-
-/** Giving initiation: max 10 requests per 15 minutes per IP. */
-const givingLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 10,
   standardHeaders,
   legacyHeaders,
   message: { success: false, message: 'Too many requests. Please try again later.' },
@@ -57,7 +47,6 @@ const authLimiter = rateLimit({
 module.exports = {
   contactLimiter,
   prayerRequestsLimiter,
-  givingLimiter,
   newsletterLimiter,
   authLimiter,
 };

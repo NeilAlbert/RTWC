@@ -9,7 +9,28 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================================================
   // 1. Statement of Faith Accordion Logic
   // ==========================================================================
-  const accordionHeaders = document.querySelectorAll('.accordion-header');
+  const accordion = document.getElementById('faith-accordion');
+  const accordionHeaders = accordion
+    ? accordion.querySelectorAll('.accordion-header')
+    : [];
+
+  function setExpanded(item, header, content, expanded) {
+    item.classList.toggle('active', expanded);
+    header.setAttribute('aria-expanded', String(expanded));
+    content.setAttribute('aria-hidden', String(!expanded));
+
+    if (!expanded) {
+      content.style.maxHeight = null;
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      if (header.getAttribute('aria-expanded') === 'true') {
+        content.offsetHeight;
+        content.style.maxHeight = `${content.scrollHeight}px`;
+      }
+    });
+  }
 
   accordionHeaders.forEach(header => {
     header.addEventListener('click', () => {
@@ -17,36 +38,35 @@ document.addEventListener('DOMContentLoaded', () => {
       const content = header.nextElementSibling;
       const isExpanded = header.getAttribute('aria-expanded') === 'true';
 
-      // Close all active items
-      document.querySelectorAll('.accordion-item').forEach(item => {
+      accordion.querySelectorAll('.accordion-item').forEach(item => {
         if (item !== accordionItem) {
-          item.classList.remove('active');
           const itemHeader = item.querySelector('.accordion-header');
           const itemContent = item.querySelector('.accordion-content');
           if (itemHeader && itemContent) {
-            itemHeader.setAttribute('aria-expanded', 'false');
-            itemContent.style.maxHeight = null;
+            setExpanded(item, itemHeader, itemContent, false);
           }
         }
       });
 
-      // Toggle clicked item
-      if (!isExpanded) {
-        accordionItem.classList.add('active');
-        header.setAttribute('aria-expanded', 'true');
-        content.style.maxHeight = content.scrollHeight + 'px';
-      } else {
-        accordionItem.classList.remove('active');
-        header.setAttribute('aria-expanded', 'false');
-        content.style.maxHeight = null;
-      }
+      setExpanded(accordionItem, header, content, !isExpanded);
     });
+
+    const content = header.nextElementSibling;
+    if (content) {
+      content.setAttribute('aria-hidden', String(header.getAttribute('aria-expanded') !== 'true'));
+    }
   });
 
-  // Open first accordion item by default
-  if (accordionHeaders.length > 0) {
-    accordionHeaders[0].click();
+  function resizeExpandedPanels() {
+    accordion?.querySelectorAll('.accordion-header[aria-expanded="true"]').forEach(header => {
+      const content = header.nextElementSibling;
+      if (content) content.style.maxHeight = `${content.scrollHeight}px`;
+    });
   }
+
+  window.addEventListener('resize', resizeExpandedPanels);
+
+  if (accordionHeaders.length > 0) accordionHeaders[0].click();
 
   // ==========================================================================
   // 2. Leadership Section Static Data & Renderer

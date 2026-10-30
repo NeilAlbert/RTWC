@@ -36,10 +36,6 @@ router.put(
     'mission_statement',
     'vision_statement',
     'hero_tagline',
-    'giving_intro',
-    'giving_momo',
-    'giving_bank',
-    'giving_note',
   ], { maxLength: 10000 }),
   validateRequest,
   updateSettings

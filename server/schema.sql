@@ -132,7 +132,6 @@ CREATE TABLE IF NOT EXISTS newsletter_subscribers (
 -- -----------------------------------------------------------------------------
 -- site_settings — editable key/value content shown on the public site
 -- (welcome message, service times, contact info, mission/vision, hero tagline,
--- and giving details: giving_intro, giving_momo, giving_bank, giving_note).
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS site_settings (
   id            INT UNSIGNED     NOT NULL AUTO_INCREMENT,
@@ -167,11 +166,5 @@ INSERT INTO site_settings (setting_key, setting_value) VALUES
   ('next_service_date', ''),
   ('next_service_time', ''),
   ('previous_broadcast_url', ''),
-  -- Giving settings (offline only — manually configured from Admin > Settings)
-  ('giving_intro', 'Tithes and offerings support the work of the ministry. God bless you as you give.'),
-  ('giving_momo', 'MTN Mobile Money | 0XX XXX XXXX | ADD ACCOUNT NAME\nTelecel Tmoney | 0XX XXX XXXX | ADD ACCOUNT NAME'),
-  ('giving_bank', 'Bank | Account name | Account number | Branch\n( branch is optional )'),
-  ('giving_note', 'Please confirm the account name matches the church before sending.\nExample: John Doe — Tithes')
-ON DUPLICATE KEY UPDATE setting_key = setting_key;
 
 SET FOREIGN_KEY_CHECKS = 1;

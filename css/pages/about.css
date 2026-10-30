@@ -204,6 +204,7 @@
   font-weight: 600;
   color: var(--primary-navy);
   flex-grow: 1;
+  min-width: 0;
 }
 
 .accordion-icon {
@@ -221,7 +222,7 @@
 .accordion-content {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.35s ease, padding 0.35s ease;
+  transition: max-height 0.35s ease;
   background-color: #FCFBF9;
   padding: 0 1.5rem;
 }
@@ -234,6 +235,16 @@
   color: var(--text-muted);
   font-size: 0.98rem;
   line-height: 1.7;
+}
+
+.accordion-content .faith-scriptures {
+  margin-top: 0.75rem;
+  color: var(--primary-navy);
+  font-size: 0.88rem;
+}
+
+.faith-scriptures strong {
+  color: var(--accent-gold);
 }
 
 /* Leadership Section */
