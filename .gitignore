@@ -7,3 +7,7 @@ node_modules/
 server/logs/
 backups/
 *.log
+.agents/
+.claude/
+.freebuff/
+.github/
