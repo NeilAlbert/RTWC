@@ -29,6 +29,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     { key: 'email', label: 'Contact Email', type: 'email' },
     { key: 'mission_statement', label: 'Mission Statement', type: 'textarea', full: true },
     { key: 'vision_statement', label: 'Vision Statement', type: 'textarea', full: true },
+    // Live stream settings
+    { key: 'youtube_channel_url', label: 'YouTube Channel URL', type: 'url' },
+    { key: 'youtube_live_video_id', label: 'YouTube Live Video ID', type: 'text' },
+    { key: 'facebook_live_url', label: 'Facebook Live URL', type: 'url' },
+    { key: 'preferred_default_platform', label: 'Preferred Default Platform', type: 'select', options: ['youtube', 'facebook'] },
+    { key: 'live_status_override', label: 'Manual Live/Offline Override', type: 'select', options: ['live', 'offline'] },
+    { key: 'next_service_title', label: 'Next Service Title', type: 'text' },
+    { key: 'next_service_date', label: 'Next Service Date', type: 'date' },
+    { key: 'next_service_time', label: 'Next Service Time', type: 'time' },
+    { key: 'previous_broadcast_url', label: 'Previous Broadcast URL', type: 'url' },
   ];
 
   const originalValues = {}; // key → value as loaded from the API
@@ -62,11 +72,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         input.name = field.key;
         input.className = 'textarea-lg';
         input.rows = 3;
+      } else if (field.type === 'select') {
+        input = document.createElement('select');
+        input.id = `setting-${field.key}`;
+        input.name = field.key;
+        field.options.forEach((option) => {
+          const opt = document.createElement('option');
+          opt.value = option;
+          opt.textContent = option;
+          if (input.value === option) opt.selected = true;
+          input.appendChild(opt);
+        });
       } else {
         input = document.createElement('input');
         input.id = `setting-${field.key}`;
         input.name = field.key;
-        input.type = field.type === 'email' ? 'email' : 'text';
+        input.type = field.type === 'email' ? 'email' : field.type !== 'url' ? 'text' : 'url';
+        if (field.type === 'url') {
+          input.placeholder = 'e.g. https://www.youtube.com/channel/...';
+        }
       }
 
       group.appendChild(label);

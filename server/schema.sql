@@ -174,17 +174,15 @@ CREATE TABLE IF NOT EXISTS newsletter_subscribers (
   subscribed_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_newsletter_email (email)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- -----------------------------------------------------------------------------
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;-- -----------------------------------------------------------------------------
 -- site_settings — editable key/value content shown on the public site
 -- (welcome message, service times, contact info, mission/vision, hero tagline).
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS site_settings (
-  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  setting_key   VARCHAR(100) NOT NULL,
+  id            INT UNSIGNED     NOT NULL AUTO_INCREMENT,
+  setting_key   VARCHAR(100)     NOT NULL,
   setting_value TEXT,
-  updated_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  updated_at    TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_site_settings_key (setting_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -203,7 +201,16 @@ INSERT INTO site_settings (setting_key, setting_value) VALUES
   ('email', 'info@royaltemple.org'),
   ('mission_statement', 'To glorify God through holy living, spirit-filled worship, and the evangelisation of every nation.'),
   ('vision_statement', 'A glorious, spirit-filled assembly raising believers who transform their communities for Christ.'),
-  ('hero_tagline', 'A House of Prayer, Worship and Evangelism')
+  ('hero_tagline', 'A House of Prayer, Worship and Evangelism'),
+  ('youtube_channel_url', ''),
+  ('youtube_live_video_id', ''),
+  ('facebook_live_url', ''),
+  ('preferred_default_platform', 'youtube'),
+  ('live_status_override', ''),
+  ('next_service_title', ''),
+  ('next_service_date', ''),
+  ('next_service_time', ''),
+  ('previous_broadcast_url', '')
 ON DUPLICATE KEY UPDATE setting_key = setting_key;
 
 SET FOREIGN_KEY_CHECKS = 1;

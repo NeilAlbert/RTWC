@@ -21,6 +21,15 @@ const ALLOWED_KEYS = [
   'mission_statement',
   'vision_statement',
   'hero_tagline',
+  'youtube_channel_url',
+  'youtube_live_video_id',
+  'facebook_live_url',
+  'preferred_default_platform',
+  'live_status_override',
+  'next_service_title',
+  'next_service_date',
+  'next_service_time',
+  'previous_broadcast_url',
 ];
 
 /** Reduce DB rows into a plain { key: value } object. */
