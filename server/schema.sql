@@ -2,9 +2,6 @@
 -- ROYAL TEMPLE WORSHIP CENTRE (THE CHURCH OF PENTECOST) — DATABASE SCHEMA
 -- Run against the Aiven MySQL database, e.g.:
 --   mysql --host=$DB_HOST --port=$DB_PORT --user=$DB_USER --password=$DB_PASSWORD $DB_NAME < schema.sql
---
--- All tables use InnoDB + utf8mb4. All application queries must use
--- parameterized placeholders (?) — never string concatenation.
 -- =============================================================================
 
 SET NAMES utf8mb4;
@@ -80,7 +77,7 @@ CREATE TABLE IF NOT EXISTS leadership (
   id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
   name          VARCHAR(150) NOT NULL,
   role          ENUM('pastor','pastors_wife','presiding_elder','secretary',
-                      'elder','deacon','deaconess','ministry_leader') NOT NULL,
+              'elder','deacon','deaconess','ministry_leader') NOT NULL,
   ministry_id   INT UNSIGNED NULL,
   photo_url     VARCHAR(500),
   bio           TEXT,
@@ -122,50 +119,6 @@ CREATE TABLE IF NOT EXISTS prayer_requests (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------
--- giving_records — payment_reference is UNIQUE for idempotency: the webhook
--- must never double-record a donation for the same reference.
--- -----------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS giving_records (
-  id                INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  name              VARCHAR(150) NOT NULL,
-  email             VARCHAR(255) NOT NULL,
-  amount            DECIMAL(12,2) NOT NULL,
-  category          ENUM('tithe','offering','building_fund','thanksgiving',
-                         'seed_offering') NOT NULL,
-  payment_status    ENUM('pending','completed','failed') NOT NULL DEFAULT 'pending',
-  -- payment_channel — Paystack metadata stored on webhook completion
-  -- (e.g. 'card', 'mobile_money', 'bank', 'ussd'). Nullable; informational only.
-  payment_channel   VARCHAR(50)   NULL,
-  payment_reference VARCHAR(100) NOT NULL,
-  created_at        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  UNIQUE KEY uq_giving_reference (payment_reference),
-  KEY idx_giving_category (category),
-  KEY idx_giving_created (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- -----------------------------------------------------------------------------
--- Migration (idempotent — safe to run every time, including fresh installs):
--- adds payment_channel to EXISTING giving_records tables that were created
--- before the column existed. Fresh installs already have it from the CREATE
--- TABLE above, so the dynamic check simply no-ops.
--- -----------------------------------------------------------------------------
-SET @rtwc_col = (
-  SELECT COUNT(*) FROM information_schema.COLUMNS
-  WHERE TABLE_SCHEMA = DATABASE()
-    AND TABLE_NAME = 'giving_records'
-    AND COLUMN_NAME = 'payment_channel'
-);
-SET @rtwc_sql = IF(
-  @rtwc_col = 0,
-  'ALTER TABLE giving_records ADD COLUMN payment_channel VARCHAR(50) NULL AFTER payment_status',
-  'SELECT 1'
-);
-PREPARE rtwc_stmt FROM @rtwc_sql;
-EXECUTE rtwc_stmt;
-DEALLOCATE PREPARE rtwc_stmt;
-
--- -----------------------------------------------------------------------------
 -- newsletter_subscribers
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS newsletter_subscribers (
@@ -174,9 +127,12 @@ CREATE TABLE IF NOT EXISTS newsletter_subscribers (
   subscribed_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_newsletter_email (email)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;-- -----------------------------------------------------------------------------
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------------
 -- site_settings — editable key/value content shown on the public site
--- (welcome message, service times, contact info, mission/vision, hero tagline).
+-- (welcome message, service times, contact info, mission/vision, hero tagline,
+-- and giving details: giving_intro, giving_momo, giving_bank, giving_note).
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS site_settings (
   id            INT UNSIGNED     NOT NULL AUTO_INCREMENT,
@@ -210,7 +166,12 @@ INSERT INTO site_settings (setting_key, setting_value) VALUES
   ('next_service_title', ''),
   ('next_service_date', ''),
   ('next_service_time', ''),
-  ('previous_broadcast_url', '')
+  ('previous_broadcast_url', ''),
+  -- Giving settings (offline only — manually configured from Admin > Settings)
+  ('giving_intro', 'Tithes and offerings support the work of the ministry. God bless you as you give.'),
+  ('giving_momo', 'MTN Mobile Money | 0XX XXX XXXX | ADD ACCOUNT NAME\nTelecel Tmoney | 0XX XXX XXXX | ADD ACCOUNT NAME'),
+  ('giving_bank', 'Bank | Account name | Account number | Branch\n( branch is optional )'),
+  ('giving_note', 'Please confirm the account name matches the church before sending.\nExample: John Doe — Tithes')
 ON DUPLICATE KEY UPDATE setting_key = setting_key;
 
-SET FOREIGN_KEY_CHECKS = 1;
+SET FOREIGN_KEY_CHECKS = 1;

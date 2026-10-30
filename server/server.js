@@ -7,6 +7,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const csrf = require('csurf');
 
 const authRoutes = require('./routes/auth');
 const sermonsRoutes = require('./routes/sermons');
@@ -15,7 +16,6 @@ const ministriesRoutes = require('./routes/ministries');
 const leadershipRoutes = require('./routes/leadership');
 const contactRoutes = require('./routes/contact');
 const prayerRequestsRoutes = require('./routes/prayerRequests');
-const givingRoutes = require('./routes/giving');
 const newsletterRoutes = require('./routes/newsletter');
 const facebookLiveRoutes = require('./routes/facebookLive');
 const youtubeLiveRoutes = require('./routes/youtubeLive');
@@ -65,6 +65,10 @@ app.use(express.json({
   },
 }));
 
+// CSRF protection — only applied to state-changing routes behind auth
+const csrfMiddleware = csrf({ cookie: true });
+app.use(csrfMiddleware);
+
 // Simple request logging (no sensitive data — no bodies, no tokens).
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.originalUrl}`, { ip: req.ip });
@@ -80,15 +84,22 @@ app.get('/api/health', (req, res) => {
 
 // -----------------------------------------------------------------------------
 // Routes
-// -----------------------------------------------------------------------------
+// CSRF exemptions: login is public, so it must not be protected by CSRF
 app.use('/api/auth', authRoutes);
-app.use('/api/sermons', sermonsRoutes);
+
+// CSRF token endpoint — the admin login page needs this to render the form
+app.get('/api/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
+
+// -----------------------------------------------------------------------------
+// Routes// -----------------------------------------------------------------------------
+app.use('/api/auth', authRoutes);app.use('/api/sermons', sermonsRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/ministries', ministriesRoutes);
 app.use('/api/leadership', leadershipRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/prayer-requests', prayerRequestsRoutes);
-app.use('/api/giving', givingRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/facebook', facebookLiveRoutes);
 app.use('/api/youtube', youtubeLiveRoutes);

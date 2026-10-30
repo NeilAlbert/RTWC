@@ -251,8 +251,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
       if (watchDirectlyLink) {
-        watchDirectlyLink.href = '/api/settings';
-        watchDirectlyLink.textContent = 'Watch Live';
+        watchDirectlyLink.href = 'https://www.facebook.com/cop.rtwc/videos';
+        watchDirectlyLink.textContent = 'Watch on Facebook';
       }
     }
 

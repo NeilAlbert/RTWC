@@ -39,6 +39,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     { key: 'next_service_date', label: 'Next Service Date', type: 'date' },
     { key: 'next_service_time', label: 'Next Service Time', type: 'time' },
     { key: 'previous_broadcast_url', label: 'Previous Broadcast URL', type: 'url' },
+    // Giving settings (offline only)
+    { key: 'giving_intro', label: 'Giving Intro', type: 'textarea' },
+    { key: 'giving_momo', label: 'Mobile Money Accounts', type: 'textarea' },
+    { key: 'giving_bank', label: 'Bank Transfer Details', type: 'textarea' },
+    { key: 'giving_note', label: 'Giving Note / Instructions', type: 'textarea' },
   ];
 
   const originalValues = {}; // key → value as loaded from the API

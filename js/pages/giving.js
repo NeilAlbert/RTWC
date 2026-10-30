@@ -1,130 +1,111 @@
 /**
  * THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
- * Online Giving Page Specific JavaScript (js/pages/giving.js)
+ * Giving Page Specific JavaScript (js/pages/giving.js)
  *
- * Flow: the donor fills the form -> we POST to /api/giving/initiate ->
- * the backend creates a pending giving_records row and initializes a Paystack
- * transaction -> we redirect the donor's browser to Paystack's hosted checkout
- * (authorization_url). After payment, Paystack redirects back to
- * giving-callback.html, which calls GET /api/giving/verify/:reference.
+ * Flow: renders giving settings from the admin panel as offline info.
+ * No payment form, no amount field, no checkout redirect, no third-party scripts.
+ * Supports: Tithes, Offering, Building Fund, Thanksgiving, Seed Offering.
+ * Manual giving via mobile money or bank transfer.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Base URL for the API. Empty string = same origin. Change this if the API
-  // is hosted on a different domain (e.g. 'https://api.royaltemple.org').
-  const API_BASE = '';
+  initClipboardCopy();
+  initMobileFirstResponsive();
+});
 
-  const form = document.getElementById('giving-form');
-  const customAmountInput = document.getElementById('custom-amount');
-  const presetBtns = document.querySelectorAll('.btn-preset');
-  const submitBtn = document.getElementById('giving-submit-btn');
-  const submitLabel = submitBtn ? submitBtn.querySelector('.btn-giving-label') : null;
-  const errorBox = document.getElementById('giving-form-error');
-
-  const categorySelect = document.getElementById('giving-category');
-  const nameInput = document.getElementById('giver-name');
-  const emailInput = document.getElementById('giver-email');
-
-  // Preset Amount Button Handlers
-  presetBtns.forEach(btn => {
+/**
+ * Initialise Clipboard API copy buttons with fallback and screen reader announcement.
+ * Each .copy-btn copies its associated target element's text content.
+ */
+function initClipboardCopy() {
+  const copyBtns = document.querySelectorAll('.copy-btn');
+  copyBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      presetBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const val = btn.getAttribute('data-amount');
-      if (customAmountInput) {
-        customAmountInput.value = val;
-        hideError();
+      const targetId = btn.getAttribute('data-copy-target');
+      const targetEl = document.getElementById(targetId);
+      if (!targetEl) return;
+
+      const textToCopy = targetEl.textContent.trim();
+
+      if (navigator.clipboard && window.isSecureContext) {
+        // Use modern Clipboard API
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          showCopyConfirmation(btn, true);
+        }).catch(() => fallbackCopyText(textToCopy, btn));
+      } else {
+        fallbackCopyText(textToCopy, btn);
       }
     });
   });
+}
 
-  // Clear preset active state when user manually types custom amount
-  if (customAmountInput) {
-    customAmountInput.addEventListener('input', () => {
-      presetBtns.forEach(b => b.classList.remove('active'));
-      hideError();
-    });
+/**
+ * Fallback: select text in a temporary textarea and copy via document.execCommand.
+ */
+function fallbackCopyText(text, btn) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  try {
+    document.execCommand('copy') ? showCopyConfirmation(btn, true) : showCopyConfirmation(btn, false);
+  } catch (err) {
+    showCopyConfirmation(btn, false);
+  } finally {
+    document.body.removeChild(textarea);
   }
+}
 
-  function showError(message) {
-    if (!errorBox) return;
-    errorBox.textContent = message;
-    errorBox.hidden = false;
-  }
+/**
+ * Show a "Copied" confirmation announced to screen readers, auto-reset after 2s.
+ */
+function showCopyConfirmation(btn, success) {
+  // Announce to screen readers
+  const announcement = document.createElement('div');
+  announcement.setAttribute('role', 'status');
+  announcement.setAttribute('aria-live', 'polite');
+  announcement.textContent = success ? 'Copied to clipboard' : 'Failed to copy';
+  announcement.style.position = 'fixed';
+  announcement.style.left = '-9999px';
+  announcement.style.top = '-9999px';
+  document.body.appendChild(announcement);
 
-  function hideError() {
-    if (!errorBox) return;
-    errorBox.textContent = '';
-    errorBox.hidden = true;
-  }
+  // Button visual feedback
+  const originalText = btn.textContent;
+  btn.textContent = success ? 'Copied!' : 'Copy';
+  btn.classList.toggle('copied', success);
+  btn.disabled = true;
 
-  function setLoading(isLoading) {
-    if (!submitBtn) return;
-    submitBtn.disabled = isLoading;
-    if (submitLabel) {
-      submitLabel.textContent = isLoading ? 'Redirecting to secure payment…' : 'Proceed to Secure Payment';
-    }
-  }
+  // Reset after 2 seconds
+  setTimeout(() => {
+    btn.textContent = originalText;
+    btn.classList.toggle('copied', false);
+    btn.disabled = false;
+    document.body.removeChild(announcement);
+  }, 2000);
+}
 
-  // Form Submission Handler
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideError();
+/**
+ * Mobile-first responsive layout initialisation.
+ * Ensures numbers never overflow, account names wrap cleanly,
+ * and copy buttons are at least 44x44px touch-friendly.
+ */
+function initMobileFirstResponsive() {
+  // Ensure copy buttons are touch-friendly (min 44x44px)
+  const copyBtns = document.querySelectorAll('.copy-btn');
+  copyBtns.forEach(btn => {
+    btn.style.minWidth = '44px';
+    btn.style.minHeight = '44px';
+    btn.style.fontSize = '1rem';
+  });
 
-      const name = nameInput ? nameInput.value.trim() : '';
-      const email = emailInput ? emailInput.value.trim() : '';
-      const category = categorySelect ? categorySelect.value : '';
-      const amount = Number(customAmountInput ? customAmountInput.value : 0);
-
-      // Client-side checks (the server validates again).
-      if (name.length < 2) {
-        showError('Please enter your full name.');
-        nameInput && nameInput.focus();
-        return;
-      }
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        showError('Please enter a valid email address.');
-        emailInput && emailInput.focus();
-        return;
-      }
-      if (!category) {
-        showError('Please select a giving category.');
-        categorySelect && categorySelect.focus();
-        return;
-      }
-      if (!Number.isFinite(amount) || amount < 1) {
-        showError('Please enter an amount of at least GH₵ 1.');
-        customAmountInput && customAmountInput.focus();
-        return;
-      }
-
-      setLoading(true);
-
-      try {
-        const response = await fetch(`${API_BASE}/api/giving/initiate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, amount, category }),
-        });
-
-        const data = await response.json().catch(() => ({}));
-
-        if (!response.ok || !data.success) {
-          throw new Error(data.message || 'Something went wrong. Please try again.');
-        }
-
-        // Redirect the donor to Paystack's secure hosted checkout.
-        if (data.data && data.data.authorizationUrl) {
-          window.location.href = data.data.authorizationUrl;
-          return; // page will navigate away
-        }
-        throw new Error('The payment link could not be created. Please try again.');
-      } catch (err) {
-        setLoading(false);
-        showError(err.message || 'Something went wrong. Please try again.');
-      }
-    });
-  }
-});
+  // Make sure account number elements are wide enough on mobile
+  const accountNumbers = document.querySelectorAll('.account-number');
+  accountNumbers.forEach(el => {
+    el.style.wordBreak = 'break-all';
+    el.style.fontFamily = 'inherit';
+  });
+}
