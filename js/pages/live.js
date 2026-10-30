@@ -15,7 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const streamDesc = document.getElementById('stream-desc');
   const watchDirectlyLink = document.getElementById('watch-directly-link');
   const shareButtons = document.querySelector('.share-buttons');
-  const defaultFacebookUrl = 'https://www.facebook.com/cop.rtwc/videos';
+  const defaultFacebookPageUrl = 'https://www.facebook.com/cop.rtwc';
+  const defaultFacebookUrl = `${defaultFacebookPageUrl}/videos`;
   const defaultYoutubeUrl = 'https://www.youtube.com';
 
   let settings = null;
@@ -54,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
       youtubeVideoId,
       youtubeUrl: trustedHttpsUrl(values.youtube_channel_url || '', ['youtube.com', 'youtu.be'])
         || (youtubeVideoId ? `https://www.youtube.com/watch?v=${youtubeVideoId}` : ''),
-      facebookUrl: trustedHttpsUrl(values.facebook_live_url || '', ['facebook.com']) || '',
+      facebookUrl: trustedHttpsUrl(values.facebook_live_url || '', ['facebook.com']) || defaultFacebookPageUrl,
       preferredPlatform: values.preferred_default_platform === 'facebook' ? 'facebook' : 'youtube',
       statusOverride: values.live_status_override || '',
     };
