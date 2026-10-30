@@ -73,8 +73,58 @@
 .stream-embed-container {
   position: relative;
   width: 100%;
-  min-height: 700px;
+  aspect-ratio: 16 / 9;
+  min-height: 320px;
   background-color: var(--primary-navy-dark);
+}
+
+.youtube-player,
+.facebook-player {
+  width: 100%;
+  height: 100%;
+}
+
+.youtube-player iframe,
+.facebook-player iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  border: 0;
+}
+
+.platform-selector {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 2;
+}
+
+.platform-btn {
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: var(--radius-full);
+  padding: 0.5rem 0.9rem;
+  background: rgba(18, 35, 69, 0.88);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.platform-btn[aria-pressed="true"] {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+
+.platform-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 .stream-offline-overlay {
@@ -268,11 +318,6 @@
   line-height: 1.6;
 }
 
-.fb-live-iframe {
-  border: none;
-  overflow: hidden;
-}
-
 .flex-column-gap {
   display: flex;
   flex-direction: column;
@@ -287,5 +332,16 @@
   }
   .replay-player-card {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .stream-embed-container {
+    min-height: 240px;
+  }
+
+  .youtube-player iframe,
+  .facebook-player iframe {
+    min-height: 240px;
   }
 }

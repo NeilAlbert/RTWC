@@ -1,4 +1,3 @@
-<!-- BACKEND REMOVED — see live stream status previously called /api/facebook/live-status and /api/facebook/latest-live. Reconnect when backend is rebuilt. -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,24 +26,6 @@
   <link rel="stylesheet" href="css/pages/live.css">
 </head>
 <body>
-
-  <!--
-    ==========================================================================
-    FACEBOOK EMBED INSTRUCTIONS (DEVELOPER REFERENCE ONLY):
-    1. The Facebook Page video or live post must be set to PUBLIC visibility for
-       the Page Plugin to render for visitors who are not logged into Facebook.
-    2. The Page Plugin uses the Page URL directly and does not require a new
-       embed URL for each service or week.
-    3. The Facebook SDK below must be loaded once per page; keep the fb-root div
-       and script tag in place.
-    4. Facebook occasionally updates its embed and SDK requirements, so the
-       embed should be checked periodically.
-    ==========================================================================
-  -->
-
-  <!-- Official Facebook SDK (loaded once per page for the fb-root div and Page Plugin) -->
-  <div id="fb-root"></div>
-  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0" nonce="RoyalTempleLive"></script>
 
   <!-- Top Announcement Bar -->
   <div class="top-bar">
@@ -129,7 +110,7 @@
             <!-- Dynamic State 1: LIVE BROADCAST SCREEN -->
             <div class="stream-embed-container" id="live-stream-box">
               <!-- YouTube Live Player -->
-              <div class="youtube-player" id="youtube-player" style="display:none; width:100%; min-height:700px;">
+              <div class="youtube-player" id="youtube-player" hidden>
                 <iframe
                   id="yt-live-iframe"
                   title="Royal Temple Worship Centre YouTube live"
@@ -139,25 +120,17 @@
               </div>
 
               <!-- Facebook Live Player -->
-              <div class="facebook-player" id="facebook-player" style="display:none; width:100%; min-height:700px;">
-                <div id="fb-root"></div>
-                <div class="fb-live-page"
-                  data-href="{{facebook_live_url}}"
-                  data-tabs="timeline"
-                  data-width="500"
-                  data-height="700"
-                  data-small-header="false"
-                  data-adapt-container-width="true"
-                  data-hide-cover="false"
-                  data-show-facepile="false">
-                </div>
-                <script async defer crossorigin="anonymous"
-                  src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0"
-                  nonce="RoyalTempleLive"></script>
+              <div class="facebook-player" id="facebook-player" hidden>
+                <iframe
+                  id="fb-live-iframe"
+                  title="Royal Temple Worship Centre Facebook live"
+                  allow="autoplay; encrypted-media; picture-in-picture; web-share"
+                  allowfullscreen>
+                </iframe>
               </div>
 
               <!-- Platform selector / currently active player -->
-              <div class="platform-selector" id="platform-selector" style="text-align:center; padding:1rem 0;">
+              <div class="platform-selector" id="platform-selector" hidden>
                 <button class="platform-btn youtube-btn" id="youtube-btn" aria-pressed="false" aria-label="Select YouTube live stream">YouTube</button>
                 <button class="platform-btn facebook-btn" id="facebook-btn" aria-pressed="false" aria-label="Select Facebook live stream">Facebook</button>
               </div>

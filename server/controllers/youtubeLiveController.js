@@ -52,10 +52,9 @@ async function fetchYouTubeVideoStatus(videoId) {
       videoId: video.id,
       title: snippet.title || 'YouTube Live Stream',
       channelTitle: snippet.channelTitle || '',
-      isLive: status.liveBroadcastContent === 'live',
+      isLive: snippet.liveBroadcastContent === 'live',
       privacyStatus: status.privacyStatus,
-      liveBroadcastContent: status.liveBroadcastContent,
-      viewCount: snippet.viewCount || 0,
+      liveBroadcastContent: snippet.liveBroadcastContent,
       publishedAt: snippet.publishedAt,
     };
   } catch (err) {
