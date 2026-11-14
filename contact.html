@@ -27,6 +27,7 @@
   <link rel="stylesheet" href="css/pages/contact.css">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
   <!-- Top Announcement Bar -->
   <div class="top-bar">
@@ -43,7 +44,6 @@
       </div>
       <div class="top-bar-links">
         <a href="index.html#services">Service Times</a>
-        <span>|</span>
       </div>
     </div>
   </div>
@@ -75,14 +75,15 @@
           <li><a href="about.html" class="nav-link">About Us</a></li>
           <li><a href="ministries.html" class="nav-link">Ministries</a></li>
           <li><a href="sermons.html" class="nav-link">Sermons</a></li><li><a href="events.html" class="nav-link">Events</a></li>
-          <li><a href="live.html" class="nav-link">Live Stream</a></li>
+          <li><a href="gallery.html" class="nav-link">Gallery</a></li>
           <li><a href="contact.html" class="nav-link active">Contact</a></li>
+          <li><a href="live.html" class="nav-link nav-cta-btn"><span class="nav-live-dot" aria-hidden="true"></span>Watch Live</a></li>
         </ul>
       </nav>
     </div>
   </header>
 
-  <main>
+  <main id="main-content">
     <!-- PAGE HERO -->
     <section class="page-hero">
       <div class="container">
@@ -160,15 +161,15 @@
             -->
             <form id="contact-form" class="contact-form" action="#" method="POST" novalidate>
               <div class="form-group">
-                <label for="contact-name" class="form-label">Full Name *</label>
-                <input type="text" id="contact-name" name="name" class="form-input" placeholder="Your full name" required>
-                <span class="field-error" id="err-name"></span>
+                <label for="contact-name" class="form-label">Full Name <span class="required-mark" aria-hidden="true">*</span></label>
+                <input type="text" id="contact-name" name="name" class="form-input" placeholder="Your full name" autocomplete="name" aria-describedby="err-name" required>
+                <span class="field-error" id="err-name" aria-live="polite"></span>
               </div>
 
               <div class="form-group">
-                <label for="contact-email" class="form-label">Email Address *</label>
-                <input type="email" id="contact-email" name="email" class="form-input" placeholder="name@example.com" required>
-                <span class="field-error" id="err-email"></span>
+                <label for="contact-email" class="form-label">Email Address <span class="required-mark" aria-hidden="true">*</span></label>
+                <input type="email" id="contact-email" name="email" class="form-input" placeholder="name@example.com" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" aria-describedby="err-email" required>
+                <span class="field-error" id="err-email" aria-live="polite"></span>
               </div>
 
               <div class="form-group">
@@ -177,15 +178,15 @@
               </div>
 
               <div class="form-group">
-                <label for="contact-message" class="form-label">Your Message *</label>
-                <textarea id="contact-message" name="message" rows="5" class="form-textarea" placeholder="How can we assist you?" required></textarea>
-                <span class="field-error" id="err-message"></span>
+                <label for="contact-message" class="form-label">Your Message <span class="required-mark" aria-hidden="true">*</span></label>
+                <textarea id="contact-message" name="message" rows="5" class="form-textarea" placeholder="How can we assist you?" aria-describedby="err-message" required></textarea>
+                <span class="field-error" id="err-message" aria-live="polite"></span>
               </div>
 
               <button type="submit" class="btn btn-primary btn-full-width">
                 Send Message &rarr;
               </button>
-              <div id="contact-success-msg" class="success-alert no-display">
+              <div id="contact-success-msg" class="success-alert no-display" role="status" tabindex="-1">
                 Thank you, we'll be in touch.
               </div>
             </form>
@@ -212,9 +213,9 @@
               </div>
 
               <div class="form-group">
-                <label for="prayer-request" class="form-label">Prayer Request Details *</label>
-                <textarea id="prayer-request" name="request" rows="5" class="form-textarea" placeholder="Share your prayer need, healing request, or thanksgiving..." required></textarea>
-                <span class="field-error" id="err-prayer"></span>
+                <label for="prayer-request" class="form-label">Prayer Request Details <span class="required-mark" aria-hidden="true">*</span></label>
+                <textarea id="prayer-request" name="request" rows="5" class="form-textarea" placeholder="Share your prayer need, healing request, or thanksgiving..." aria-describedby="err-prayer" required></textarea>
+                <span class="field-error" id="err-prayer" aria-live="polite"></span>
               </div>
 
               <div class="form-group checkbox-group">
@@ -227,7 +228,7 @@
               <button type="submit" class="btn btn-secondary btn-full-width">
                 Submit Prayer Request
               </button>
-              <div id="prayer-success-msg" class="success-alert no-display">
+              <div id="prayer-success-msg" class="success-alert no-display" role="status" tabindex="-1">
                 Thank you, we'll be in touch.
               </div>
             </form>

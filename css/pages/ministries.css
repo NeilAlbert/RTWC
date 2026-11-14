@@ -202,3 +202,81 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Interaction & motion refinements
+   -------------------------------------------------------------------------- */
+.ministry-tag {
+  color: var(--accent-gold-text);
+}
+
+.ministry-icon {
+  transition: transform var(--dur-base) var(--ease-spring), background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.ministry-card:hover .ministry-icon,
+.ministry-card.expanded .ministry-icon {
+  transform: rotate(-6deg) scale(1.06);
+  background-color: var(--accent-gold-strong);
+  color: #FFFFFF;
+}
+
+.ministry-card.expanded {
+  border-color: var(--accent-gold);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-expand-ministry {
+  min-height: var(--hit-min);
+  width: 100%;
+  font-family: inherit;
+}
+
+.btn-expand-ministry:hover {
+  color: var(--accent-gold-text);
+}
+
+.btn-expand-ministry:active {
+  transform: scale(0.98);
+  transition-duration: var(--dur-instant);
+}
+
+.btn-expand-ministry svg {
+  transition: transform var(--dur-base) var(--ease-spring);
+}
+
+.ministry-details {
+  transition:
+    max-height var(--dur-base) var(--ease-in-out),
+    padding var(--dur-base) var(--ease-in-out),
+    margin var(--dur-base) var(--ease-in-out);
+}
+
+/* Tall enough for the longest description on a narrow phone. */
+.ministry-card.expanded .ministry-details {
+  max-height: 520px;
+}
+
+.ministry-details > * {
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.ministry-card.expanded .ministry-details > * {
+  opacity: 1;
+  transition-delay: 110ms;
+}
+
+@media (max-width: 640px) {
+  .ministry-card {
+    padding: 1.5rem;
+  }
+
+  .cta-banner {
+    padding: 2.5rem 1.25rem;
+  }
+
+  .cta-banner h2 {
+    font-size: 1.75rem;
+  }
+}

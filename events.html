@@ -26,6 +26,7 @@
   <link rel="stylesheet" href="css/pages/events.css">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
   <!-- Top Announcement Bar -->
   <div class="top-bar">
@@ -42,7 +43,6 @@
       </div>
       <div class="top-bar-links">
         <a href="index.html#services">Service Times</a>
-        <span>|</span>
       </div>
     </div>
   </div>
@@ -75,14 +75,15 @@
           <li><a href="ministries.html" class="nav-link">Ministries</a></li>
           <li><a href="sermons.html" class="nav-link">Sermons</a></li>
           <li><a href="events.html" class="nav-link active">Events</a></li>
-          <li><a href="live.html" class="nav-link">Live Stream</a></li>
+          <li><a href="gallery.html" class="nav-link">Gallery</a></li>
           <li><a href="contact.html" class="nav-link">Contact</a></li>
+          <li><a href="live.html" class="nav-link nav-cta-btn"><span class="nav-live-dot" aria-hidden="true"></span>Watch Live</a></li>
         </ul>
       </nav>
     </div>
   </header>
 
-  <main>
+  <main id="main-content">
     <!-- PAGE HERO -->
     <section class="page-hero">
       <div class="container">
@@ -118,6 +119,7 @@
           <button class="category-tab" data-category="Revival">Revivals</button>
           <button class="category-tab" data-category="Camp Meeting">Camp Meetings</button>
           <button class="category-tab" data-category="Anniversary">Anniversaries</button>
+          <button class="category-tab" data-category="Other">Other</button>
         </div>
       </div>
     </section>
@@ -130,18 +132,41 @@
           <p id="events-view-subtitle" class="events-view-sub">Events scheduled for the coming weeks and months.</p>
         </div>
         
-        <div class="events-full-grid" id="events-full-container">
-          <!-- Dynamically populated by js/pages/events.js -->
+        <div class="events-full-grid" id="events-full-container" aria-busy="true">
+          <!-- Loading placeholders, replaced by js/pages/events.js once events arrive -->
+          <div class="skeleton-card" aria-hidden="true">
+            <div class="skeleton-line skeleton-line--block"></div>
+            <div class="skeleton-line skeleton-line--title"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line skeleton-line--short"></div>
+            <div class="skeleton-line skeleton-line--button"></div>
+          </div>
+          <div class="skeleton-card" aria-hidden="true">
+            <div class="skeleton-line skeleton-line--block"></div>
+            <div class="skeleton-line skeleton-line--title"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line skeleton-line--short"></div>
+            <div class="skeleton-line skeleton-line--button"></div>
+          </div>
+          <div class="skeleton-card" aria-hidden="true">
+            <div class="skeleton-line skeleton-line--block"></div>
+            <div class="skeleton-line skeleton-line--title"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line skeleton-line--short"></div>
+            <div class="skeleton-line skeleton-line--button"></div>
+          </div>
         </div>
 
-        <div id="no-events-msg" class="no-results">
+        <p id="events-load-error" class="events-load-error" role="alert" hidden></p>
+
+        <div id="no-events-msg" class="no-results" role="status">
           <h3>No events found matching your selected criteria.</h3>
           <p>Try switching categories or toggling between the "Upcoming" and "Past" views.</p>
         </div>
       </div>
     </section>
 
-    <!-- CALENDAR DOWNLOAD NOTE BANNER -->
+    <!-- CALENDAR SUBSCRIPTION BANNER -->
     <section class="calendar-note-section">
       <div class="container">
         <div class="calendar-note-box">
@@ -149,12 +174,16 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           </div>
           <div class="note-text">
-            <h3>Subscribe to Royal Temple Event Calendar</h3>
-            <p>Never miss a divine gathering. Save events directly to your personal Google, Apple, or Outlook calendar.</p>
+            <h3>Sync the Royal Temple Event Calendar</h3>
+            <p>Subscribe once to receive event updates in your calendar app. Use the button to open a supported calendar app, or copy this feed URL into Google Calendar, Apple Calendar, or Outlook.</p>
+            <div class="calendar-feed-controls">
+              <label class="calendar-feed-label" for="calendar-feed-url">Calendar subscription feed URL</label>
+              <input id="calendar-feed-url" class="calendar-feed-url" type="url" readonly>
+              <button type="button" class="btn btn-outline-white" id="btn-copy-calendar-url">Copy link</button>
+            </div>
+            <p class="calendar-sync-status" id="calendar-sync-status" role="status" aria-live="polite"></p>
           </div>
-          <button class="btn btn-outline-white text-nowrap" id="btn-subscribe-cal">
-            Sync Calendar (.ics)
-          </button>
+          <a class="btn btn-outline-white text-nowrap" id="btn-subscribe-cal">Subscribe in Calendar App</a>
         </div>
       </div>
     </section>

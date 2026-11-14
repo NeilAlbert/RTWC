@@ -104,6 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalSermonMeta = document.getElementById('modal-sermon-meta');
   const modalTitleDisplay = document.getElementById('modal-title-display');
   const modalDescDisplay = document.getElementById('modal-desc-display');
+  const modalWatchLink = document.getElementById('modal-watch-link');
+  const clearFiltersBtn = document.getElementById('clear-filters-btn');
 
   // Render Sermons List
   function renderSermons(items) {
@@ -184,20 +186,36 @@ document.addEventListener('DOMContentLoaded', () => {
   if (speakerSelect) speakerSelect.addEventListener('change', filterSermons);
   if (seriesSelect) seriesSelect.addEventListener('change', filterSermons);
 
+  // Empty state offers a one-click way back to the full list.
+  if (clearFiltersBtn) {
+    clearFiltersBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      speakerSelect.value = 'all';
+      seriesSelect.value = 'all';
+      filterSermons();
+      searchInput.focus();
+    });
+  }
+
   // Modal Handlers
   function openSermonModal(sermon) {
     modalSermonTitle.textContent = sermon.title;
     modalSermonMeta.textContent = `${sermon.speaker} | ${sermon.date}`;
     modalTitleDisplay.textContent = sermon.title;
     modalDescDisplay.textContent = sermon.summary;
+    if (modalWatchLink && sermon.video_url) modalWatchLink.href = sermon.video_url;
 
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
+    // Trap focus in the dialog, lock page scroll, remember what opened it.
+    window.RTWC?.dialog.open(modal, modalCloseBtn);
   }
 
   function closeModal() {
+    if (!modal.classList.contains('open')) return;
     modal.classList.remove('open');
     modal.setAttribute('aria-hidden', 'true');
+    window.RTWC?.dialog.close();
   }
 
   if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeModal);

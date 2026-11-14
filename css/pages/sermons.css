@@ -388,3 +388,133 @@
     height: 250px;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Interaction & motion refinements
+   -------------------------------------------------------------------------- */
+.filter-bar-card {
+  transition: box-shadow var(--dur-base) var(--ease-out);
+}
+
+.filter-bar-card:focus-within {
+  box-shadow: var(--shadow-lg);
+}
+
+.input-icon-wrapper svg {
+  transition: color var(--dur-fast) var(--ease-out), transform var(--dur-base) var(--ease-spring);
+  pointer-events: none;
+}
+
+.input-icon-wrapper:focus-within svg {
+  color: var(--accent-gold-text);
+  transform: translateY(-50%) scale(1.12);
+}
+
+.sermon-thumb-img {
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.sermon-play-overlay {
+  background-color: var(--accent-gold-strong);
+  transition: transform var(--dur-base) var(--ease-spring), background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+
+/* The overlay answers a hover anywhere on the card, not only on the 56px circle. */
+.sermon-card:hover .sermon-play-overlay {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.2), var(--shadow-gold);
+}
+
+.sermon-play-overlay:hover {
+  background-color: var(--accent-gold-strong-hover);
+}
+
+.sermon-play-overlay:active {
+  transform: translate(-50%, -50%) scale(0.94);
+  transition-duration: var(--dur-instant);
+}
+
+.sermon-category-tag {
+  color: #F5D061;
+}
+
+.no-results .btn {
+  margin-top: 1.25rem;
+}
+
+/* Modal: the scrim fades while the panel rises and settles (pose to pose:
+   closed → slightly below and smaller → resting). Closing is faster than opening. */
+.sermon-modal {
+  visibility: hidden;
+  transition: opacity var(--dur-fast) var(--ease-out), visibility 0s linear var(--dur-fast);
+}
+
+.sermon-modal.open {
+  visibility: visible;
+  transition: opacity var(--dur-base) var(--ease-out), visibility 0s;
+}
+
+.modal-overlay {
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+}
+
+.modal-content {
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  transform: translateY(24px) scale(0.96);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.sermon-modal.open .modal-content {
+  transform: none;
+  transition: transform var(--dur-slow) var(--ease-spring);
+}
+
+.modal-close-btn {
+  width: var(--hit-min);
+  height: var(--hit-min);
+  color: var(--primary-navy);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-fast);
+}
+
+.modal-close-btn:hover {
+  background-color: var(--primary-navy);
+  color: #FFFFFF;
+  transform: rotate(90deg);
+}
+
+.modal-close-btn:active {
+  transform: rotate(90deg) scale(0.9);
+}
+
+.player-placeholder-screen {
+  height: auto;
+  min-height: 300px;
+}
+
+.player-placeholder-screen p {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.modal-watch-link {
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .filter-bar-card {
+    padding: 1rem;
+  }
+
+  .player-placeholder-screen {
+    min-height: 240px;
+    padding: 3.5rem 1.25rem 2rem;
+  }
+
+  .modal-info {
+    padding: 1.25rem 1.25rem 1.5rem;
+  }
+}

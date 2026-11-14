@@ -26,6 +26,7 @@
   <link rel="stylesheet" href="css/pages/sermons.css">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
   <!-- Top Announcement Bar -->
   <div class="top-bar">
@@ -42,7 +43,6 @@
       </div>
       <div class="top-bar-links">
         <a href="index.html#services">Service Times</a>
-        <span>|</span>
       </div>
     </div>
   </div>
@@ -75,14 +75,15 @@
           <li><a href="ministries.html" class="nav-link">Ministries</a></li>
           <li><a href="sermons.html" class="nav-link active">Sermons</a></li>
           <li><a href="events.html" class="nav-link">Events</a></li>
-          <li><a href="live.html" class="nav-link">Live Stream</a></li>
+          <li><a href="gallery.html" class="nav-link">Gallery</a></li>
           <li><a href="contact.html" class="nav-link">Contact</a></li>
+          <li><a href="live.html" class="nav-link nav-cta-btn"><span class="nav-live-dot" aria-hidden="true"></span>Watch Live</a></li>
         </ul>
       </nav>
     </div>
   </header>
 
-  <main>
+  <main id="main-content">
     <!-- PAGE HERO -->
     <section class="page-hero">
       <div class="container">
@@ -106,7 +107,7 @@
             <label for="search-input" class="sr-only">Search Sermons</label>
             <div class="input-icon-wrapper">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              <input type="text" id="search-input" placeholder="Search sermon title, topic, or scripture..." class="filter-input">
+              <input type="search" id="search-input" placeholder="Search by title, topic or speaker" class="filter-input" autocomplete="off" enterkeyhint="search">
             </div>
           </div>
 
@@ -140,28 +141,29 @@
           <!-- Dynamically populated by js/pages/sermons.js -->
         </div>
 
-        <div id="no-results-msg" class="no-results">
+        <div id="no-results-msg" class="no-results" role="status">
           <h3>No sermons found matching your filter criteria.</h3>
-          <p>Try clearing your search keyword or selecting "All Speakers".</p>
+          <p>Try a different keyword, or clear the filters to see every sermon.</p>
+          <button type="button" class="btn btn-outline btn-sm" id="clear-filters-btn">Clear filters</button>
         </div>
       </div>
     </section>
 
     <!-- MEDIA PLAYER MODAL PLACEHOLDER -->
-    <div class="sermon-modal" id="sermon-modal" aria-hidden="true" role="dialog">
+    <div class="sermon-modal" id="sermon-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title-display">
       <div class="modal-overlay" id="modal-overlay"></div>
       <div class="modal-content">
-        <button class="modal-close-btn" id="modal-close-btn" aria-label="Close Video Player">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <button type="button" class="modal-close-btn" id="modal-close-btn" aria-label="Close sermon details">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
         <div class="modal-body">
           <div class="player-wrapper">
             <!-- Embedded HTML5 video/audio player placeholder -->
             <div class="player-placeholder-screen">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-              <h4 id="modal-sermon-title">Sermon Video Player Placeholder</h4>
-              <p id="modal-sermon-meta">Resident Pastor | July 2026</p>
-              <span class="player-note-badge">Backend Player Integration Point</span>
+              <h4 id="modal-sermon-title"></h4>
+              <p id="modal-sermon-meta"></p>
+              <a id="modal-watch-link" class="btn btn-primary modal-watch-link" href="https://www.facebook.com/cop.rtwc/videos" target="_blank" rel="noopener noreferrer">Watch on Facebook <span aria-hidden="true">&rarr;</span></a>
             </div>
           </div>
           <div class="modal-info">

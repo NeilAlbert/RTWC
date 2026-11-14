@@ -141,3 +141,109 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Design-system alignment + interaction refinements
+   The gallery now uses the same hero, colours, radii and shadows as every
+   other page instead of its own palette.
+   -------------------------------------------------------------------------- */
+.gallery-hero {
+  background: var(--primary-navy-dark);
+}
+
+.gallery-status {
+  color: var(--text-muted);
+}
+
+.gallery-card {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-normal);
+}
+
+.gallery-card:hover,
+.gallery-card:focus-visible {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--accent-gold-border);
+}
+
+.gallery-card:active {
+  transform: translateY(-2px) scale(0.985);
+  transition-duration: var(--dur-instant);
+}
+
+.gallery-card img {
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.gallery-card:hover img,
+.gallery-card:focus-visible img {
+  transform: scale(1.05);
+}
+
+.gallery-card-title {
+  font-family: 'Outfit', sans-serif;
+  color: var(--primary-navy);
+}
+
+.gallery-card-meta {
+  color: var(--text-muted);
+}
+
+/* Lightbox: scrim fades, photo rises and settles. */
+.lightbox {
+  background: rgba(18, 35, 69, 0.92);
+  animation: fade-in var(--dur-base) var(--ease-out);
+}
+
+.lightbox-content {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  max-height: calc(100vh - 3rem);
+  max-height: calc(100dvh - 3rem);
+  overflow-y: auto;
+  animation: pop-in var(--dur-slow) var(--ease-out) backwards;
+}
+
+.lightbox-content img {
+  background: var(--primary-navy-dark);
+}
+
+.lightbox-caption {
+  font-family: 'Outfit', sans-serif;
+  color: var(--primary-navy);
+}
+
+.lightbox-date {
+  color: var(--text-muted);
+}
+
+.lightbox-close {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.16);
+  transition: var(--transition-fast);
+  z-index: 1;
+}
+
+.lightbox-close:hover {
+  background: #FFFFFF;
+  color: var(--primary-navy-dark);
+  transform: rotate(90deg);
+}
+
+.lightbox-close:active {
+  transform: rotate(90deg) scale(0.9);
+}
+
+@media (max-width: 560px) {
+  .lightbox {
+    padding: 0.75rem;
+  }
+}

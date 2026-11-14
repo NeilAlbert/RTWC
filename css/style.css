@@ -46,9 +46,48 @@
   --radius-lg: 24px;
   --radius-full: 9999px;
 
-  /* Transitions */
-  --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Accessible gold variants: --accent-gold stays the brand colour for icons,
+     borders and text on navy; these two meet WCAG AA (4.5:1) against white. */
+  --accent-gold-text: #8A6508;
+  --accent-gold-strong: #946D08;
+  --accent-gold-strong-hover: #7A5A06;
+
+  /* Feedback colours */
+  --danger: #B42318;
+  --danger-bg: #FEF3F2;
+  --success: #166534;
+  --success-bg: #F0FDF4;
+
+  /* Motion system — one set of durations and curves for the whole site.
+     ease-out: things entering / responding to the user (slow out)
+     ease-in-out: things moving between two resting states
+     ease-spring: slight overshoot so elements settle (follow-through) */
+  --dur-instant: 120ms;
+  --dur-fast: 180ms;
+  --dur-base: 260ms;
+  --dur-slow: 420ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Transitions — explicit properties (never `all`) so layout never animates. */
+  --transition-fast:
+    color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+  --transition-normal:
+    color var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+
+  /* Minimum comfortable touch target */
+  --hit-min: 44px;
 }
 
 /* --------------------------------------------------------------------------
@@ -67,7 +106,52 @@ html {
   color: var(--text-dark);
   background-color: var(--bg-main);
   scroll-behavior: smooth;
+  /* Anchor targets (#visit, #leadership, #event-3) clear the sticky header. */
+  scroll-padding-top: calc(var(--header-height) + 1rem);
   -webkit-font-smoothing: antialiased;
+}
+
+/* One consistent, clearly visible keyboard focus ring everywhere. */
+:focus-visible {
+  outline: 3px solid var(--accent-gold-hover);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Visually hidden, still read by screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip link — first tab stop on every page. */
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: 0;
+  z-index: 3000;
+  background-color: var(--primary-navy);
+  color: #FFFFFF;
+  font-weight: 700;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  transform: translateY(-110%);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
 }
 
 body {
@@ -82,6 +166,11 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   line-height: 1.25;
   color: var(--primary-navy);
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 a {
@@ -159,10 +248,19 @@ button, input, select, textarea {
 
 .top-bar-links a {
   color: rgba(255, 255, 255, 0.85);
+  /* Small text, but a comfortable target */
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 0.35rem;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+  text-underline-offset: 3px;
 }
 
 .top-bar-links a:hover {
   color: var(--accent-gold-hover);
+  text-decoration-color: currentColor;
 }
 
 /* Header & Navbar */
@@ -172,7 +270,7 @@ button, input, select, textarea {
   z-index: 1000;
   background-color: var(--bg-white);
   box-shadow: var(--shadow-sm);
-  transition: var(--transition-normal);
+  transition: box-shadow var(--dur-base) var(--ease-out), background-color var(--dur-base) var(--ease-out);
 }
 
 .site-header.scrolled {
@@ -219,16 +317,24 @@ button, input, select, textarea {
 .brand-tagline {
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--accent-gold);
+  color: var(--accent-gold-text);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.brand-logo {
+  transition: transform var(--dur-base) var(--ease-spring);
+}
+
+.brand-link:hover .brand-logo {
+  transform: scale(1.05) rotate(-2deg);
 }
 
 /* Nav Menu */
 .nav-menu {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem;
 }
 
 .nav-link {
@@ -236,47 +342,102 @@ button, input, select, textarea {
   font-weight: 600;
   font-size: 0.95rem;
   color: var(--primary-navy);
-  padding: 0.5rem 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--hit-min);
+  padding: 0.5rem 0.85rem;
   border-radius: var(--radius-sm);
   position: relative;
   transition: var(--transition-fast);
 }
 
+/* Underline indicator: grows from the centre on hover, stays for the current page. */
+.nav-link:not(.nav-cta-btn)::after {
+  content: '';
+  position: absolute;
+  left: 0.85rem;
+  right: 0.85rem;
+  bottom: 7px;
+  height: 2px;
+  border-radius: 2px;
+  background-color: var(--accent-gold);
+  transform: scaleX(0);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
 .nav-link:hover,
 .nav-link.active {
-  color: var(--accent-gold);
+  color: var(--accent-gold-text);
+}
+
+.nav-link:hover {
   background-color: var(--accent-gold-light);
 }
 
-.nav-cta-btn {
-  margin-left: 0.5rem;
-  background-color: var(--accent-gold);
-  color: var(--bg-white);
-  padding: 0.6rem 1.25rem;
-  border-radius: var(--radius-full);
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.3);
+.nav-link:hover::after,
+.nav-link.active::after {
+  transform: scaleX(1);
 }
 
-.nav-cta-btn:hover {
+/* Primary action in the header: always one click from any page. */
+.nav-link.nav-cta-btn {
+  margin-left: 0.5rem;
+  gap: 0.5rem;
+  background-color: var(--accent-gold-strong);
+  color: #FFFFFF;
+  padding: 0.5rem 1.2rem;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(148, 109, 8, 0.28);
+}
+
+.nav-link.nav-cta-btn:hover,
+.nav-link.nav-cta-btn.active {
   background-color: var(--primary-navy);
-  color: var(--bg-white);
+  color: #FFFFFF;
   box-shadow: var(--shadow-md);
+}
+
+.nav-link.nav-cta-btn:active {
+  transform: scale(0.96);
+}
+
+.nav-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #FFFFFF;
+  flex-shrink: 0;
+  animation: live-pulse 2.4s var(--ease-in-out) infinite;
+}
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.8); }
 }
 
 /* Mobile Nav Hamburger Toggle */
 .mobile-nav-toggle {
   display: none;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0;
   color: var(--primary-navy);
   border-radius: var(--radius-sm);
+  transition: background-color var(--dur-fast) var(--ease-out), transform var(--dur-instant) var(--ease-out);
 }
 
-.mobile-nav-toggle:focus-visible {
-  outline: 2px solid var(--accent-gold);
+.mobile-nav-toggle:hover {
+  background-color: var(--accent-gold-light);
+}
+
+.mobile-nav-toggle:active {
+  transform: scale(0.92);
 }
 
 .mobile-nav-toggle svg {
@@ -285,6 +446,27 @@ button, input, select, textarea {
   stroke: var(--primary-navy);
   stroke-width: 2;
   stroke-linecap: round;
+}
+
+/* Hamburger ↔ close: the three lines morph instead of being swapped.
+   Line order in the markup is middle, top, bottom. */
+.mobile-nav-toggle svg line {
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+  transition: transform var(--dur-base) var(--ease-spring), opacity var(--dur-instant) linear;
+}
+
+.mobile-nav-toggle[aria-expanded="true"] svg line:nth-child(1) {
+  opacity: 0;
+  transform: scaleX(0.2);
+}
+
+.mobile-nav-toggle[aria-expanded="true"] svg line:nth-child(2) {
+  transform: rotate(45deg) translateY(6px);
+}
+
+.mobile-nav-toggle[aria-expanded="true"] svg line:nth-child(3) {
+  transform: rotate(-45deg) translateY(-6px);
 }
 
 /* --------------------------------------------------------------------------
@@ -299,34 +481,64 @@ button, input, select, textarea {
   font-weight: 700;
   font-size: 1rem;
   padding: 0.85rem 1.8rem;
+  min-height: 48px;
   border-radius: var(--radius-full);
   border: 2px solid transparent;
   cursor: pointer;
-  transition: var(--transition-normal);
+  transition: var(--transition-fast);
   text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Shared interaction states: lift on hover (anticipation), compress on press
+   (squash), spring back on release (follow-through). */
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.97);
+  transition-duration: var(--dur-instant);
+}
+
+.btn svg {
+  flex-shrink: 0;
+  transition: transform var(--dur-base) var(--ease-spring);
+}
+
+.btn:hover svg {
+  transform: scale(1.12);
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-primary {
-  background-color: var(--accent-gold);
+  background-color: var(--accent-gold-strong);
   color: #FFFFFF;
-  box-shadow: var(--shadow-gold);
+  box-shadow: 0 6px 18px rgba(148, 109, 8, 0.28);
 }
 
 .btn-primary:hover {
-  background-color: var(--accent-gold-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4);
+  background-color: var(--accent-gold-strong-hover);
+  box-shadow: 0 10px 24px rgba(148, 109, 8, 0.36);
 }
 
 .btn-secondary {
   background-color: var(--primary-navy);
   color: #FFFFFF;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary:hover {
   background-color: var(--primary-navy-dark);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-outline {
@@ -342,12 +554,13 @@ button, input, select, textarea {
 
 .btn-outline-gold {
   background-color: transparent;
-  color: var(--accent-gold);
+  color: var(--accent-gold-text);
   border-color: var(--accent-gold);
 }
 
 .btn-outline-gold:hover {
-  background-color: var(--accent-gold);
+  background-color: var(--accent-gold-strong);
+  border-color: var(--accent-gold-strong);
   color: #FFFFFF;
 }
 
@@ -364,7 +577,7 @@ button, input, select, textarea {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--accent-gold);
+  color: var(--accent-gold-text);
   background-color: var(--accent-gold-light);
   padding: 0.35rem 0.9rem;
   border-radius: var(--radius-full);
@@ -373,7 +586,7 @@ button, input, select, textarea {
 }
 
 .section-title {
-  font-size: 2.25rem;
+  font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.25rem);
   color: var(--primary-navy);
   margin-bottom: 0.75rem;
   letter-spacing: -0.02em;
@@ -471,6 +684,7 @@ button, input, select, textarea {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  min-height: 32px;
 }
 
 .footer-links a:hover {
@@ -506,8 +720,8 @@ button, input, select, textarea {
 }
 
 .social-icon-btn {
-  width: 38px;
-  height: 38px;
+  width: var(--hit-min);
+  height: var(--hit-min);
   border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.08);
   display: inline-flex;
@@ -556,26 +770,40 @@ button, input, select, textarea {
 /* --------------------------------------------------------------------------
    6. RESPONSIVE BREAKPOINTS (MOBILE FIRST)
    -------------------------------------------------------------------------- */
-@media (max-width: 991px) {
+@media (max-width: 1100px) {
   .mobile-nav-toggle {
     display: block;
   }
 
+  .mobile-nav-toggle {
+    display: inline-flex;
+  }
+
+  /* Anchored to the sticky header (not the viewport) so it always opens
+     directly beneath it, whether or not the top bar has scrolled away. */
   .nav-menu {
-    position: fixed;
-    top: var(--header-height);
+    position: absolute;
+    top: 100%;
     left: 0;
     width: 100%;
+    max-height: calc(100vh - var(--header-height));
+    max-height: calc(100dvh - var(--header-height));
+    overflow-y: auto;
+    overscroll-behavior: contain;
     background-color: var(--bg-white);
     flex-direction: column;
-    align-items: flex-start;
-    padding: 1.5rem;
+    align-items: stretch;
+    padding: 0.75rem 1.5rem 1.5rem;
+    border-top: 1px solid var(--border-color);
     box-shadow: var(--shadow-lg);
-    gap: 0.75rem;
-    transform: translateY(-150%);
+    gap: 0.25rem;
+    transform: translateY(-12px);
     opacity: 0;
     visibility: hidden;
-    transition: var(--transition-normal);
+    transition:
+      transform var(--dur-base) var(--ease-out),
+      opacity var(--dur-fast) var(--ease-out),
+      visibility 0s linear var(--dur-base);
     z-index: 999;
   }
 
@@ -583,19 +811,68 @@ button, input, select, textarea {
     transform: translateY(0);
     opacity: 1;
     visibility: visible;
+    transition-delay: 0s;
   }
 
+  /* Items follow the panel in, one after another. */
+  .nav-menu > li {
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-base) var(--ease-out);
+  }
+
+  .nav-menu.open > li {
+    opacity: 1;
+    transform: none;
+  }
+
+  .nav-menu.open > li:nth-child(1) { transition-delay: 30ms; }
+  .nav-menu.open > li:nth-child(2) { transition-delay: 55ms; }
+  .nav-menu.open > li:nth-child(3) { transition-delay: 80ms; }
+  .nav-menu.open > li:nth-child(4) { transition-delay: 105ms; }
+  .nav-menu.open > li:nth-child(5) { transition-delay: 130ms; }
+  .nav-menu.open > li:nth-child(6) { transition-delay: 155ms; }
+  .nav-menu.open > li:nth-child(7) { transition-delay: 180ms; }
+  .nav-menu.open > li:nth-child(8) { transition-delay: 205ms; }
+
   .nav-link {
+    display: flex;
     width: 100%;
+    min-height: 48px;
     padding: 0.75rem 1rem;
     font-size: 1.05rem;
   }
 
-  .nav-cta-btn {
-    width: 100%;
+  .nav-link:not(.nav-cta-btn)::after {
+    display: none;
+  }
+
+  .nav-link.active:not(.nav-cta-btn) {
+    background-color: var(--accent-gold-light);
+    box-shadow: inset 3px 0 0 var(--accent-gold);
+  }
+
+  .nav-link.nav-cta-btn {
+    justify-content: center;
     margin-left: 0;
     margin-top: 0.5rem;
-    text-align: center;
+  }
+
+  /* Dimmed page behind the open menu; tapping it closes the menu. */
+  .nav-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    background-color: rgba(18, 35, 69, 0.45);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--dur-base) var(--ease-out), visibility 0s linear var(--dur-base);
+  }
+
+  .nav-backdrop.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
   }
 }
 
@@ -682,5 +959,313 @@ button, input, select, textarea {
   white-space: nowrap;
 }
 
+/* --------------------------------------------------------------------------
+   7. SHARED PAGE HERO (inner pages)
+   -------------------------------------------------------------------------- */
+.page-hero {
+  background-color: var(--primary-navy-dark);
+  color: var(--text-light);
+  padding: 4rem 0 3.5rem 0;
+  text-align: center;
+  border-bottom: 4px solid var(--accent-gold);
+}
+
+.page-hero h1,
+.page-hero-title {
+  color: var(--text-light);
+  font-size: clamp(2rem, 1.3rem + 3vw, 2.75rem);
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.page-hero-desc,
+.page-hero-copy {
+  max-width: 720px;
+  margin: 0 auto;
+  font-size: clamp(1rem, 0.9rem + 0.5vw, 1.15rem);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.page-hero-content .btn {
+  margin-top: 1.75rem;
+}
+
+/* --------------------------------------------------------------------------
+   8. MOTION
+   Every animation here answers a question for the user: "what just arrived?",
+   "what did my click do?", "where should I look?". Nothing loops for decoration.
+   -------------------------------------------------------------------------- */
+
+/* 8.1 Page-to-page transition: a quick cross-fade while the header stays put.
+   Progressive enhancement — browsers without support simply navigate. */
+@view-transition {
+  navigation: auto;
+}
+
+.site-header {
+  view-transition-name: site-header;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur-fast);
+  animation-timing-function: var(--ease-out);
+}
+
+/* 8.2 Hero entrance: title → copy → actions, staged in reading order. */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Slight overshoot, then settle. */
+@keyframes pop-in {
+  0% { opacity: 0; transform: translateY(14px) scale(0.96); }
+  70% { opacity: 1; transform: translateY(-2px) scale(1.005); }
+  100% { opacity: 1; transform: none; }
+}
+
+.hero-content > *,
+.page-hero .container > *,
+.page-hero-content > * {
+  animation: rise-in var(--dur-slow) var(--ease-out) backwards;
+}
+
+.page-hero .container > .page-hero-content {
+  animation: none;
+}
+
+.hero-content > :nth-child(1), .page-hero .container > :nth-child(1), .page-hero-content > :nth-child(1) { animation-delay: 60ms; }
+.hero-content > :nth-child(2), .page-hero .container > :nth-child(2), .page-hero-content > :nth-child(2) { animation-delay: 130ms; }
+.hero-content > :nth-child(3), .page-hero .container > :nth-child(3), .page-hero-content > :nth-child(3) { animation-delay: 200ms; }
+.hero-content > :nth-child(4), .page-hero .container > :nth-child(4), .page-hero-content > :nth-child(4) { animation-delay: 270ms; }
+.hero-content > :nth-child(5) { animation-delay: 340ms; }
+
+/* 8.3 Scroll reveal. The .reveal class is only ever added by js/main.js to
+   elements that are still below the fold, so content is never hidden when
+   JavaScript is unavailable and nothing flashes on load. */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* Images drift in on a shallow arc rather than a straight line. */
+.reveal.reveal--arc {
+  transform: translate(-14px, 22px) rotate(-1.2deg);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--dur-slow) var(--ease-out) var(--reveal-delay, 0ms),
+    transform 560ms var(--ease-out) var(--reveal-delay, 0ms);
+}
+
+/* 8.4 Cards rendered by JavaScript (sermons, events, gallery, leaders) arrive
+   in sequence so a re-filtered list reads as "new results", not a jump cut.
+   `backwards` keeps hover transforms working once the entry has finished. */
+.sermon-card,
+.event-item-card,
+.event-preview-card,
+.gallery-card,
+.leader-card {
+  animation: rise-in var(--dur-slow) var(--ease-out) backwards;
+}
+
+:is(.sermon-card, .event-item-card, .event-preview-card, .gallery-card, .leader-card):nth-child(2) { animation-delay: 50ms; }
+:is(.sermon-card, .event-item-card, .event-preview-card, .gallery-card, .leader-card):nth-child(3) { animation-delay: 100ms; }
+:is(.sermon-card, .event-item-card, .event-preview-card, .gallery-card, .leader-card):nth-child(4) { animation-delay: 150ms; }
+:is(.sermon-card, .event-item-card, .event-preview-card, .gallery-card, .leader-card):nth-child(5) { animation-delay: 200ms; }
+:is(.sermon-card, .event-item-card, .event-preview-card, .gallery-card, .leader-card):nth-child(n + 6) { animation-delay: 250ms; }
+
+/* 8.5 Empty / error messages announce themselves. */
+.no-results,
+.events-load-error:not([hidden]) {
+  animation: rise-in var(--dur-base) var(--ease-out) backwards;
+}
+
+/* --------------------------------------------------------------------------
+   9. STATES: LOADING, FORM VALIDATION, SUCCESS
+   -------------------------------------------------------------------------- */
+
+/* Skeleton placeholder shown the instant a page opens, replaced when data arrives. */
+.skeleton-card {
+  background-color: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-height: 300px;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, #EEF1F5 25%, #F8FAFC 37%, #EEF1F5 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+.skeleton-line--block { height: 64px; border-radius: var(--radius-sm); }
+.skeleton-line--title { height: 22px; width: 80%; }
+.skeleton-line--short { width: 55%; }
+.skeleton-line--button { height: 44px; margin-top: auto; }
+
+@keyframes skeleton-shimmer {
+  from { background-position: 100% 50%; }
+  to { background-position: 0 50%; }
+}
+
+/* Shared form-field states */
+.form-input,
+.form-textarea,
+.filter-input,
+.filter-select {
+  min-height: 48px;
+}
+
+.form-input:hover,
+.form-textarea:hover,
+.filter-input:hover,
+.filter-select:hover {
+  border-color: #B6C2D2;
+}
+
+.form-input:focus-visible,
+.form-textarea:focus-visible,
+.filter-input:focus-visible,
+.filter-select:focus-visible {
+  outline: none;
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.22);
+}
+
+.form-input[aria-invalid="true"],
+.form-textarea[aria-invalid="true"] {
+  border-color: var(--danger);
+  background-color: var(--danger-bg);
+}
+
+.form-input[aria-invalid="true"]:focus-visible,
+.form-textarea[aria-invalid="true"]:focus-visible {
+  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.18);
+}
+
+.field-error {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.field-error:not(:empty) {
+  animation: rise-in var(--dur-fast) var(--ease-out) backwards;
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* A short horizontal shake draws the eye to what needs fixing. */
+@keyframes field-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+
+.is-shaking {
+  animation: field-shake 360ms var(--ease-in-out);
+}
+
+.success-alert:not(.no-display) {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  animation: pop-in var(--dur-slow) var(--ease-out) backwards;
+}
+
+.success-alert::before {
+  content: '';
+  flex: 0 0 20px;
+  height: 20px;
+  margin-top: 1px;
+  background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23166534' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 11.08V12a10 10 0 1 1-5.93-9.14'/%3E%3Cpath d='M22 4 12 14.01l-3-3'/%3E%3C/svg%3E");
+}
+
+/* --------------------------------------------------------------------------
+   10. REDUCED MOTION
+   People who ask their device for less motion get instant state changes:
+   no entrances, no reveals, no smooth scrolling, no page cross-fade.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .btn:hover,
+  .btn:active {
+    transform: none;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
 
 
+
+
+/* Top bar stays on one line on phones: the location truncates, the link stays. */
+@media (max-width: 768px) {
+  .top-bar-content {
+    flex-wrap: nowrap;
+  }
+
+  .top-bar-info {
+    min-width: 0;
+  }
+
+  .top-bar-info span:first-child {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .top-bar-info span:first-child svg {
+    display: inline-block;
+    vertical-align: -2px;
+    margin-right: 0.3rem;
+  }
+
+  .top-bar-links {
+    flex-shrink: 0;
+  }
+}

@@ -59,7 +59,17 @@ function loadGalleryPage() {
         <div class="gallery-card-meta">${photo.dateText}</div>
       </div>
     `;
+    // Cards open the preview, so they must be reachable and operable by keyboard.
+    card.tabIndex = 0;
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', `View photo: ${photo.title}, ${photo.dateText}`);
     card.addEventListener('click', () => openLightbox(photo));
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openLightbox(photo);
+      }
+    });
     galleryGrid.appendChild(card);
   });
 
@@ -74,12 +84,14 @@ function openLightbox(photo) {
   lightboxCaption.textContent = photo.title;
   lightboxDate.textContent = photo.dateText;
   lightbox.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
+  // Trap focus in the preview, lock page scroll, remember which card opened it.
+  window.RTWC?.dialog.open(lightbox, lightboxClose);
 }
 
 function closeLightbox() {
+  if (lightbox.classList.contains('hidden')) return;
   lightbox.classList.add('hidden');
-  document.body.style.overflow = '';
+  window.RTWC?.dialog.close();
 }
 
 if (lightboxClose) lightboxClose.addEventListener('click', closeLightbox);

@@ -249,3 +249,72 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Interaction & motion refinements
+   -------------------------------------------------------------------------- */
+.required-mark {
+  color: var(--danger);
+}
+
+.info-card-icon {
+  transition: transform var(--dur-base) var(--ease-spring), background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.info-card:hover .info-card-icon {
+  transform: translateY(-3px) scale(1.08);
+  background-color: var(--accent-gold-strong);
+  color: #FFFFFF;
+}
+
+.info-card a {
+  color: var(--primary-navy);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Errors only take space when there is one, so the form stays compact. */
+.field-error {
+  min-height: 0;
+}
+
+.field-error:empty {
+  display: none;
+}
+
+/* The whole row is the target for the privacy checkbox, not just the 18px box. */
+.checkbox-label {
+  min-height: var(--hit-min);
+  padding: 0.25rem 0;
+}
+
+.checkbox-label input {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.success-alert {
+  background-color: var(--success-bg);
+  color: var(--success);
+  font-weight: 600;
+}
+
+.success-alert:focus {
+  outline: none;
+}
+
+@media (max-width: 640px) {
+  .form-card {
+    padding: 1.5rem;
+  }
+
+  .contact-info-section {
+    padding: 3rem 0 2rem;
+  }
+
+  .info-card {
+    padding: 1.5rem;
+  }
+}

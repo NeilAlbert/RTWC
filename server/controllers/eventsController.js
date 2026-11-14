@@ -5,6 +5,7 @@
  */
 const Event = require('../models/eventModel');
 const { NotFoundError } = require('../utils/errors');
+const { createCalendarFeed } = require('../utils/ical');
 
 const CATEGORY_MAP = {
   convention: 'Convention',
@@ -29,6 +30,24 @@ async function getEvents(req, res, next) {
     const data = rows.map(formatEvent);
 
     return res.json({ success: true, message: 'Events fetched successfully.', data });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+/** GET /api/events/calendar.ics — public subscribable calendar feed */
+async function getCalendarFeed(req, res, next) {
+  try {
+    const events = await Event.findAll({ upcoming: true });
+    const calendar = createCalendarFeed(events);
+
+    res.set({
+      'Content-Type': 'text/calendar; charset=utf-8',
+      'Content-Disposition': 'inline; filename="royal-temple-events.ics"',
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+      'X-Content-Type-Options': 'nosniff',
+    });
+    return res.send(calendar);
   } catch (err) {
     return next(err);
   }
@@ -78,4 +97,4 @@ async function deleteEvent(req, res, next) {
   }
 }
 
-module.exports = { getEvents, getEventById, createEvent, updateEvent, deleteEvent };
+module.exports = { getEvents, getCalendarFeed, getEventById, createEvent, updateEvent, deleteEvent };

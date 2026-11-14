@@ -11,6 +11,7 @@ const validateRequest = require('../middleware/validateRequest');
 const { sanitizeBody } = require('../middleware/sanitizeInput');
 const {
   getEvents,
+  getCalendarFeed,
   getEventById,
   createEvent,
   updateEvent,
@@ -31,6 +32,9 @@ router.get(
   validateRequest,
   getEvents
 );
+
+/** GET /api/events/calendar.ics — public subscribable calendar feed */
+router.get('/calendar.ics', getCalendarFeed);
 
 /** GET /api/events/:id — public */
 router.get(

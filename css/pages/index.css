@@ -628,3 +628,150 @@
 .section-tag-flush {
   margin-left: 0;
 }
+
+/* --------------------------------------------------------------------------
+   7. INTERACTION & MOTION REFINEMENTS
+   -------------------------------------------------------------------------- */
+
+/* Solid gold reads more clearly over the photo than gradient-clipped text. */
+.hero-title span {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  color: #F5D061;
+}
+
+.hero-service-times {
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
+}
+
+.btn-hero-outline:hover {
+  background-color: #FFFFFF;
+  border-color: #FFFFFF;
+  color: var(--primary-navy-dark);
+}
+
+/* Quick links: the icon answers the hover (secondary action) and the arrow
+   leans toward where the click will take you (anticipation). */
+.quicklink-icon-box {
+  transition: transform var(--dur-base) var(--ease-spring), background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.quicklink-card:hover .quicklink-icon-box {
+  transform: translateY(-3px) rotate(-6deg) scale(1.06);
+  background-color: var(--accent-gold-strong);
+  color: #FFFFFF;
+}
+
+.quicklink-card:active {
+  transform: translateY(-2px) scale(0.985);
+  transition-duration: var(--dur-instant);
+}
+
+.quicklink-card::before {
+  background: var(--accent-gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.quicklink-card:hover::before,
+.quicklink-card:focus-visible::before {
+  transform: scaleX(1);
+}
+
+.quicklink-arrow {
+  color: var(--accent-gold-text);
+  transition: transform var(--dur-base) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+
+.quicklink-card:hover .quicklink-arrow {
+  transform: translateX(6px);
+}
+
+/* Featured sermon: the whole thumbnail responds, and the play button is a
+   generous 80px target with a ring that expands on hover. */
+.sermon-thumb-img {
+  transition: transform var(--dur-slow) var(--ease-out), opacity var(--dur-base) var(--ease-out);
+}
+
+.sermon-player-container:hover .sermon-thumb-img {
+  transform: scale(1.03);
+  opacity: 0.95;
+}
+
+.play-overlay-btn {
+  width: 80px;
+  height: 80px;
+  background-color: var(--accent-gold-strong);
+  transition: transform var(--dur-base) var(--ease-spring), background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+
+.play-overlay-btn:hover {
+  background-color: var(--accent-gold-strong-hover);
+  box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.18), var(--shadow-gold);
+}
+
+.play-overlay-btn:active {
+  transform: translate(-50%, -50%) scale(0.94);
+  transition-duration: var(--dur-instant);
+}
+
+.event-preview-card:hover {
+  transform: translateY(-5px);
+}
+
+.welcome-badge-card {
+  transition: transform var(--dur-base) var(--ease-spring);
+}
+
+.welcome-image-wrapper:hover .welcome-badge-card {
+  transform: translateY(-4px);
+}
+
+.pillar-item svg {
+  transition: transform var(--dur-base) var(--ease-spring);
+}
+
+.pillar-item:hover svg {
+  transform: scale(1.2);
+}
+
+@media (max-width: 640px) {
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  .hero-service-times .text-divider {
+    display: none;
+  }
+
+  .hero-service-times {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .welcome-pillars {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-section,
+  .sermon-preview-section,
+  .events-preview-section,
+  .visit-section {
+    padding: 3.5rem 0;
+  }
+
+  .visit-card {
+    padding: 1.75rem;
+  }
+
+  .events-preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sermon-meta-list {
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+  }
+}

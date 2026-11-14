@@ -548,3 +548,68 @@
     font-size: 2rem;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Interaction & motion refinements
+   -------------------------------------------------------------------------- */
+.accordion-header {
+  min-height: 56px;
+}
+
+.accordion-header:active {
+  background-color: var(--accent-gold-light);
+}
+
+.accordion-number {
+  color: var(--accent-gold-text);
+}
+
+.accordion-icon {
+  flex-shrink: 0;
+  transition: transform var(--dur-base) var(--ease-spring), color var(--dur-fast) var(--ease-out);
+}
+
+.accordion-content {
+  transition: max-height var(--dur-base) var(--ease-in-out), padding var(--dur-base) var(--ease-in-out);
+}
+
+/* Text follows the panel open rather than appearing all at once. */
+.accordion-content > * {
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-base) var(--ease-out);
+}
+
+.accordion-item.active .accordion-content > * {
+  opacity: 1;
+  transform: none;
+  transition-delay: 90ms;
+}
+
+.mv-icon {
+  transition: transform var(--dur-base) var(--ease-spring);
+}
+
+.mv-card:hover .mv-icon {
+  transform: translateY(-3px) scale(1.08);
+}
+
+.leader-img,
+.pastor-featured-img {
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.leader-card:hover .leader-img {
+  transform: scale(1.04);
+}
+
+.section-subtitle a {
+  color: var(--primary-navy);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.section-subtitle a:hover {
+  color: var(--accent-gold-text);
+}
