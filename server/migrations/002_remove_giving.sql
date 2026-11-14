@@ -11,7 +11,7 @@
 DROP TABLE IF EXISTS giving_records;
 
 -- Delete giving-related rows from site_settings (keys starting with "giving_")
-DELETE FROM site_settings WHERE setting_key LIKE 'giving_%' OR setting_key LIKE 'giving_%';
+DELETE FROM site_settings WHERE setting_key LIKE 'giving_%';
 
 -- ----------------------------------------
 -- End of migration 002_remove_giving.sql

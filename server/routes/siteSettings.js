@@ -35,7 +35,6 @@ router.put(
     'email',
     'mission_statement',
     'vision_statement',
-    'hero_tagline',
   ], { maxLength: 10000 }),
   validateRequest,
   updateSettings

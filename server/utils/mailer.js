@@ -18,7 +18,7 @@ function getTransporter() {
 
   const { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASSWORD } = process.env;
   if (!EMAIL_HOST || !EMAIL_USER || !EMAIL_PASSWORD) {
-    return null; // email not configured — callers skip gracefully
+    return null; // Email is not configured. sendMail() logs this and skips.
   }
 
   transporter = nodemailer.createTransport({
@@ -40,13 +40,13 @@ async function sendMail({ to, subject, text, html }) {
   const recipient = to || process.env.ADMIN_NOTIFICATION_EMAIL;
 
   if (!t || !recipient) {
-    logger.warn('Mailer not configured or no recipient — skipping email', { subject });
+    logger.warn('Mailer not configured or no recipient, so no email was sent', { subject });
     return { skipped: true };
   }
 
   try {
     const info = await t.sendMail({
-      from: `"Royal Temple Website" <${process.env.EMAIL_USER}>`,
+      from: `"Royal Temple Worship Centre website" <${process.env.EMAIL_USER}>`,
       to: recipient,
       subject,
       text,

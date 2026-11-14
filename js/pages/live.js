@@ -1,306 +1,217 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const liveBanner = document.getElementById('live-status-banner');
-  const liveText = document.getElementById('live-status-text');
-  const offlineOverlay = document.getElementById('stream-offline-overlay');
+/* Watch Live page. Asks the API whether the church is live on YouTube or Facebook
+   and shows the stream. The YouTube and Facebook links come from Admin > Settings. */
+
+(() => {
+  const FACEBOOK_PAGE = 'https://www.facebook.com/cop.rtwc';
+  const FACEBOOK_VIDEOS = `${FACEBOOK_PAGE}/videos`;
+  const NAMES = { youtube: 'YouTube', facebook: 'Facebook' };
+
+  const status = document.getElementById('live-status');
+  const offlinePanel = document.getElementById('live-offline');
   const offlineMessage = document.getElementById('offline-message');
-  const youtubePlayer = document.getElementById('youtube-player');
-  const facebookPlayer = document.getElementById('facebook-player');
-  const youtubeFrame = document.getElementById('yt-live-iframe');
-  const facebookFrame = document.getElementById('fb-live-iframe');
-  const youtubeBtn = document.getElementById('youtube-btn');
-  const facebookBtn = document.getElementById('facebook-btn');
+  const nextService = document.getElementById('next-service');
+  const watchLink = document.getElementById('watch-directly-link');
+  const frames = {
+    youtube: document.getElementById('youtube-frame'),
+    facebook: document.getElementById('facebook-frame')
+  };
+  const buttons = {
+    youtube: document.getElementById('youtube-button'),
+    facebook: document.getElementById('facebook-button')
+  };
   const platformSelector = document.getElementById('platform-selector');
   const platformLinks = document.getElementById('platform-links');
   const streamTitle = document.getElementById('stream-title');
-  const streamDesc = document.getElementById('stream-desc');
-  const watchDirectlyLink = document.getElementById('watch-directly-link');
-  const shareButtons = document.querySelector('.share-buttons');
-  const defaultFacebookPageUrl = 'https://www.facebook.com/cop.rtwc';
-  const defaultFacebookUrl = `${defaultFacebookPageUrl}/videos`;
-  const defaultYoutubeUrl = 'https://www.youtube.com';
+  const shareLink = document.getElementById('share-link');
+  const recentServiceLink = document.getElementById('recent-service-link');
 
-  let settings = null;
-  let liveStreams = {};
+  let settings = { youtubeVideoId: '', youtubeUrl: '', facebookUrl: FACEBOOK_PAGE, preferred: 'facebook', override: '' };
+  let streams = {};
 
-  function trustedHttpsUrl(value, domains) {
+  // Settings are typed in by an admin, so only links to the expected sites are used.
+  function trustedUrl(value, domains) {
     try {
       const url = new URL(value);
-      if (url.protocol !== 'https:') return '';
-      return domains.some((domain) => url.hostname === domain || url.hostname.endsWith(`.${domain}`))
-        ? url.href
-        : '';
+      const trusted = url.protocol === 'https:' &&
+        domains.some(domain => url.hostname === domain || url.hostname.endsWith(`.${domain}`));
+      return trusted ? url.href : '';
     } catch {
       return '';
     }
   }
 
-  async function fetchJson(url) {
+  async function fetchData(url) {
     const response = await fetch(url, { cache: 'no-store' });
     const payload = await response.json();
-    if (!response.ok || !payload.success) {
-      throw new Error(payload.message || `Request failed (${response.status})`);
-    }
-    return payload;
+    if (!response.ok || !payload.success) throw new Error(payload.message || `Request failed (${response.status}).`);
+    if (payload.data?.error) throw new Error(payload.data.error);
+    return payload.data;
   }
 
-  function getSettings(payload) {
-    const values = payload.data || {};
-    const rawVideoId = (values.youtube_live_video_id || '').trim();
-    const youtubeVideoId = /^[A-Za-z0-9_-]{11}$/.test(rawVideoId) ? rawVideoId : '';
-    if (rawVideoId && !youtubeVideoId) {
-      console.error('The configured YouTube live video ID is invalid.');
-    }
-
+  function readSettings(values) {
+    const videoId = (values.youtube_live_video_id || '').trim();
+    const youtubeVideoId = /^[A-Za-z0-9_-]{11}$/.test(videoId) ? videoId : '';
     return {
       youtubeVideoId,
-      youtubeUrl: trustedHttpsUrl(values.youtube_channel_url || '', ['youtube.com', 'youtu.be'])
-        || (youtubeVideoId ? `https://www.youtube.com/watch?v=${youtubeVideoId}` : ''),
-      facebookUrl: trustedHttpsUrl(values.facebook_live_url || '', ['facebook.com']) || defaultFacebookPageUrl,
-      preferredPlatform: values.preferred_default_platform === 'facebook' ? 'facebook' : 'youtube',
-      statusOverride: values.live_status_override || '',
+      youtubeUrl: trustedUrl(values.youtube_channel_url || '', ['youtube.com', 'youtu.be']) ||
+        (youtubeVideoId ? `https://www.youtube.com/watch?v=${youtubeVideoId}` : ''),
+      facebookUrl: trustedUrl(values.facebook_live_url || '', ['facebook.com']) || FACEBOOK_PAGE,
+      preferred: values.preferred_default_platform === 'facebook' ? 'facebook' : 'youtube',
+      override: values.live_status_override || ''
     };
   }
 
-  function makeLink(url, label) {
-    const link = document.createElement('a');
-    link.href = url;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.className = 'btn btn-outline';
-    link.textContent = label;
-    return link;
+  function directUrl(platform) {
+    if (platform === 'youtube') return settings.youtubeUrl;
+    return streams.facebook?.video?.permalinkUrl || settings.facebookUrl;
   }
 
-  function renderDirectLinks() {
-    if (!platformLinks) return;
-    platformLinks.replaceChildren();
+  function showPageLinks(values) {
+    const links = [];
+    if (settings.youtubeUrl) links.push(['Watch on YouTube', settings.youtubeUrl]);
+    links.push(['Watch on Facebook', settings.facebookUrl]);
+    platformLinks.replaceChildren(...links.map(([label, href]) => {
+      const link = document.createElement('a');
+      link.className = 'button-plain';
+      link.href = href;
+      link.textContent = label;
+      return link;
+    }));
 
-    if (settings.youtubeUrl) {
-      platformLinks.appendChild(makeLink(settings.youtubeUrl, 'Watch on YouTube'));
+    const recent = trustedUrl(values.previous_broadcast_url || '', ['youtube.com', 'youtu.be', 'facebook.com']);
+    if (recent) recentServiceLink.href = recent;
+
+    if (values.next_service_date) {
+      const parts = [
+        values.next_service_title,
+        window.rtwc.formatDate(values.next_service_date),
+        values.next_service_time && window.rtwc.formatTime(values.next_service_time)
+      ].filter(Boolean);
+      nextService.textContent = `Next broadcast: ${parts.join(', ')}.`;
+      nextService.hidden = false;
     }
-    platformLinks.appendChild(makeLink(settings.facebookUrl || defaultFacebookUrl, 'Watch on Facebook'));
   }
 
-  function setWatchLink(platform, url) {
-    if (!watchDirectlyLink) return;
-    watchDirectlyLink.href = url || (platform === 'youtube' ? defaultYoutubeUrl : defaultFacebookUrl);
-    watchDirectlyLink.target = '_blank';
-    watchDirectlyLink.rel = 'noopener noreferrer';
-    watchDirectlyLink.textContent = `Watch on ${platform === 'youtube' ? 'YouTube' : 'Facebook'} →`;
+  function hidePlayers() {
+    Object.values(frames).forEach(frame => {
+      frame.hidden = true;
+      frame.removeAttribute('src');
+    });
   }
 
-  function setOfflineMessage(message, platform, url) {
-    if (!offlineMessage) return;
-    const link = watchDirectlyLink || document.createElement('a');
-    const destination = url || (platform === 'youtube' ? defaultYoutubeUrl : defaultFacebookUrl);
-    link.className = '';
-    link.href = destination;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.textContent = `Watch on ${platform === 'youtube' ? 'YouTube' : 'Facebook'} →`;
-    offlineMessage.replaceChildren(document.createTextNode(`${message} `), link);
-  }
+  function showOffline(statusText, message) {
+    hidePlayers();
+    platformSelector.hidden = true;
+    streamTitle.hidden = true;
+    shareLink.hidden = true;
+    status.textContent = statusText;
+    offlineMessage.textContent = message;
+    offlinePanel.hidden = false;
 
-  function clearPlayers() {
-    if (youtubePlayer) youtubePlayer.hidden = true;
-    if (facebookPlayer) facebookPlayer.hidden = true;
-    if (youtubeFrame) youtubeFrame.removeAttribute('src');
-    if (facebookFrame) facebookFrame.removeAttribute('src');
-  }
-
-  function showOffline(message) {
-    clearPlayers();
-    if (platformSelector) platformSelector.hidden = true;
-    if (liveBanner) {
-      liveBanner.classList.remove('is-live');
-      liveBanner.classList.add('is-visible');
-    }
-    if (liveText) liveText.textContent = 'BROADCAST OFFLINE — SEE SERVICE SCHEDULE';
-    if (streamTitle) streamTitle.textContent = 'No live broadcast right now';
-    if (streamDesc) streamDesc.textContent = 'Join us during our next scheduled service.';
-    if (offlineOverlay) offlineOverlay.classList.remove('hidden');
-    const platform = settings && settings.preferredPlatform === 'youtube' && settings.youtubeUrl
-      ? 'youtube'
-      : 'facebook';
-    const directUrl = platform === 'youtube' ? settings.youtubeUrl : settings.facebookUrl;
-    setOfflineMessage(message, platform, directUrl);
-    if (shareButtons) shareButtons.replaceChildren();
-  }
-
-  function showUnverified(errorMessage) {
-    showOffline(errorMessage || 'We could not confirm the stream status. ');
-    if (liveText) liveText.textContent = 'STREAM STATUS UNAVAILABLE';
-    if (streamTitle) streamTitle.textContent = 'Stream status unavailable';
+    const platform = settings.preferred === 'youtube' && settings.youtubeUrl ? 'youtube' : 'facebook';
+    watchLink.href = platform === 'youtube' ? settings.youtubeUrl : FACEBOOK_VIDEOS;
+    watchLink.textContent = `Watch on ${NAMES[platform]}`;
   }
 
   function embedUrl(platform, stream) {
     if (platform === 'youtube') {
       const videoId = stream.video?.videoId || settings.youtubeVideoId;
-      return videoId
-        ? `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?rel=0`
-        : '';
+      return videoId ? `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}?rel=0` : '';
     }
-
-    const permalink = trustedHttpsUrl(stream.video?.permalinkUrl || '', ['facebook.com']);
+    const permalink = trustedUrl(stream.video?.permalinkUrl || '', ['facebook.com']);
     if (!permalink) return '';
-    const url = new URL('https://www.facebook.com/plugins/video.php');
-    url.searchParams.set('href', permalink);
-    url.searchParams.set('show_text', 'false');
-    url.searchParams.set('width', '700');
-    return url.href;
+    return `https://www.facebook.com/plugins/video.php?${new URLSearchParams({ href: permalink, show_text: 'false', width: '700' })}`;
   }
 
-  function updateShareLink(platform) {
-    if (!shareButtons) return;
-    const share = makeLink(
-      platform === 'youtube'
-        ? `https://www.youtube.com/share?url=${encodeURIComponent(window.location.href)}`
-        : `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
-      `Share on ${platform === 'youtube' ? 'YouTube' : 'Facebook'}`
-    );
-    share.className = 'btn btn-outline btn-sm';
-    shareButtons.replaceChildren(share);
-  }
+  function showStream(platform) {
+    const stream = streams[platform];
+    if (!stream?.isLive) return;
 
-  function selectStream(platform) {
-    const stream = liveStreams[platform];
-    if (!stream || !stream.isLive) return;
-
+    hidePlayers();
     const url = embedUrl(platform, stream);
-    clearPlayers();
-
-    if (url && platform === 'youtube' && youtubeFrame && youtubePlayer) {
-      youtubeFrame.src = url;
-      youtubePlayer.hidden = false;
-      if (offlineOverlay) offlineOverlay.classList.add('hidden');
-    } else if (url && platform === 'facebook' && facebookFrame && facebookPlayer) {
-      facebookFrame.src = url;
-      facebookPlayer.hidden = false;
-      if (offlineOverlay) offlineOverlay.classList.add('hidden');
+    if (url) {
+      frames[platform].src = url;
+      frames[platform].hidden = false;
+      offlinePanel.hidden = true;
     } else {
-      if (offlineOverlay) offlineOverlay.classList.remove('hidden');
-      const directUrl = platform === 'youtube'
-        ? settings.youtubeUrl
-        : (stream.video?.permalinkUrl || settings.facebookUrl || defaultFacebookUrl);
-      setOfflineMessage('The stream is live but cannot be embedded here.', platform, directUrl);
+      offlineMessage.textContent = 'We are live, but the video cannot be shown on this page.';
+      offlinePanel.hidden = false;
+      watchLink.href = directUrl(platform);
+      watchLink.textContent = `Watch on ${NAMES[platform]}`;
     }
 
-    if (liveBanner) liveBanner.classList.add('is-visible', 'is-live');
-    if (liveText) liveText.textContent = `WE ARE LIVE ON ${platform.toUpperCase()}`;
-    if (streamTitle) {
-      streamTitle.textContent = stream.video?.title || `${platform === 'youtube' ? 'YouTube' : 'Facebook'} Live Stream`;
-    }
-    if (streamDesc) streamDesc.textContent = `Streaming live on ${platform === 'youtube' ? 'YouTube' : 'Facebook'}.`;
-    setWatchLink(platform, platform === 'youtube'
-      ? settings.youtubeUrl
-      : (stream.video?.permalinkUrl || settings.facebookUrl || defaultFacebookUrl));
+    status.textContent = `We are live now on ${NAMES[platform]}.`;
+    streamTitle.textContent = stream.video?.title || 'Live service';
+    streamTitle.hidden = false;
 
-    const livePlatforms = Object.keys(liveStreams).filter((name) => liveStreams[name]?.isLive);
-    if (platformSelector) platformSelector.hidden = livePlatforms.length < 2;
-    if (youtubeBtn) {
-      youtubeBtn.disabled = !liveStreams.youtube?.isLive;
-      youtubeBtn.setAttribute('aria-pressed', String(platform === 'youtube'));
-    }
-    if (facebookBtn) {
-      facebookBtn.disabled = !liveStreams.facebook?.isLive;
-      facebookBtn.setAttribute('aria-pressed', String(platform === 'facebook'));
-    }
-    updateShareLink(platform);
+    const share = document.createElement('a');
+    share.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`;
+    share.textContent = 'Share this page on Facebook';
+    shareLink.replaceChildren(share);
+    shareLink.hidden = false;
+
+    const live = Object.keys(streams).filter(name => streams[name]?.isLive);
+    platformSelector.hidden = live.length < 2;
+    Object.entries(buttons).forEach(([name, button]) => {
+      button.disabled = !streams[name]?.isLive;
+      button.setAttribute('aria-pressed', String(name === platform));
+    });
   }
 
-  async function checkYoutube() {
-    const result = await fetchJson(`/api/youtube/live-status?videoId=${encodeURIComponent(settings.youtubeVideoId)}`);
-    if (result.data?.error) throw new Error(result.data.error);
-    return { isLive: Boolean(result.data?.isLive), video: result.data };
-  }
+  async function start() {
+    const values = await window.rtwc.settings;
+    if (!values) {
+      showOffline('We could not check whether a service is live.', 'Please use the Facebook link to watch.');
+      return;
+    }
+    settings = readSettings(values);
+    showPageLinks(values);
 
-  async function checkFacebook() {
-    const result = await fetchJson('/api/facebook/live-status');
-    if (result.data?.error) throw new Error(result.data.error);
-    return { isLive: Boolean(result.data?.isLive), video: result.data?.video || null };
-  }
-
-  async function initialize() {
-    try {
-      const payload = await fetchJson('/api/settings');
-      settings = getSettings(payload);
-      renderDirectLinks();
-
-      const checks = {};
-      if (settings.youtubeVideoId) {
-        checks.youtube = checkYoutube();
-      }
-      if (settings.facebookUrl) {
-        checks.facebook = checkFacebook();
-      }
-
-      const results = await Promise.all(
-        Object.entries(checks).map(async ([platform, check]) => {
-          try {
-            return [platform, await check];
-          } catch (error) {
-            console.error(`Failed to check ${platform} live status:`, error);
-            return [platform, { isLive: false, error }];
-          }
-        })
-      );
-      liveStreams = Object.fromEntries(results);
-
-      if (settings.statusOverride === 'offline') {
-        showOffline('Our next live service will appear here during service hours.');
-        return;
-      }
-
-      if (settings.statusOverride === 'live' && !Object.values(liveStreams).some((stream) => stream.isLive)) {
-        const platform = settings.preferredPlatform === 'youtube' && !settings.youtubeUrl && settings.facebookUrl
-          ? 'facebook'
-          : settings.preferredPlatform;
-        const hasDestination = platform === 'youtube'
-          ? Boolean(settings.youtubeUrl)
-          : Boolean(settings.facebookUrl);
-        if (!hasDestination) {
-          showUnverified('Live status is set to live, but no streaming destination is configured in Admin > Settings.');
-          return;
-        }
-        const videoId = settings.youtubeVideoId;
-        liveStreams[platform] = {
-          isLive: true,
-          video: platform === 'youtube' && videoId
-            ? { videoId, title: 'Live Broadcast' }
-            : null,
-        };
-      }
-
-      const availablePlatforms = Object.keys(liveStreams).filter((platform) => liveStreams[platform].isLive);
-      if (availablePlatforms.length) {
-        const preferredLivePlatform = availablePlatforms.includes(settings.preferredPlatform)
-          ? settings.preferredPlatform
-          : availablePlatforms[0];
-        selectStream(preferredLivePlatform);
-        return;
-      }
-
-      const failures = Object.values(liveStreams).filter((stream) => stream.error);
-      if (failures.length && failures.length === Object.keys(liveStreams).length) {
-        showUnverified('We could not confirm the stream status. Please use a direct link below.');
-      } else {
-        showOffline('Our next live service will appear here during service hours.');
-      }
-    } catch (error) {
-      console.error('Failed to initialize the live stream page:', error);
-      settings = settings || {
-        preferredPlatform: 'facebook',
-        facebookUrl: '',
-        youtubeUrl: '',
-        youtubeVideoId: '',
+    const checks = { facebook: () => fetchData('/api/facebook/live-status') };
+    if (settings.youtubeVideoId) {
+      checks.youtube = async () => {
+        const video = await fetchData(`/api/youtube/live-status?videoId=${encodeURIComponent(settings.youtubeVideoId)}`);
+        return { isLive: Boolean(video?.isLive), video };
       };
-      renderDirectLinks();
-      showUnverified('We could not load stream details. Please use a direct link below.');
+    }
+
+    streams = Object.fromEntries(await Promise.all(
+      Object.entries(checks).map(async ([platform, check]) => {
+        try {
+          return [platform, await check()];
+        } catch (error) {
+          console.error(`Could not check ${NAMES[platform]} live status.`, error);
+          return [platform, { isLive: false, failed: true }];
+        }
+      })
+    ));
+
+    if (settings.override === 'offline') {
+      showOffline('We are not live at the moment.', 'Our services are shown here while they are live.');
+      return;
+    }
+
+    // An admin can mark the stream as live when the automatic check misses it.
+    if (settings.override === 'live' && !Object.values(streams).some(stream => stream.isLive)) {
+      const platform = settings.preferred === 'youtube' && settings.youtubeUrl ? 'youtube' : 'facebook';
+      streams[platform] = {
+        isLive: true,
+        video: platform === 'youtube' && settings.youtubeVideoId ? { videoId: settings.youtubeVideoId } : null
+      };
+    }
+
+    const live = Object.keys(streams).filter(platform => streams[platform].isLive);
+    if (live.length > 0) {
+      showStream(live.includes(settings.preferred) ? settings.preferred : live[0]);
+    } else if (Object.values(streams).every(stream => stream.failed)) {
+      showOffline('We could not check whether a service is live.', 'Please use the links below to watch.');
+    } else {
+      showOffline('We are not live at the moment.', 'Our services are shown here while they are live.');
     }
   }
 
-  if (youtubeBtn) youtubeBtn.addEventListener('click', () => selectStream('youtube'));
-  if (facebookBtn) facebookBtn.addEventListener('click', () => selectStream('facebook'));
+  buttons.youtube.addEventListener('click', () => showStream('youtube'));
+  buttons.facebook.addEventListener('click', () => showStream('facebook'));
 
-  initialize();
-});
+  start();
+})();

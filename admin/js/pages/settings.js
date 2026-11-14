@@ -1,16 +1,11 @@
-/**
- * =============================================================================
- * admin/js/pages/settings.js — edit site-wide text content.
- *
- * Loads all settings via GET /api/settings, renders one field per key, and on
- * "Save Changes" sends ONLY the changed fields via PUT /api/settings.
- * =============================================================================
- */
+/* Settings page: the church details and live stream links shown on the public site.
+   Loads every setting with GET /api/settings and saves only the fields that changed
+   with PUT /api/settings. */
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!AdminAuth.checkAuth()) return;
 
-  AdminAuth.initShell('settings', 'Settings'); // initShell wires the 401 handler
+  AdminAuth.initShell('settings', 'Settings');
 
   const form = document.getElementById('settings-form');
   const saveBtn = document.getElementById('save-settings-btn');
@@ -18,30 +13,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   const successAlert = document.getElementById('settings-success');
   const errorAlert = document.getElementById('settings-error');
 
-  // Key → field metadata. Order defines the form layout.
+  // The order here is the order on the page. `hint` says where the value appears.
   const FIELDS = [
-    { key: 'welcome_message', label: 'Welcome Message', type: 'textarea', full: true },
-    { key: 'hero_tagline', label: 'Hero Tagline', type: 'text', full: true },
-    { key: 'service_times', label: 'Service Times', type: 'textarea', full: true },
-    { key: 'church_address', label: 'Church Address', type: 'textarea', full: true },
-    { key: 'phone_number', label: 'Phone Number', type: 'text' },
-    { key: 'helpline_number', label: 'Helpline Number', type: 'text' },
-    { key: 'email', label: 'Contact Email', type: 'email' },
-    { key: 'mission_statement', label: 'Mission Statement', type: 'textarea', full: true },
-    { key: 'vision_statement', label: 'Vision Statement', type: 'textarea', full: true },
-    // Live stream settings
-    { key: 'youtube_channel_url', label: 'YouTube Channel URL', type: 'url' },
-    { key: 'youtube_live_video_id', label: 'YouTube Live Video ID', type: 'text' },
-    { key: 'facebook_live_url', label: 'Facebook Live URL', type: 'url' },
-    { key: 'preferred_default_platform', label: 'Preferred Default Platform', type: 'select', options: ['youtube', 'facebook'] },
-    { key: 'live_status_override', label: 'Manual Live/Offline Override', type: 'select', options: ['live', 'offline'] },
-    { key: 'next_service_title', label: 'Next Service Title', type: 'text' },
-    { key: 'next_service_date', label: 'Next Service Date', type: 'date' },
-    { key: 'next_service_time', label: 'Next Service Time', type: 'time' },
-    { key: 'previous_broadcast_url', label: 'Previous Broadcast URL', type: 'url' },
+    { key: 'welcome_message', label: 'Welcome message', type: 'textarea', hint: 'First paragraph of the home page.' },
+    { key: 'service_times', label: 'Service times', type: 'textarea', hint: 'One service per line, for example "Sunday worship service: 8:00 am to 11:30 am".' },
+    { key: 'church_address', label: 'Church address', type: 'textarea' },
+    { key: 'phone_number', label: 'Phone number', type: 'text' },
+    { key: 'helpline_number', label: 'Helpline number', type: 'text', hint: 'Shown on the Contact page.' },
+    { key: 'email', label: 'Contact email', type: 'email' },
+    { key: 'mission_statement', label: 'Mission statement', type: 'textarea', hint: 'Shown on the About page.' },
+    { key: 'vision_statement', label: 'Vision statement', type: 'textarea', hint: 'Shown on the About page.' },
+    { key: 'youtube_channel_url', label: 'YouTube channel link', type: 'url' },
+    { key: 'youtube_live_video_id', label: 'YouTube live video ID', type: 'text', hint: 'The 11 characters after "v=" in the video link.' },
+    { key: 'facebook_live_url', label: 'Facebook page or live link', type: 'url' },
+    { key: 'preferred_default_platform', label: 'Show first when live on both', type: 'select', options: [['youtube', 'YouTube'], ['facebook', 'Facebook']] },
+    { key: 'live_status_override', label: 'Live status', type: 'select', options: [['', 'Check automatically'], ['live', 'Always show as live'], ['offline', 'Always show as not live']] },
+    { key: 'next_service_title', label: 'Next broadcast: name', type: 'text' },
+    { key: 'next_service_date', label: 'Next broadcast: date', type: 'date' },
+    { key: 'next_service_time', label: 'Next broadcast: time', type: 'text', hint: 'For example "8:00 am".' },
+    { key: 'previous_broadcast_url', label: 'Link to a recent service', type: 'url' },
   ];
 
-  const originalValues = {}; // key → value as loaded from the API
+  const originalValues = {};
 
   function showAlert(alertEl, message) {
     alertEl.textContent = message;
@@ -55,11 +48,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function buildForm() {
     const grid = document.getElementById('settings-fields');
-    grid.innerHTML = '';
 
     FIELDS.forEach((field) => {
       const group = document.createElement('div');
-      group.className = 'form-group' + (field.full ? ' full' : '');
+      group.className = field.type === 'textarea' ? 'form-group full' : 'form-group';
 
       const label = document.createElement('label');
       label.setAttribute('for', `setting-${field.key}`);
@@ -68,34 +60,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       let input;
       if (field.type === 'textarea') {
         input = document.createElement('textarea');
-        input.id = `setting-${field.key}`;
-        input.name = field.key;
-        input.className = 'textarea-lg';
         input.rows = 3;
       } else if (field.type === 'select') {
         input = document.createElement('select');
-        input.id = `setting-${field.key}`;
-        input.name = field.key;
-        field.options.forEach((option) => {
-          const opt = document.createElement('option');
-          opt.value = option;
-          opt.textContent = option;
-          if (input.value === option) opt.selected = true;
-          input.appendChild(opt);
-        });
+        field.options.forEach(([value, text]) => input.add(new Option(text, value)));
       } else {
         input = document.createElement('input');
-        input.id = `setting-${field.key}`;
-        input.name = field.key;
-        input.type = field.type === 'email' ? 'email' : field.type !== 'url' ? 'text' : 'url';
-        if (field.type === 'url') {
-          input.placeholder = 'e.g. https://www.youtube.com/channel/...';
-        }
+        input.type = field.type;
       }
+      input.id = `setting-${field.key}`;
+      input.name = field.key;
 
-      group.appendChild(label);
-      group.appendChild(input);
-      grid.appendChild(group);
+      group.append(label, input);
+
+      if (field.hint) {
+        const hint = document.createElement('span');
+        hint.className = 'hint';
+        hint.id = `hint-${field.key}`;
+        hint.textContent = field.hint;
+        input.setAttribute('aria-describedby', hint.id);
+        group.append(hint);
+      }
+      grid.append(group);
     });
   }
 
@@ -105,73 +91,57 @@ document.addEventListener('DOMContentLoaded', async () => {
       const settings = res.data || {};
 
       FIELDS.forEach((field) => {
-        const el = document.getElementById(`setting-${field.key}`);
-        const value = settings[field.key] !== undefined && settings[field.key] !== null
-          ? settings[field.key]
-          : '';
-        el.value = value;
+        const value = settings[field.key] ?? '';
+        document.getElementById(`setting-${field.key}`).value = value;
         originalValues[field.key] = value;
       });
     } catch (err) {
-      showAlert(errorAlert, `Failed to load settings: ${err.message}`);
+      showAlert(errorAlert, `The settings could not be loaded. ${err.message}`);
       saveBtn.disabled = true;
     }
   }
 
-  // Restore every field to the values loaded from the server.
-  // (A native type="reset" would clear fields to empty — those would then be
-  // sent as blank values on save, wiping content. Re-populate explicitly.)
-  function resetFields() {
+  // A native reset button would empty every field, and the empty values would then
+  // be saved over the real ones. Put back what was loaded instead.
+  resetBtn.addEventListener('click', () => {
     FIELDS.forEach((field) => {
-      const el = document.getElementById(`setting-${field.key}`);
-      el.value = originalValues[field.key] || '';
+      document.getElementById(`setting-${field.key}`).value = originalValues[field.key] || '';
     });
     hideAlerts();
-  }
-
-  if (resetBtn) resetBtn.addEventListener('click', resetFields);
-
-  // Collect only the fields whose value changed from the loaded originals.
-  function collectChangedFields() {
-    const changed = {};
-    FIELDS.forEach((field) => {
-      const el = document.getElementById(`setting-${field.key}`);
-      if (el.value !== (originalValues[field.key] || '')) {
-        changed[field.key] = el.value;
-      }
-    });
-    return changed;
-  }
+  });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     hideAlerts();
 
-    const changed = collectChangedFields();
+    const changed = {};
+    FIELDS.forEach((field) => {
+      const value = document.getElementById(`setting-${field.key}`).value;
+      if (value !== (originalValues[field.key] || '')) changed[field.key] = value;
+    });
+
     if (Object.keys(changed).length === 0) {
-      showAlert(successAlert, 'No changes to save.');
+      showAlert(successAlert, 'Nothing has changed, so nothing was saved.');
       return;
     }
 
     saveBtn.disabled = true;
-    saveBtn.textContent = 'Saving…';
+    saveBtn.textContent = 'Saving';
 
     try {
       const res = await AdminApi.put('/settings', changed);
-      // Update the baseline so subsequent saves only send new diffs.
       FIELDS.forEach((field) => {
-        const el = document.getElementById(`setting-${field.key}`);
         if (res.data && res.data[field.key] !== undefined) {
           originalValues[field.key] = res.data[field.key];
-          el.value = res.data[field.key];
+          document.getElementById(`setting-${field.key}`).value = res.data[field.key];
         }
       });
-      showAlert(successAlert, 'Settings saved successfully.');
+      showAlert(successAlert, 'Your changes have been saved.');
     } catch (err) {
-      showAlert(errorAlert, `Failed to save settings: ${err.message}`);
+      showAlert(errorAlert, `Your changes could not be saved. ${err.message}`);
     } finally {
       saveBtn.disabled = false;
-      saveBtn.textContent = 'Save Changes';
+      saveBtn.textContent = 'Save changes';
     }
   });
 

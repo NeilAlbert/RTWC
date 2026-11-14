@@ -2,13 +2,12 @@
  * controllers/youtubeLiveController.js — YouTube live-stream status.
  * 
  * Calls the YouTube Data API server-side and caches results.
- * The API key NEVER leaves the server. Graceful error handling: a API
- * failure never crashes the request — we return a structured "unknown" state
+ * The API key NEVER leaves the server. Graceful error handling: an API
+ * failure never crashes the request; we return a structured "unknown" state
  * so the frontend can degrade.
  * 
- * NOTE: This uses the public Youonomy v3 Videos endpoint with a per-video ID.
- * For full channel-wide live detection you would need a paid/released API scope,
- * but for a configured video ID this is sufficient and free.
+ * This checks one configured video ID with the YouTube Data API v3 "videos"
+ * endpoint. It does not search the whole channel for a live broadcast.
  */
 
 const cache = require('../utils/cache');

@@ -1,11 +1,6 @@
-/**
- * =============================================================================
- * admin/js/pages/login.js — login page behavior.
- * =============================================================================
- */
+/* Admin login page. */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // If already authenticated, skip straight to the dashboard.
   if (AdminAuth.hasValidToken()) {
     window.location.replace('dashboard.html');
     return;
@@ -39,36 +34,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const email = emailInput.value.trim();
     const password = passwordInput.value;
 
-    // Client-side validation (backend validates too — defense in depth).
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     let valid = true;
 
     if (!email) {
-      showFieldError(emailInput, errEmail, 'Email is required.');
+      showFieldError(emailInput, errEmail, 'Please enter your email address.');
       valid = false;
     } else if (!emailRegex.test(email)) {
-      showFieldError(emailInput, errEmail, 'Enter a valid email address.');
+      showFieldError(emailInput, errEmail, 'That does not look like an email address.');
       valid = false;
     }
 
     if (!password) {
-      showFieldError(passwordInput, errPassword, 'Password is required.');
+      showFieldError(passwordInput, errPassword, 'Please enter your password.');
       valid = false;
     }
 
     if (!valid) return;
 
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Signing in…';
+    submitBtn.textContent = 'Signing in';
 
     try {
       await AdminAuth.login(email, password);
       window.location.replace('dashboard.html');
     } catch (err) {
-      errorAlert.textContent = err.message || 'Login failed. Please try again.';
+      errorAlert.textContent = err.message || 'You could not be signed in. Please try again.';
       errorAlert.classList.add('visible');
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Sign In';
+      submitBtn.textContent = 'Sign in';
     }
   });
 });

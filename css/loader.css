@@ -1,0 +1,68 @@
+/* Loading screen for the public pages. The logo is the whole loader.
+   Its layer-by-layer entrance animation is inside the two SVG files
+   (assets/images/logo-loader.svg and logo-loader-dark.svg). */
+
+#page-loader {
+  display: none;
+}
+
+/* js/loader-init.js adds .show-loader to <html> on the first page of a session. */
+.show-loader #page-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  z-index: 100;
+  background-color: #FFFFFF; /* background of the light Figma frame */
+  opacity: 1;
+  transition: opacity 300ms ease-out;
+}
+
+/* Reduced motion: no animation (see the SVG files) and a quick fade.
+   Keep these two times the same as FADE_MS and REDUCED_MOTION_FADE_MS in js/loader.js. */
+@media (prefers-reduced-motion: reduce) {
+  .show-loader #page-loader {
+    transition-duration: 150ms;
+  }
+}
+
+.show-loader #page-loader.is-hiding {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Page scroll is locked while the loader is showing. */
+html.show-loader {
+  overflow: hidden;
+}
+
+#page-loader img {
+  width: min(60vw, 280px);
+  height: auto;
+  max-height: 80dvh; /* short landscape screens */
+  object-fit: contain;
+}
+
+@media (min-width: 768px) {
+  #page-loader img {
+    width: 320px;
+  }
+}
+
+/* LIGHT OR DARK VERSION
+   The dark logo itself is chosen by the <source media="(prefers-color-scheme: dark)">
+   line in each page. This block sets the matching background.
+   To force the light version everywhere, set FOLLOW_SYSTEM_DARK_MODE to false in
+   js/loader-init.js. That adds .loader-light-only to <html>, which switches off the
+   dark background here and swaps the light logo back in below. */
+@media (prefers-color-scheme: dark) {
+  html:not(.loader-light-only).show-loader #page-loader {
+    background-color: #070C1A; /* background of the dark Figma frame */
+  }
+
+  .loader-light-only #page-loader img {
+    content: url("../assets/images/logo-loader.svg");
+  }
+}

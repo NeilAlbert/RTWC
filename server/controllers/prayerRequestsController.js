@@ -12,7 +12,8 @@ const logger = require('../utils/logger');
 /** POST /api/prayer-requests — public (rate-limited) */
 async function submitPrayerRequest(req, res, next) {
   try {
-    const { name, request_text, is_private } = req.body;
+    const { request_text, is_private } = req.body;
+    const name = req.body.name || 'Anonymous';
 
     const prayer = await PrayerRequest.create({
       name,
@@ -23,7 +24,7 @@ async function submitPrayerRequest(req, res, next) {
     // Notification email — best-effort.
     try {
       await sendMail({
-        subject: 'New Prayer Request — Royal Temple Website',
+        subject: 'New prayer request from the church website',
         text: `Name: ${name}\nPrivacy: ${prayer.is_private ? 'Private' : 'May be shared'}\n\nRequest:\n${request_text}`,
       });
     } catch (mailErr) {
@@ -32,7 +33,7 @@ async function submitPrayerRequest(req, res, next) {
 
     return res.status(201).json({
       success: true,
-      message: 'Thank you — your prayer request has been received.',
+      message: 'Thank you. We received your prayer request.',
       data: { id: prayer.id, createdAt: prayer.created_at },
     });
   } catch (err) {

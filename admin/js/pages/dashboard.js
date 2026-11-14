@@ -1,16 +1,10 @@
-/**
- * =============================================================================
- * admin/js/pages/dashboard.js — overview/landing page.
- *
- * Loads counts: total sermons, upcoming events, unread contact messages,
- * new prayer requests, newsletter subscribers.
- * =============================================================================
- */
+/* Admin dashboard: counts of sermons, upcoming events, unread messages,
+   new prayer requests and newsletter subscribers. */
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (!AdminAuth.checkAuth()) return;
 
-  AdminAuth.initShell('dashboard', 'Dashboard'); // initShell wires the 401 handler
+  AdminAuth.initShell('dashboard', 'Dashboard');
 
   const cards = {
     sermons: document.getElementById('stat-sermons'),
@@ -20,7 +14,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     newsletter: document.getElementById('stat-newsletter'),
   };
 
-  // Grab the numeric value span inside each card.
   const valueEls = {};
   Object.keys(cards).forEach((key) => {
     const el = cards[key];
@@ -51,13 +44,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       setValue('prayers', prayers.data.pagination.total ?? 0);
       setValue('newsletter', newsletter.data.pagination.total ?? 0);
     } catch (err) {
-      // Never fail silently — show a visible error banner.
       const banner = document.getElementById('dashboard-error');
       if (banner) {
-        banner.textContent = `Failed to load dashboard counts: ${err.message}`;
+        banner.textContent = `The counts could not be loaded. ${err.message}`;
         banner.classList.add('visible');
       }
-      Object.keys(valueEls).forEach((key) => setValue(key, '—'));
+      Object.keys(valueEls).forEach((key) => setValue(key, '-'));
     }
   }
 

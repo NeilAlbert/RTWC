@@ -1,11 +1,11 @@
 /**
  * =============================================================================
- * admin/js/adminApi.js — shared fetch wrapper for the admin dashboard.
+ * admin/js/adminApi.js: shared fetch wrapper for the admin dashboard.
  *
  * - Attaches "Authorization: Bearer <token>" (from sessionStorage) to every
  *   request automatically.
  * - On any 401 response, invokes the configured unauthorized handler (which
- *   clears the token and redirects to login.html — token expired).
+ *   clears the token and redirects to login.html, because the token has expired).
  * - Throws descriptive errors; never fails silently.
  * - Returns the parsed JSON body, which follows the API's standard
  *   { success, data, message } shape.
@@ -49,22 +49,22 @@ const AdminApi = (() => {
     let response;
     try {
       response = await fetch(`${API_BASE}${path}`, { ...options, headers });
-    } catch (err) {
-      throw new ApiError('Network error — could not reach the server. Please try again.', 0);
+    } catch {
+      throw new ApiError('The server could not be reached. Please check your connection and try again.', 0);
     }
 
     let body = null;
     try {
       body = await response.json();
-    } catch (err) {
-      body = null; // non-JSON response
+    } catch {
+      // Not JSON (for example an HTML error page). The status code is handled below.
     }
 
     if (response.status === 401) {
       // Prefer the server's own message (e.g. "Invalid email or password." on
       // the login page). Fall back to a session message when the body has none.
       const message = (body && (body.message || body.error))
-        || 'Your session has expired. Please log in again.';
+        || 'You have been signed out. Please sign in again.';
       // Only redirect for an expired/invalid session, NOT on the login page
       // where a 401 simply means wrong credentials.
       if (typeof onUnauthorized === 'function') onUnauthorized();
@@ -73,7 +73,7 @@ const AdminApi = (() => {
 
     if (!response.ok) {
       const message = (body && (body.message || body.error))
-        || `Request failed with status ${response.status}.`;
+        || `The server returned an error (${response.status}).`;
       throw new ApiError(message, response.status);
     }
 

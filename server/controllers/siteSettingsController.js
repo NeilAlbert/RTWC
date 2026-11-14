@@ -20,7 +20,6 @@ const ALLOWED_KEYS = [
   'email',
   'mission_statement',
   'vision_statement',
-  'hero_tagline',
   'youtube_channel_url',
   'youtube_live_video_id',
   'facebook_live_url',

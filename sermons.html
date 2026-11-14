@@ -2,256 +2,129 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- SEO & Social Meta Tags -->
-  <title>Sermons Archive | The Church of Pentecost — Royal Temple Worship Centre</title>
-  <meta name="description" content="Browse and listen to life-transforming sermons, Bible study teachings, and anointed messages from Royal Temple Worship Centre.">
-  <meta name="keywords" content="Sermons, Pentecost Sermons, Pastor Emmanuel Ofori, Audio Preaching, Christian Messages, Royal Temple Worship Centre">
-  
-  <!-- Open Graph / Social Media -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sermons | Royal Temple Worship Centre</title>
+  <meta name="description" content="Sermons preached at Royal Temple Worship Centre, with links to watch each one.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://royaltemple.org/sermons.html">
-  <meta property="og:title" content="Sermons & Preaching Archive — Royal Temple Worship Centre">
-  <meta property="og:description" content="Listen to anointed messages, series teachings, and spiritual guidance for your walk with Christ.">
-  <meta property="og:image" content="assets/images/sermon-latest.jpg">
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Shared & Page Styles -->
+  <meta property="og:title" content="Sermons | Royal Temple Worship Centre">
+  <meta property="og:description" content="Sermons preached at Royal Temple Worship Centre, with links to watch each one.">
+  <!-- ADD: og:url and og:image need the full web address of the live site. Add them once the domain is confirmed. -->
+  <link rel="icon" href="assets/images/logo.jpg">
+  <link rel="preload" as="image" href="assets/images/logo-loader.svg" media="(prefers-color-scheme: light)">
+  <link rel="preload" as="image" href="assets/images/logo-loader-dark.svg" media="(prefers-color-scheme: dark)">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/pages/sermons.css">
+  <link rel="stylesheet" href="css/loader.css">
+  <script src="js/loader-init.js"></script>
+  <noscript><style>#page-loader { display: none; }</style></noscript>
+  <script src="js/loader.js" defer></script>
+  <script src="js/main.js" defer></script>
+  <script src="js/pages/sermons.js" defer></script>
 </head>
 <body>
-  <a class="skip-link" href="#main-content">Skip to main content</a>
-
-  <!-- Top Announcement Bar -->
-  <div class="top-bar">
-    <div class="container top-bar-content">
-      <div class="top-bar-info">
-        <span>
-          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          Royal Temple Worship Centre Main Sanctuary
-        </span>
-        <span>
-          <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-          +233 (0) 30 123 4567
-        </span>
-      </div>
-      <div class="top-bar-links">
-        <a href="index.html#services">Service Times</a>
-      </div>
-    </div>
+  <div id="page-loader" role="status" aria-live="polite">
+    <span class="visually-hidden">Loading Royal Temple Worship Centre website</span>
+    <picture>
+      <source srcset="assets/images/logo-loader-dark.svg" media="(prefers-color-scheme: dark)">
+      <img src="assets/images/logo-loader.svg" alt="" width="800" height="800">
+    </picture>
   </div>
 
-  <!-- Header / Navigation -->
+  <a class="skip-link" href="#main">Skip to main content</a>
+
   <header class="site-header">
-    <div class="container">
-      <nav class="navbar" aria-label="Main Navigation">
-        <a href="index.html" class="brand-link">
-          <img src="assets/images/logo.jpg" alt="Royal Temple Logo" class="brand-logo">
-          <div class="brand-text">
-            <span class="brand-name">Royal Temple</span>
-            <span class="brand-tagline">The Church of Pentecost</span>
-          </div>
-        </a>
-
-        <!-- Hamburger Toggle Button -->
-        <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-menu">
-          <svg viewBox="0 0 24 24">
-            <line x1="4" y1="12" x2="20" y2="12"></line>
-            <line x1="4" y1="6" x2="20" y2="6"></line>
-            <line x1="4" y1="18" x2="20" y2="18"></line>
-          </svg>
-        </button>
-
-        <!-- Navigation Links -->
-        <ul class="nav-menu" id="nav-menu">
-          <li><a href="index.html" class="nav-link">Home</a></li>
-          <li><a href="about.html" class="nav-link">About Us</a></li>
-          <li><a href="ministries.html" class="nav-link">Ministries</a></li>
-          <li><a href="sermons.html" class="nav-link active">Sermons</a></li>
-          <li><a href="events.html" class="nav-link">Events</a></li>
-          <li><a href="gallery.html" class="nav-link">Gallery</a></li>
-          <li><a href="contact.html" class="nav-link">Contact</a></li>
-          <li><a href="live.html" class="nav-link nav-cta-btn"><span class="nav-live-dot" aria-hidden="true"></span>Watch Live</a></li>
+    <div class="wrap">
+      <a class="site-name" href="index.html">
+        <img src="assets/images/logo.jpg" alt="" width="48" height="48">
+        <span><strong>Royal Temple Worship Centre</strong><span>The Church of Pentecost</span></span>
+      </a>
+      <button type="button" class="menu-button" id="menu-button" aria-expanded="false" aria-controls="site-menu">Menu</button>
+      <nav class="site-nav" aria-label="Main">
+        <ul id="site-menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="ministries.html">Ministries</a></li>
+          <li><a href="sermons.html" aria-current="page">Sermons</a></li>
+          <li><a href="events.html">Events</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="live.html">Watch live</a></li>
         </ul>
       </nav>
     </div>
   </header>
 
-  <main id="main-content">
-    <!-- PAGE HERO -->
-    <section class="page-hero">
-      <div class="container">
-        <span class="section-tag section-tag-gold">Anointed Word</span>
-        <h1 class="page-hero-title">Sermons & Teaching Archive</h1>
-        <p class="page-hero-desc">
-          Feast upon God's Word. Filter by speaker or search by keyword to listen or watch past messages.
-        </p>
-      </div>
-    </section>
+  <main id="main">
+    <div class="wrap">
+      <section class="page-title">
+        <h1>Sermons</h1>
+        <p>Messages preached at Royal Temple Worship Centre.</p>
+      </section>
 
-    <!-- SEARCH & FILTER CONTROLS BAR -->
-    <section class="sermon-filter-section">
-      <div class="container">
-        <!-- 
-          BACKEND INTEGRATION NOTE:
-          Past live streams from Facebook/YouTube will automatically populate this archive grid once the live streaming backend webhook is connected.
-        -->
-        <div class="filter-bar-card">
-          <div class="filter-field search-field">
-            <label for="search-input" class="sr-only">Search Sermons</label>
-            <div class="input-icon-wrapper">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              <input type="search" id="search-input" placeholder="Search by title, topic or speaker" class="filter-input" autocomplete="off" enterkeyhint="search">
-            </div>
+      <section class="section">
+        <h2 class="visually-hidden">Sermon list</h2>
+        <form class="sermon-filters" id="sermon-filters" role="search" hidden>
+          <div>
+            <label for="sermon-search">Search sermons</label>
+            <input type="search" id="sermon-search" autocomplete="off">
           </div>
-
-          <div class="filter-field">
-            <label for="speaker-select" class="sr-only">Filter by Speaker</label>
-            <select id="speaker-select" class="filter-select">
-              <option value="all">All Speakers</option>
-              <option value="Pastor Emmanuel K. Ofori">Pastor Emmanuel K. Ofori</option>
-              <option value="Elder Samuel Mensah">Elder Samuel Mensah</option>
-              <option value="Guest Minister">Guest Minister</option>
-            </select>
+          <div>
+            <label for="sermon-speaker">Speaker</label>
+            <select id="sermon-speaker"><option value="">All speakers</option></select>
           </div>
-
-          <div class="filter-field">
-            <label for="series-select" class="sr-only">Filter by Category</label>
-            <select id="series-select" class="filter-select">
-              <option value="all">All Categories</option>
-              <option value="Sunday Worship">Sunday Worship</option>
-              <option value="Bible Study">Midweek Bible Study</option>
-              <option value="Revival Service">Revival Services</option>
-            </select>
+          <div>
+            <label for="sermon-category">Service</label>
+            <select id="sermon-category"><option value="">All services</option></select>
           </div>
-        </div>
-      </div>
-    </section>
+        </form>
 
-    <!-- SERMONS ARCHIVE GRID -->
-    <section class="sermons-archive-section">
-      <div class="container">
-        <div class="sermons-grid" id="sermons-container">
-          <!-- Dynamically populated by js/pages/sermons.js -->
-        </div>
-
-        <div id="no-results-msg" class="no-results" role="status">
-          <h3>No sermons found matching your filter criteria.</h3>
-          <p>Try a different keyword, or clear the filters to see every sermon.</p>
-          <button type="button" class="btn btn-outline btn-sm" id="clear-filters-btn">Clear filters</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- MEDIA PLAYER MODAL PLACEHOLDER -->
-    <div class="sermon-modal" id="sermon-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title-display">
-      <div class="modal-overlay" id="modal-overlay"></div>
-      <div class="modal-content">
-        <button type="button" class="modal-close-btn" id="modal-close-btn" aria-label="Close sermon details">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-        <div class="modal-body">
-          <div class="player-wrapper">
-            <!-- Embedded HTML5 video/audio player placeholder -->
-            <div class="player-placeholder-screen">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-              <h4 id="modal-sermon-title"></h4>
-              <p id="modal-sermon-meta"></p>
-              <a id="modal-watch-link" class="btn btn-primary modal-watch-link" href="https://www.facebook.com/cop.rtwc/videos" target="_blank" rel="noopener noreferrer">Watch on Facebook <span aria-hidden="true">&rarr;</span></a>
-            </div>
-          </div>
-          <div class="modal-info">
-            <h3 id="modal-title-display">Sermon Title</h3>
-            <p id="modal-desc-display">Sermon description will appear here.</p>
-          </div>
-        </div>
-      </div>
+        <ul class="event-list" id="sermon-list"></ul>
+        <p id="sermon-status" role="status">No sermons have been posted here yet.</p>
+        <p><a href="https://www.facebook.com/cop.rtwc/videos">Watch recent services on Facebook</a></p>
+      </section>
     </div>
   </main>
 
-  <!-- FOOTER -->
   <footer class="site-footer">
-    <div class="container">
-      <div class="footer-grid">
-        <!-- Brand Info -->
-        <div class="footer-col-brand">
-          <img src="assets/images/logo.jpg" alt="Royal Temple Logo" class="footer-logo">
-          <h3>Royal Temple Worship Centre</h3>
-          <div class="tagline">The Church of Pentecost</div>
-          <p>A glorious assembly dedicated to holy living, spirit-filled worship, and global evangelism.</p>
-          <div class="social-links">
-            <a href="https://www.facebook.com/cop.rtwc" target="_blank" rel="noopener noreferrer" class="social-icon-btn" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
-            <a href="#" class="social-icon-btn" aria-label="YouTube"><svg viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg></a>
-            <a href="#" class="social-icon-btn" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
-          </div>
-        </div>
-
-        <!-- Service Times -->
+    <div class="wrap">
+      <div class="footer-columns">
         <div>
-          <h4 class="footer-h4">Service Times</h4>
-          <div class="service-time-item">
-            <span class="service-time-name">Sunday Worship Service</span>
-            <span class="service-time-clock">8:00 AM – 11:30 AM</span>
-          </div>
-          <div class="service-time-item">
-            <span class="service-time-name">Wednesday Bible Study</span>
-            <span class="service-time-clock">6:30 PM – 8:30 PM</span>
-          </div>
-          <div class="service-time-item">
-            <span class="service-time-name">Friday Prayer Tower</span>
-            <span class="service-time-clock">6:30 PM – 9:00 PM</span>
-          </div>
-        </div>
-
-        <!-- Quick Links -->
-        <div>
-          <h4 class="footer-h4">Quick Links</h4>
-          <ul class="footer-links">
-            <li><a href="about.html">About & Statement of Faith</a></li>
-            <li><a href="ministries.html">Church Ministries</a></li>
-            <li><a href="sermons.html">Sermons Archive</a></li>
-            <li><a href="events.html">Upcoming Events</a></li>
-            <li><a href="contact.html">Contact Us</a></li>
+          <h2>Service Times</h2>
+          <ul class="service-times" data-setting="service_times">
+            <li>Sunday worship service: 8:00 am to 11:30 am</li>
+            <li>Wednesday Bible study: 6:30 pm to 8:30 pm</li>
+            <li>Friday prayer meeting: 6:30 pm to 9:00 pm</li>
           </ul>
         </div>
-
-        <!-- Contact Info -->
         <div>
-          <h4 class="footer-h4">Get in Touch</h4>
-          <p class="footer-text-block">
-            <strong>Address:</strong><br>
-            Royal Temple Worship Centre Complex,<br>
-            The Church of Pentecost.
-          </p>
-          <p class="footer-text-block">
-            <strong>Phone:</strong> +233 (0) 30 123 4567<br>
-            <strong>Email:</strong> info@royaltemple.org
-          </p>
+          <h2>Contact</h2>
+          <dl class="contact-details">
+            <dt>Address</dt>
+            <dd><span class="to-add" data-setting="church_address">[ADD: church address]</span></dd>
+            <dt>Phone</dt>
+            <dd><a class="to-add" data-setting="phone_number" data-link="tel:">[ADD: church phone number]</a></dd>
+            <dt>Email</dt>
+            <dd><a class="to-add" data-setting="email" data-link="mailto:">[ADD: church email address]</a></dd>
+          </dl>
+          <p><a href="https://www.facebook.com/cop.rtwc">Royal Temple Worship Centre on Facebook</a></p>
+        </div>
+        <div>
+          <h2>Pages</h2>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="ministries.html">Ministries</a></li>
+            <li><a href="sermons.html">Sermons</a></li>
+            <li><a href="events.html">Events</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="live.html">Watch live</a></li>
+          </ul>
         </div>
       </div>
-    </div>
-
-    <!-- Footer Copyright -->
-    <div class="footer-bottom">
-      <div class="container footer-bottom-content">
-        <div>
-          &copy; <span id="current-year">2026</span> Royal Temple Worship Centre — The Church of Pentecost. All Rights Reserved.
-        </div>
-        <div>
-          Affiliated with <a href="https://thecophq.org" target="_blank" rel="noopener noreferrer" class="cop-link">The Church of Pentecost International (thecophq.org)</a>
-        </div>
-      </div>
+      <!-- Icons8 attribution: no Icons8 link or Icons8 icon was found anywhere in the site.
+           If Icons8 icons are added, their attribution link belongs here. -->
+      <p class="footer-small">&copy; <span id="year">2026</span> The Church of Pentecost, Royal Temple Worship Centre. An assembly of <a href="https://thecophq.org">The Church of Pentecost</a>.</p>
     </div>
   </footer>
-
-  <!-- Scripts -->
-  <script src="js/main.js"></script>
-  <script src="js/pages/sermons.js"></script>
 </body>
 </html>

@@ -56,7 +56,7 @@ async function main() {
     // Idempotency: skip if an account with this email already exists.
     const [existing] = await pool.query('SELECT id FROM admins WHERE email = ? LIMIT 1', [email]);
     if (existing.length > 0) {
-      logger.info('Admin seed skipped — account already exists', { email });
+      logger.info('Admin seed skipped: account already exists', { email });
       console.log(`Admin account for ${email} already exists. Nothing to do.`);
       process.exit(0);
     }

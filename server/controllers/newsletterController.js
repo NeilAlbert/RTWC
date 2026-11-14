@@ -20,7 +20,7 @@ async function subscribe(req, res, next) {
     const subscriber = await NewsletterSubscriber.create(email);
     return res.status(201).json({
       success: true,
-      message: 'Subscribed successfully. Welcome to the Royal Temple newsletter!',
+      message: 'Thank you. You are now subscribed to our newsletter.',
       data: { id: subscriber.id, email: subscriber.email, alreadySubscribed: false },
     });
   } catch (err) {

@@ -1,9 +1,9 @@
 /**
  * =============================================================================
- * admin/js/adminAuth.js — authentication + shared dashboard shell.
+ * admin/js/adminAuth.js: authentication + shared dashboard shell.
  *
  * - login(): calls POST /api/auth/login, stores the JWT in sessionStorage
- *   (clears on tab close — safer for a shared church office computer).
+ *   (cleared when the tab closes, which is safer on a shared church office computer).
  * - checkAuth(): guards every admin page; redirects to login.html if the token
  *   is missing or expired (client-side exp check).
  * - logout(): clears the token and redirects.
@@ -22,7 +22,7 @@ const AdminAuth = (() => {
     try {
       const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
       return JSON.parse(atob(base64));
-    } catch (err) {
+    } catch {
       return null;
     }
   }
@@ -34,7 +34,7 @@ const AdminAuth = (() => {
   function getAdmin() {
     try {
       return JSON.parse(sessionStorage.getItem(ADMIN_KEY));
-    } catch (err) {
+    } catch {
       return null;
     }
   }
@@ -59,7 +59,7 @@ const AdminAuth = (() => {
   }
 
   /**
-   * Route protection — call at the top of every protected admin page.
+   * Route protection: call at the top of every protected admin page.
    * Redirects to login.html and returns false when the token is missing/expired.
    */
   function checkAuth() {
@@ -75,7 +75,7 @@ const AdminAuth = (() => {
   async function login(email, password) {
     const res = await AdminApi.post('/auth/login', { email, password });
     if (!res.success || !res.data || !res.data.token) {
-      throw new Error(res.message || 'Login failed.');
+      throw new Error(res.message || 'You could not be signed in.');
     }
     setSession(res.data.token, res.data.admin);
     return res.data.admin;
@@ -98,16 +98,10 @@ const AdminAuth = (() => {
   // -------------------------------------------------------------------------
   // Shared shell (sidebar + topbar)
   // -------------------------------------------------------------------------
+  // Only pages that exist are listed. Add an entry here when a new admin page is built.
   const NAV_ITEMS = [
-    { key: 'dashboard', label: 'Dashboard', icon: '▤', href: 'dashboard.html' },
-    { key: 'settings', label: 'Settings', icon: '⚙', href: 'settings.html' },
-    { key: 'leadership', label: 'Leadership', icon: '◉', href: 'leadership.html' },
-    { key: 'sermons', label: 'Sermons', icon: '▶', href: 'sermons.html' },
-    { key: 'events', label: 'Events', icon: '▣', href: 'events.html' },
-    { key: 'ministries', label: 'Ministries', icon: '✚', href: 'ministries.html' },
-    { key: 'messages', label: 'Messages', icon: '✉', href: 'messages.html' },
-    { key: 'prayer-requests', label: 'Prayer Requests', icon: '✝', href: 'prayer-requests.html' },
-    { key: 'newsletter', label: 'Newsletter', icon: '☰', href: 'newsletter.html' },
+    { key: 'dashboard', label: 'Dashboard', href: 'dashboard.html' },
+    { key: 'settings', label: 'Settings', href: 'settings.html' },
   ];
 
   /**
@@ -123,19 +117,17 @@ const AdminAuth = (() => {
       const nav = NAV_ITEMS.map((item) => {
         const active = item.key === activeKey ? ' active' : '';
         const ariaCurrent = item.key === activeKey ? ' aria-current="page"' : '';
-        return `<a href="${item.href}" class="nav-item${active}"${ariaCurrent}>
-                  <span class="nav-icon">${item.icon}</span><span>${item.label}</span>
-                </a>`;
+        return `<a href="${item.href}" class="nav-item${active}"${ariaCurrent}>${item.label}</a>`;
       }).join('');
 
       sidebar.innerHTML = `
         <div class="sidebar-brand">
           <div class="brand-church">Royal Temple</div>
-          <div class="brand-role">Admin Dashboard</div>
+          <div class="brand-role">Admin</div>
         </div>
         <nav class="sidebar-nav" aria-label="Admin navigation">${nav}</nav>
         <div class="sidebar-footer">
-          <a href="${LOGIN_URL}" class="sidebar-logout-link" id="sidebar-logout-link">Logout</a>
+          <a href="${LOGIN_URL}" class="sidebar-logout-link" id="sidebar-logout-link">Log out</a>
         </div>
       `;
 
@@ -153,12 +145,12 @@ const AdminAuth = (() => {
       const admin = getAdmin();
       topbar.innerHTML = `
         <div class="topbar-left">
-          <button type="button" class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation">☰</button>
+          <button type="button" class="sidebar-toggle" id="sidebar-toggle">Menu</button>
           <span class="topbar-title">${pageTitle || 'Dashboard'}</span>
         </div>
         <div class="topbar-user">
           <span class="user-name">${admin && admin.name ? `Signed in as ${admin.name}` : ''}</span>
-          <button type="button" class="btn btn-outline btn-sm" id="logout-btn">Logout</button>
+          <button type="button" class="btn btn-outline btn-sm" id="logout-btn">Log out</button>
         </div>
       `;
       const logoutBtn = document.getElementById('logout-btn');

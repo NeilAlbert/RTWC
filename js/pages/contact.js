@@ -1,141 +1,119 @@
-// BACKEND REMOVED — see contact form and prayer request previously called /api/contact and /api/prayer-requests. Reconnect when backend is rebuilt.
+/* Contact page: the message form and the prayer request form.
+   Both send to the API, which stores the submission and emails the church office.
+   A field is checked when the visitor leaves it and again when the form is sent. */
 
-/**
- * THE CHURCH OF PENTECOST - ROYAL TEMPLE WORSHIP CENTRE
- * Contact & Prayer Request Page Specific JavaScript (js/pages/contact.js)
- *
- * Validation behaviour (shared by both forms):
- *  - Be liberal in what we accept: surrounding spaces, doubled spaces, a
- *    capitalised or mistyped-case email, or a trailing full stop are tidied up
- *    rather than rejected.
- *  - Nothing is flagged while the visitor is still typing a field for the
- *    first time. A field is checked when they leave it, and once it has shown
- *    an error it re-checks on every keystroke so the error clears the moment
- *    it is fixed.
- *  - On submit, focus moves to the first field that needs attention and that
- *    field shakes briefly.
- */
-
-document.addEventListener('DOMContentLoaded', () => {
+(() => {
   const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-  const tidyText = value => value.replace(/\s+/g, ' ').trim();
-  const tidyEmail = value => value.trim().replace(/\s+/g, '').replace(/[.,;]+$/, '').toLowerCase();
+  function setUpForm({ form, endpoint, fields, status, sentMessage, buildBody }) {
+    const submitButton = form.querySelector('button[type="submit"]');
 
-  /**
-   * Wire up one form.
-   * @param {object} config
-   * @param {HTMLFormElement} config.form
-   * @param {Array<{input: HTMLElement, error: HTMLElement, normalize?: Function, validate: Function}>} config.fields
-   * @param {HTMLElement} config.successEl
-   */
-  function setupForm({ form, fields, successEl }) {
-    if (!form) return;
-    let hideTimer = null;
-
-    const setError = (field, message) => {
+    function check(field) {
+      const message = field.validate(field.input.value.trim());
       field.error.textContent = message;
       if (message) field.input.setAttribute('aria-invalid', 'true');
       else field.input.removeAttribute('aria-invalid');
-    };
-
-    const check = field => {
-      const message = field.validate(field.input.value);
-      setError(field, message);
       return !message;
-    };
+    }
 
     fields.forEach(field => {
       field.input.addEventListener('blur', () => {
-        // Tidy the value in place so what the visitor sees is what is used.
-        if (field.normalize && field.input.value) field.input.value = field.normalize(field.input.value);
         if (field.input.value.trim() || field.input.hasAttribute('aria-invalid')) check(field);
       });
+      // Clear an error as soon as it is fixed, before the visitor reaches the button.
       field.input.addEventListener('input', () => {
         if (field.input.hasAttribute('aria-invalid')) check(field);
       });
     });
 
-    form.addEventListener('submit', event => {
+    form.addEventListener('submit', async event => {
       event.preventDefault();
-
-      fields.forEach(field => {
-        if (field.normalize) field.input.value = field.normalize(field.input.value);
-      });
+      status.textContent = '';
+      status.classList.remove('is-error');
 
       const invalid = fields.filter(field => !check(field));
       if (invalid.length > 0) {
-        const first = invalid[0].input;
-        first.focus();
-        first.classList.remove('is-shaking');
-        void first.offsetWidth; // restart the animation if it is already running
-        first.classList.add('is-shaking');
-        first.addEventListener('animationend', () => first.classList.remove('is-shaking'), { once: true });
+        invalid[0].input.focus();
         return;
       }
 
-      /*
-        BACKEND REMOVED NOTE:
-        This form currently displays an on-page confirmation message.
-        Reconnect to a real backend API (POST /api/contact or /api/prayer-requests)
-        or a form service (e.g. Formspree) later.
-      */
-      form.reset();
-      fields.forEach(field => setError(field, ''));
-
-      successEl.textContent = "Thank you, we'll be in touch.";
-      successEl.classList.add('no-display');
-      void successEl.offsetWidth; // replay the entrance if submitted twice in a row
-      successEl.classList.remove('no-display');
-      successEl.style.display = '';
-      successEl.focus({ preventScroll: true });
-      successEl.scrollIntoView({ block: 'nearest', behavior: window.RTWC?.reducedMotion.matches ? 'auto' : 'smooth' });
-
-      clearTimeout(hideTimer);
-      hideTimer = setTimeout(() => successEl.classList.add('no-display'), 8000);
+      submitButton.disabled = true;
+      let failure = 'Sorry, this could not be sent. Please try again, or phone the church office.';
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(buildBody())
+        });
+        if (response.status === 429) {
+          failure = 'You have sent several messages in a short time. Please try again later.';
+        }
+        if (!response.ok) throw new Error(`${endpoint} returned HTTP ${response.status}.`);
+        form.reset();
+        status.textContent = sentMessage;
+      } catch (error) {
+        console.error('Form could not be sent.', error);
+        status.classList.add('is-error');
+        status.textContent = failure;
+      } finally {
+        submitButton.disabled = false;
+        status.focus();
+      }
     });
   }
 
-  // 1. General contact form
-  setupForm({
+  const contactName = document.getElementById('contact-name');
+  const contactEmail = document.getElementById('contact-email');
+  const contactMessage = document.getElementById('contact-message');
+
+  setUpForm({
     form: document.getElementById('contact-form'),
-    successEl: document.getElementById('contact-success-msg'),
+    endpoint: '/api/contact',
+    status: document.getElementById('contact-status'),
+    sentMessage: 'Thank you. We received your message.',
+    buildBody: () => ({
+      name: contactName.value.trim(),
+      email: contactEmail.value.trim(),
+      message: contactMessage.value.trim()
+    }),
     fields: [
       {
-        input: document.getElementById('contact-name'),
-        error: document.getElementById('err-name'),
-        normalize: tidyText,
-        validate: value => (tidyText(value) ? '' : 'Please enter your full name.')
+        input: contactName,
+        error: document.getElementById('contact-name-error'),
+        validate: value => (value.length >= 2 ? '' : 'Please enter your name.')
       },
       {
-        input: document.getElementById('contact-email'),
-        error: document.getElementById('err-email'),
-        normalize: tidyEmail,
-        validate: value => {
-          const email = tidyEmail(value);
-          if (!email) return 'Please enter your email address.';
-          if (!EMAIL_PATTERN.test(email)) return 'That email looks incomplete. It should look like name@example.com.';
-          return '';
-        }
+        input: contactEmail,
+        error: document.getElementById('contact-email-error'),
+        validate: value => (EMAIL_PATTERN.test(value) ? '' : 'Please enter an email address, such as name@gmail.com.')
       },
       {
-        input: document.getElementById('contact-message'),
-        error: document.getElementById('err-message'),
-        validate: value => (value.trim() ? '' : 'Please enter your message.')
+        input: contactMessage,
+        error: document.getElementById('contact-message-error'),
+        validate: value => (value.length >= 5 ? '' : 'Please write your message.')
       }
     ]
   });
 
-  // 2. Prayer request form
-  setupForm({
+  const prayerName = document.getElementById('prayer-name');
+  const prayerRequest = document.getElementById('prayer-request');
+
+  setUpForm({
     form: document.getElementById('prayer-form'),
-    successEl: document.getElementById('prayer-success-msg'),
+    endpoint: '/api/prayer-requests',
+    status: document.getElementById('prayer-status'),
+    sentMessage: 'Thank you. We received your prayer request.',
+    buildBody: () => ({
+      name: prayerName.value.trim(),
+      request_text: prayerRequest.value.trim(),
+      is_private: document.getElementById('prayer-private').checked
+    }),
     fields: [
       {
-        input: document.getElementById('prayer-request'),
-        error: document.getElementById('err-prayer'),
-        validate: value => (value.trim() ? '' : 'Please describe your prayer request.')
+        input: prayerRequest,
+        error: document.getElementById('prayer-request-error'),
+        validate: value => (value.length >= 5 ? '' : 'Please write your prayer request.')
       }
     ]
   });
-});
+})();

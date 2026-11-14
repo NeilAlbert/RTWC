@@ -1,13 +1,8 @@
-/**
- * =============================================================================
- * server.js — Royal Temple Worship Centre API entry point.
- * =============================================================================
- */
+/* Royal Temple Worship Centre API entry point. */
 require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-const csrf = require('csurf');
 
 const authRoutes = require('./routes/auth');
 const sermonsRoutes = require('./routes/sermons');
@@ -27,13 +22,11 @@ const logger = require('./utils/logger');
 
 const app = express();
 
-// Behind a reverse proxy (e.g. nginx), preserve the real client IP for
-// rate limiting. If not using a proxy, remove or keep harmless.
+// The API sits behind a reverse proxy (for example nginx), so the client IP used
+// for rate limiting is read from the proxy header.
 app.set('trust proxy', 1);
 
-// -----------------------------------------------------------------------------
-// CORS — only allow the site's own domain(s).
-// -----------------------------------------------------------------------------
+// CORS: only the site's own domains may call the API from a browser.
 const allowedOrigins = (process.env.CORS_ORIGIN || '')
   .split(',')
   .map((origin) => origin.trim())
@@ -55,45 +48,24 @@ app.use(
   })
 );
 
-// Capture the RAW body bytes for admin settings and other requests.
-// req.rawBody is a Buffer available to all handlers.
-app.use(express.json({
-  limit: '1mb',
-  verify: (req, res, buf) => {
-    req.rawBody = buf;
-  },
-}));
+app.use(express.json({ limit: '1mb' }));
 
-// CSRF protection — only applied to state-changing routes behind auth
-const csrfMiddleware = csrf({ cookie: true });
-app.use(csrfMiddleware);
+// No CSRF middleware: the admin signs in with a bearer token sent in the
+// Authorization header, not a cookie, so a forged cross-site request carries no
+// credentials. (The csurf setup that was here made every request fail with HTTP 500.)
 
-// Simple request logging (no sensitive data — no bodies, no tokens).
+// Request log. Bodies and tokens are never logged.
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.originalUrl}`, { ip: req.ip });
   next();
 });
 
-// -----------------------------------------------------------------------------
-// Health check
-// -----------------------------------------------------------------------------
 app.get('/api/health', (req, res) => {
   res.json({ success: true, message: 'Royal Temple API is running.', data: { uptime: process.uptime() } });
 });
 
-// -----------------------------------------------------------------------------
-// Routes
-// CSRF exemptions: login is public, so it must not be protected by CSRF
 app.use('/api/auth', authRoutes);
-
-// CSRF token endpoint — the admin login page needs this to render the form
-app.get('/api/csrf-token', (req, res) => {
-  res.json({ csrfToken: req.csrfToken() });
-});
-
-// -----------------------------------------------------------------------------
-// Routes// -----------------------------------------------------------------------------
-app.use('/api/auth', authRoutes);app.use('/api/sermons', sermonsRoutes);
+app.use('/api/sermons', sermonsRoutes);
 app.use('/api/events', eventsRoutes);
 app.use('/api/ministries', ministriesRoutes);
 app.use('/api/leadership', leadershipRoutes);
@@ -106,9 +78,7 @@ app.use('/api/facebook', facebookGalleryRoutes);
 app.use('/api/cop-news', copNewsRoutes);
 app.use('/api/settings', siteSettingsRoutes);
 
-// -----------------------------------------------------------------------------
-// 404 + centralized error handling (MUST be last)
-// -----------------------------------------------------------------------------
+// The 404 and error handlers must come after every route.
 app.use(notFound);
 app.use(errorHandler);
 

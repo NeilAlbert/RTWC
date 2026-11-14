@@ -23,7 +23,7 @@ async function submitContact(req, res, next) {
     // Notification email — best-effort; a failure must not fail the request.
     try {
       await sendMail({
-        subject: 'New Contact Form Message — Royal Temple Website',
+        subject: 'New message from the church website',
         text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
       });
     } catch (mailErr) {
@@ -32,7 +32,7 @@ async function submitContact(req, res, next) {
 
     return res.status(201).json({
       success: true,
-      message: 'Thank you — your message has been received.',
+      message: 'Thank you. We received your message.',
       data: { id: contact.id, createdAt: contact.created_at },
     });
   } catch (err) {
