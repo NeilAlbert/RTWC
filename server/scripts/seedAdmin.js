@@ -6,12 +6,18 @@
  * password with bcrypt, and inserts into the admins table. Idempotent: if the
  * email already exists it does nothing.
  *
+ * The email is stored trimmed and in lowercase, the same way the sign-in route
+ * compares it. The password is hashed exactly as given and is never altered.
+ * To change the password of an existing admin use scripts/resetAdminPassword.js.
+ *
  * Usage:
- *   node scripts/seedAdmin.js --name "Jane Doe" --email admin@royaltemple.org --password "S3cure!Pass"
+ *   node scripts/seedAdmin.js --name "Jane Doe" --email admin@royaltemple.org --password "a long password"
  *   # or via .env: ADMIN_NAME, ADMIN_EMAIL, ADMIN_PASSWORD
  * =============================================================================
  */
-require('dotenv').config();
+const path = require('path');
+
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const bcrypt = require('bcrypt');
 const pool = require('../config/db');
@@ -32,17 +38,17 @@ function parseArgs(argv) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const name = args.name || process.env.ADMIN_NAME;
-  const email = args.email || process.env.ADMIN_EMAIL;
+  const email = String(args.email || process.env.ADMIN_EMAIL || '').trim().toLowerCase();
   const password = args.password || process.env.ADMIN_PASSWORD;
 
   if (!name || !email || !password) {
-    console.error('Usage: node scripts/seedAdmin.js --name "Jane Doe" --email admin@royaltemple.org --password "S3cure!Pass"');
+    console.error('Usage: node scripts/seedAdmin.js --name "Jane Doe" --email admin@royaltemple.org --password "a long password"');
     console.error('       (or provide ADMIN_NAME, ADMIN_EMAIL, ADMIN_PASSWORD in .env)');
     process.exit(1);
   }
 
-  if (password.length < 8) {
-    console.error('Password must be at least 8 characters long.');
+  if (typeof password !== 'string' || password.length < 12) {
+    console.error('Password must be at least 12 characters long.');
     process.exit(1);
   }
 
@@ -54,10 +60,12 @@ async function main() {
 
   try {
     // Idempotency: skip if an account with this email already exists.
-    const [existing] = await pool.query('SELECT id FROM admins WHERE email = ? LIMIT 1', [email]);
+    const [existing] = await pool.query('SELECT id FROM admins WHERE LOWER(TRIM(email)) = ? LIMIT 1', [email]);
     if (existing.length > 0) {
       logger.info('Admin seed skipped: account already exists', { email });
       console.log(`Admin account for ${email} already exists. Nothing to do.`);
+      console.log('To change its password run: node scripts/resetAdminPassword.js ' + email);
+      await pool.end();
       process.exit(0);
     }
 

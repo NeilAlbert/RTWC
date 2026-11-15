@@ -2,7 +2,7 @@
    js/loader-init.js decides whether it is shown at all. */
 
 (() => {
-  const MIN_VISIBLE_MS = 1200; // long enough for the logo animation to finish
+  const MIN_VISIBLE_MS = 2000; // long enough for the logo animation to finish
   const MAX_VISIBLE_MS = 4000; // a slow image or embed can never keep visitors waiting longer
   const FADE_MS = 300;
   const REDUCED_MOTION_FADE_MS = 150;

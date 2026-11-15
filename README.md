@@ -4,8 +4,76 @@ Website of The Church of Pentecost, Royal Temple Worship Centre.
 
 - Public pages: the `.html` files in this folder, with `css/style.css` and `js/`.
 - Admin pages: `admin/` (sign in at `admin/login.html`).
-- API: `server/` (Node, Express, MySQL). The web server must serve these static files
-  and pass `/api/` to the API on the same address. The API does not serve the pages itself.
+- API: `server/` (Node, Express, MySQL). The pages and `/api/` must be on the same
+  address, because the admin sign-in sends its requests to `/api/` on the address the
+  page came from. The API serves the pages itself, so on its own it is enough. On a
+  live host a web server such as nginx can serve the pages and pass `/api/` to the API.
+
+## Running the site and signing in to the admin
+
+1. In `server/`, copy `.env.example` to `.env` and fill in the database settings
+   (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`) and a `JWT_SECRET` of at
+   least 32 characters. For a hosted database such as Aiven, set `DB_SSL_CA` to the path
+   of its `ca.pem`. For MySQL on the same computer, set `DB_SSL=false`. The server will
+   not start until the database settings and `JWT_SECRET` are there, and it says which
+   one is missing.
+2. In `server/`, run `npm install`, then `npm start`.
+3. Open `http://localhost:5000/api/health`. It must say `"database":"connected"`.
+4. Open `http://localhost:5000/admin/login.html` and sign in. Do not open the admin
+   pages from another local server (for example Live Server on port 5500) or by
+   double-clicking the file: the sign-in cannot reach the API from there.
+
+### Admin pages
+
+| Page | What it edits |
+| --- | --- |
+| Dashboard | Five counts, each with a link to its page |
+| Settings | Church details and live stream links |
+| Leadership | Leaders, their roles, photos and order |
+| Sermons | The sermon archive |
+| Events | Events. These show on the public Events page and home page at once |
+| Ministries | Ministries. One that still has leaders cannot be deleted |
+| Messages | Messages from the contact form. Opening a new one marks it as read |
+| Prayer Requests | Prayer requests. A private one shows its name and text only when opened |
+| Newsletter | Subscribers, with search, remove and "Export as CSV" |
+
+The sidebar shows how many messages and prayer requests are new. The CSV export holds
+every subscriber. Any address that starts with `=`, `+`, `-` or `@` gets a single quote
+in front, so a spreadsheet cannot run it as a formula.
+
+The public Sermons, Ministries and About pages do not read from the admin yet. They
+still show what is written in `js/pages/sermons.js`, `ministries.html` and `about.html`.
+
+Photos uploaded in the admin are saved in `assets/uploads/` under a random name (JPEG,
+PNG or WebP, 5 MB at most). Some hosts wipe the server's disk on every deploy, which
+would lose these photos. See the note at the top of `server/middleware/upload.js`, and
+include `assets/uploads/` in backups.
+
+### Creating the admin or changing its password
+
+In `server/`, run this with the admin's email address:
+
+```
+node scripts/resetAdminPassword.js admin@example.org
+```
+
+It asks for the new password twice and shows nothing as you type. The password must be
+at least 12 characters. If there is no admin with that email yet, one is created. The
+password can also be given as a second argument, but it is then kept in the terminal's
+command history.
+
+### If sign-in fails
+
+| Message on the login page | Meaning |
+| --- | --- |
+| Invalid email or password | The email or the password is wrong. Reset the password with the command above. |
+| Too many attempts. Please try again in a few minutes. | More than 10 attempts in 15 minutes from one address. Wait, or restart the API, which clears the count. |
+| Cannot reach the server. Please try again. | The API is not running, or the page was not opened from the API's address. |
+| The server has a problem and could not sign you in. | Usually the database. Check `/api/health` and `server/logs/server.log`. |
+
+`TRUST_PROXY` in `.env` is the number of proxies in front of the API: 1 behind nginx, 0
+when browsers reach the API directly. If it is too low on a live host, every visitor
+appears to come from one address and they share one sign-in limit.
 
 ## Where to edit content
 

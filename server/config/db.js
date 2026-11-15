@@ -3,9 +3,11 @@
  * MySQL connection pool (mysql2) — SSL-enabled for Aiven.
  *
  * - Uses connection pooling (10 connections by default).
- * - SSL is ALWAYS enabled (Aiven requires it). If DB_SSL_CA is provided, the
- *   Aiven CA certificate is pinned; otherwise rejectUnauthorized: true is used
- *   against the system CA store.
+ * - SSL is enabled unless DB_SSL=false (Aiven requires it). If DB_SSL_CA is
+ *   provided, the Aiven CA certificate is pinned; otherwise rejectUnauthorized:
+ *   true is used against the system CA store.
+ * - DB_SSL=false is only for a MySQL server on this same computer, which has no
+ *   certificate a client can verify. Never use it for a hosted database.
  * - dateStrings keeps DATE/DATETIME values as plain strings so the API returns
  *   dates like "2026-08-28" instead of timezone-shifted Date objects.
  * =============================================================================
@@ -17,7 +19,9 @@ const mysql = require('mysql2/promise');
 const sslCaPath = process.env.DB_SSL_CA;
 
 let ssl;
-if (sslCaPath) {
+if (String(process.env.DB_SSL).toLowerCase() === 'false') {
+  ssl = undefined;
+} else if (sslCaPath) {
   const absoluteCaPath = path.resolve(__dirname, '..', sslCaPath);
   try {
     ssl = {

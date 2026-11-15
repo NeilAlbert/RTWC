@@ -22,19 +22,33 @@ async function create(email) {
   return findByEmail(email);
 }
 
-async function countAll() {
-  const [rows] = await pool.query('SELECT COUNT(*) AS total FROM newsletter_subscribers');
+/** Turns a search phrase into a LIKE pattern. % and _ in the phrase match themselves. */
+function emailPattern(q) {
+  return `%${String(q).replace(/[\\%_]/g, (char) => `\\${char}`)}%`;
+}
+
+async function countAll({ q } = {}) {
+  const [rows] = q
+    ? await pool.query('SELECT COUNT(*) AS total FROM newsletter_subscribers WHERE email LIKE ?', [emailPattern(q)])
+    : await pool.query('SELECT COUNT(*) AS total FROM newsletter_subscribers');
   return rows[0].total;
 }
 
-async function findAll({ limit, offset }) {
+async function findAll({ q, limit, offset }) {
+  const where = q ? 'WHERE email LIKE ?' : '';
+  const params = q ? [emailPattern(q), limit, offset] : [limit, offset];
   const [rows] = await pool.query(
-    `SELECT id, email, subscribed_at FROM newsletter_subscribers
+    `SELECT id, email, subscribed_at FROM newsletter_subscribers ${where}
      ORDER BY subscribed_at DESC, id DESC
      LIMIT ? OFFSET ?`,
-    [limit, offset]
+    params
   );
   return rows;
+}
+
+async function remove(id) {
+  const [result] = await pool.query('DELETE FROM newsletter_subscribers WHERE id = ?', [id]);
+  return result.affectedRows > 0;
 }
 
 async function removeByEmail(email) {
@@ -42,4 +56,4 @@ async function removeByEmail(email) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findByEmail, create, countAll, findAll, removeByEmail };
+module.exports = { findByEmail, create, countAll, findAll, remove, removeByEmail };

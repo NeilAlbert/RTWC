@@ -9,6 +9,7 @@ const { body, param, query } = require('express-validator');
 const authMiddleware = require('../middleware/authMiddleware');
 const validateRequest = require('../middleware/validateRequest');
 const { sanitizeBody } = require('../middleware/sanitizeInput');
+const { isHttpUrl, isImageRef, isCalendarDate } = require('../utils/validators');
 const {
   getSermons,
   getSermonById,
@@ -19,12 +20,26 @@ const {
 
 const router = express.Router();
 
-/** GET /api/sermons — public, ?speaker=&date=&page=&limit= */
+/** The same rules for adding and for editing a sermon. */
+const sermonRules = [
+  body('title').trim().isLength({ min: 1, max: 200 }).withMessage('Enter a title of 200 characters or fewer.'),
+  body('speaker').trim().isLength({ min: 1, max: 120 }).withMessage('Enter the speaker, in 120 characters or fewer.'),
+  body('description').optional({ values: 'falsy' }).isString().isLength({ max: 5000 })
+    .withMessage('The description must be 5000 characters or fewer.'),
+  body('video_url').optional({ values: 'falsy' }).trim().isLength({ max: 500 }).custom(isHttpUrl)
+    .withMessage('The video link must start with http:// or https://.'),
+  body('thumbnail_url').optional({ values: 'falsy' }).trim().isLength({ max: 500 }).custom(isImageRef)
+    .withMessage('The thumbnail must be an uploaded image or a link that starts with http:// or https://.'),
+  body('sermon_date').custom(isCalendarDate).withMessage('Enter a valid date.'),
+];
+
+/** GET /api/sermons — public, ?speaker=&date=&q=&page=&limit= (q searches the title) */
 router.get(
   '/',
   [
     query('speaker').optional().trim().isLength({ max: 120 }),
     query('date').optional().isISO8601().withMessage('date must be YYYY-MM-DD'),
+    query('q').optional().trim().isLength({ max: 200 }),
     query('page').optional().isInt({ min: 1 }),
     query('limit').optional().isInt({ min: 1, max: 50 }),
   ],
@@ -45,14 +60,7 @@ router.post(
   '/',
   authMiddleware,
   sanitizeBody(['title', 'speaker', 'description'], { maxLength: 5000 }),
-  [
-    body('title').trim().isLength({ min: 1, max: 255 }).withMessage('Title is required.'),
-    body('speaker').trim().isLength({ min: 1, max: 120 }).withMessage('Speaker is required.'),
-    body('description').optional().isString().isLength({ max: 5000 }),
-    body('video_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
-    body('thumbnail_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
-    body('sermon_date').isISO8601().withMessage('sermon_date must be YYYY-MM-DD.'),
-  ],
+  sermonRules,
   validateRequest,
   createSermon
 );
@@ -62,15 +70,7 @@ router.put(
   '/:id',
   authMiddleware,
   sanitizeBody(['title', 'speaker', 'description'], { maxLength: 5000 }),
-  [
-    param('id').isInt({ min: 1 }),
-    body('title').trim().isLength({ min: 1, max: 255 }),
-    body('speaker').trim().isLength({ min: 1, max: 120 }),
-    body('description').optional().isString().isLength({ max: 5000 }),
-    body('video_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
-    body('thumbnail_url').optional({ values: 'falsy' }).isURL({ require_protocol: true }),
-    body('sermon_date').isISO8601(),
-  ],
+  [param('id').isInt({ min: 1 }).withMessage('Invalid sermon id.'), ...sermonRules],
   validateRequest,
   updateSermon
 );

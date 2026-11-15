@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Messages | Royal Temple Worship Centre Admin</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="admin-sidebar" id="admin-sidebar"></aside>
+
+    <div class="admin-main">
+      <header class="admin-topbar" id="admin-topbar"></header>
+
+      <main class="admin-content">
+        <div class="page-head">
+          <h1>Messages</h1>
+          <p>Messages sent through the contact form on the website. Opening a new message marks it as read.</p>
+        </div>
+
+        <div class="alert alert-error" id="page-alert" role="alert"></div>
+
+        <div class="filter-bar">
+          <div class="form-group">
+            <label for="message-status">Status</label>
+            <select id="message-status">
+              <option value="">All messages</option>
+              <option value="new">New</option>
+              <option value="read">Read</option>
+              <option value="responded">Responded</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="message-table"></div>
+        <div id="message-pagination"></div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/adminApi.js"></script>
+  <script src="js/adminAuth.js"></script>
+  <script src="js/components/dom.js"></script>
+  <script src="js/components/toast.js"></script>
+  <script src="js/components/dialog.js"></script>
+  <script src="js/components/table.js"></script>
+  <script src="js/components/inbox.js"></script>
+  <script src="js/pages/messages.js"></script>
+</body>
+</html>

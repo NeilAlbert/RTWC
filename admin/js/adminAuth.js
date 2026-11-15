@@ -102,7 +102,50 @@ const AdminAuth = (() => {
   const NAV_ITEMS = [
     { key: 'dashboard', label: 'Dashboard', href: 'dashboard.html' },
     { key: 'settings', label: 'Settings', href: 'settings.html' },
+    { key: 'leadership', label: 'Leadership', href: 'leadership.html' },
+    { key: 'sermons', label: 'Sermons', href: 'sermons.html' },
+    { key: 'events', label: 'Events', href: 'events.html' },
+    { key: 'ministries', label: 'Ministries', href: 'ministries.html' },
+    { key: 'messages', label: 'Messages', href: 'messages.html', countKey: 'newMessages' },
+    { key: 'prayer-requests', label: 'Prayer Requests', href: 'prayer-requests.html', countKey: 'newPrayerRequests' },
+    { key: 'newsletter', label: 'Newsletter', href: 'newsletter.html' },
+    { key: 'website', label: 'View website', href: '../index.html' },
   ];
+
+  /**
+   * Shows how many new messages and new prayer requests there are, as a small
+   * count beside those sidebar links. Pages call this again after a status changes.
+   */
+  async function refreshCounts() {
+    const sidebar = document.getElementById('admin-sidebar');
+    if (!sidebar) return;
+
+    let counts;
+    try {
+      counts = (await AdminApi.get('/admin/stats')).data;
+    } catch (err) {
+      // The counts are an extra. Without them the sidebar still works, and each
+      // page reports its own loading errors, so there is nothing more to show here.
+      return;
+    }
+
+    NAV_ITEMS.filter((item) => item.countKey).forEach((item) => {
+      const link = sidebar.querySelector(`[data-key="${item.key}"]`);
+      if (!link) return;
+      let count = link.querySelector('.nav-count');
+      const total = Number(counts[item.countKey]) || 0;
+      if (total > 0) {
+        if (!count) {
+          count = document.createElement('span');
+          count.className = 'nav-count';
+          link.append(count);
+        }
+        count.textContent = `${total} new`;
+      } else if (count) {
+        count.remove();
+      }
+    });
+  }
 
   /**
    * Render sidebar + topbar into the page's #admin-sidebar / #admin-topbar.
@@ -117,7 +160,7 @@ const AdminAuth = (() => {
       const nav = NAV_ITEMS.map((item) => {
         const active = item.key === activeKey ? ' active' : '';
         const ariaCurrent = item.key === activeKey ? ' aria-current="page"' : '';
-        return `<a href="${item.href}" class="nav-item${active}"${ariaCurrent}>${item.label}</a>`;
+        return `<a href="${item.href}" class="nav-item${active}" data-key="${item.key}"${ariaCurrent}>${item.label}</a>`;
       }).join('');
 
       sidebar.innerHTML = `
@@ -130,6 +173,8 @@ const AdminAuth = (() => {
           <a href="${LOGIN_URL}" class="sidebar-logout-link" id="sidebar-logout-link">Log out</a>
         </div>
       `;
+
+      refreshCounts();
 
       const sidebarLogout = document.getElementById('sidebar-logout-link');
       if (sidebarLogout) {
@@ -146,13 +191,15 @@ const AdminAuth = (() => {
       topbar.innerHTML = `
         <div class="topbar-left">
           <button type="button" class="sidebar-toggle" id="sidebar-toggle">Menu</button>
-          <span class="topbar-title">${pageTitle || 'Dashboard'}</span>
+          <span class="topbar-title"></span>
         </div>
         <div class="topbar-user">
-          <span class="user-name">${admin && admin.name ? `Signed in as ${admin.name}` : ''}</span>
+          <span class="user-name"></span>
           <button type="button" class="btn btn-outline btn-sm" id="logout-btn">Log out</button>
         </div>
       `;
+      topbar.querySelector('.topbar-title').textContent = pageTitle || 'Dashboard';
+      topbar.querySelector('.user-name').textContent = admin && admin.name ? `Signed in as ${admin.name}` : '';
       const logoutBtn = document.getElementById('logout-btn');
       if (logoutBtn) logoutBtn.addEventListener('click', () => logout());
 
@@ -174,6 +221,7 @@ const AdminAuth = (() => {
     login,
     logout,
     initShell,
+    refreshCounts,
     initUnauthorizedHandler,
   };
 })();

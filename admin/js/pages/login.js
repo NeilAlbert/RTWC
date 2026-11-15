@@ -59,7 +59,13 @@ document.addEventListener('DOMContentLoaded', () => {
       await AdminAuth.login(email, password);
       window.location.replace('dashboard.html');
     } catch (err) {
-      errorAlert.textContent = err.message || 'You could not be signed in. Please try again.';
+      // One message per kind of failure. A wrong email and a wrong password read the same.
+      let message = 'You could not be signed in. Please try again.';
+      if (err.status === 401) message = 'Invalid email or password';
+      else if (err.status === 429) message = 'Too many attempts. Please try again in a few minutes.';
+      else if (err.status === 0) message = 'Cannot reach the server. Please try again.';
+      else if (err.status >= 500) message = 'The server has a problem and could not sign you in. Please try again later.';
+      errorAlert.textContent = message;
       errorAlert.classList.add('visible');
       submitBtn.disabled = false;
       submitBtn.textContent = 'Sign in';

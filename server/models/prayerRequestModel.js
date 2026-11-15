@@ -59,4 +59,9 @@ async function updateStatus(id, status) {
   return findById(id);
 }
 
-module.exports = { create, countAll, findAll, findById, updateStatus };
+async function remove(id) {
+  const [result] = await pool.query('DELETE FROM prayer_requests WHERE id = ?', [id]);
+  return result.affectedRows > 0;
+}
+
+module.exports = { create, countAll, findAll, findById, updateStatus, remove };

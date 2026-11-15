@@ -20,8 +20,12 @@ router.post(
   '/login',
   authLimiter,
   [
-    body('email').trim().isEmail().withMessage('A valid email address is required.'),
-    body('password').isLength({ min: 1 }).withMessage('Password is required.'),
+    // Emails are stored trimmed and lowercased (see scripts/seedAdmin.js and
+    // scripts/resetAdminPassword.js), so the one typed here is compared the same way.
+    body('email').trim().toLowerCase().isEmail().withMessage('A valid email address is required.'),
+    // The password is compared exactly as typed. It must never be trimmed,
+    // sanitized or altered in any way.
+    body('password').isString().isLength({ min: 1 }).withMessage('Password is required.'),
   ],
   validateRequest,
   login

@@ -35,6 +35,30 @@ async function findAll({ category, upcoming } = {}) {
   return rows;
 }
 
+/** WHERE and ORDER BY for the admin list. `when` is 'upcoming', 'past' or 'all'. */
+function adminListClauses(when) {
+  if (when === 'upcoming') return { where: 'WHERE event_date >= CURDATE()', order: 'ORDER BY event_date ASC, id ASC' };
+  if (when === 'past') return { where: 'WHERE event_date < CURDATE()', order: 'ORDER BY event_date DESC, id DESC' };
+  return { where: '', order: 'ORDER BY event_date DESC, id DESC' };
+}
+
+async function countForAdmin({ when } = {}) {
+  const { where } = adminListClauses(when);
+  const [rows] = await pool.query(`SELECT COUNT(*) AS total FROM events ${where}`);
+  return rows[0].total;
+}
+
+async function findForAdmin({ when, limit, offset } = {}) {
+  const { where, order } = adminListClauses(when);
+  const [rows] = await pool.query(
+    `SELECT id, title, description, event_date, event_time, location, category, created_at
+     FROM events ${where} ${order}
+     LIMIT ? OFFSET ?`,
+    [limit, offset]
+  );
+  return rows;
+}
+
 async function findById(id) {
   const [rows] = await pool.query(
     'SELECT id, title, description, event_date, event_time, location, category, created_at FROM events WHERE id = ? LIMIT 1',
@@ -67,4 +91,4 @@ async function remove(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findAll, findById, create, update, remove };
+module.exports = { findAll, countForAdmin, findForAdmin, findById, create, update, remove };

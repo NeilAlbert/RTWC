@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Ministries | Royal Temple Worship Centre Admin</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="admin-sidebar" id="admin-sidebar"></aside>
+
+    <div class="admin-main">
+      <header class="admin-topbar" id="admin-topbar"></header>
+
+      <main class="admin-content">
+        <div class="page-head has-action">
+          <div>
+            <h1>Ministries</h1>
+            <p>The ministries of the assembly, in alphabetical order.</p>
+          </div>
+          <button type="button" class="btn btn-primary" id="add-ministry">Add ministry</button>
+        </div>
+
+        <div class="alert alert-info">
+          The public Ministries page does not read this list yet. It still shows the ministries written in <code>ministries.html</code>.
+        </div>
+
+        <div class="alert alert-error" id="page-alert" role="alert"></div>
+
+        <div id="ministry-table"></div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/adminApi.js"></script>
+  <script src="js/adminAuth.js"></script>
+  <script src="js/components/dom.js"></script>
+  <script src="js/components/toast.js"></script>
+  <script src="js/components/dialog.js"></script>
+  <script src="js/components/table.js"></script>
+  <script src="js/components/imageUpload.js"></script>
+  <script src="js/components/form.js"></script>
+  <script src="js/components/crud.js"></script>
+  <script src="js/pages/ministries.js"></script>
+</body>
+</html>

@@ -10,8 +10,8 @@
   <meta property="og:description" content="The ministries of Royal Temple Worship Centre, with when each one meets and who leads it.">
   <!-- ADD: og:url and og:image need the full web address of the live site. Add them once the domain is confirmed. -->
   <link rel="icon" href="assets/images/logo.jpg">
-  <link rel="preload" as="image" href="assets/images/logo-loader.svg" media="(prefers-color-scheme: light)">
-  <link rel="preload" as="image" href="assets/images/logo-loader-dark.svg" media="(prefers-color-scheme: dark)">
+  <link rel="preload" as="image" href="assets/images/logo-loader.svg">
+  <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/loader.css">
   <script src="js/loader-init.js"></script>
@@ -22,10 +22,7 @@
 <body>
   <div id="page-loader" role="status" aria-live="polite">
     <span class="visually-hidden">Loading Royal Temple Worship Centre website</span>
-    <picture>
-      <source srcset="assets/images/logo-loader-dark.svg" media="(prefers-color-scheme: dark)">
-      <img src="assets/images/logo-loader.svg" alt="" width="800" height="800">
-    </picture>
+    <img src="assets/images/logo-loader.svg" alt="" width="800" height="800">
   </div>
 
   <a class="skip-link" href="#main">Skip to main content</a>
@@ -61,51 +58,53 @@
 
       <!-- VERIFY: confirm this list matches the ministries of the assembly. Meeting times and
            leaders are edited here in ministries.html. -->
-      <article class="ministry" id="pemem">
-        <h2>Men's Ministry (PEMEM)</h2>
-        <p>The fellowship for the men of the assembly.</p>
-        <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-      </article>
-      <article class="ministry" id="womens">
-        <h2>Women's Ministry</h2>
-        <p>The fellowship for the women of the assembly.</p>
-        <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-      </article>
-      <article class="ministry" id="pyfm">
-        <h2>Youth Ministry</h2>
-        <p>For the teenagers and young adults of the assembly.</p>
-        <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-      </article>
-      <article class="ministry" id="pensa">
-        <h2>PENSA (Pentecost Students and Associates)</h2>
-        <p>For students in secondary and tertiary schools.</p>
-        <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-      </article>
-      <article class="ministry" id="children">
-        <h2>Children's Ministry</h2>
-        <p>Sunday school and Bible teaching for the children of the assembly.</p>
-        <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-      </article>
-      <article class="ministry" id="choir">
-        <h2>Choir and Praise Team</h2>
-        <p>Leads the singing at our services.</p>
-        <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-      </article>
-      <article class="ministry" id="evangelism">
-        <h2>Evangelism Ministry</h2>
-        <p>Leads the assembly's outreach and follows up with new converts.</p>
-        <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-      </article>
-      <article class="ministry" id="ushering">
-        <h2>Ushers</h2>
-        <p>Welcome people to our services and help them find a seat.</p>
-        <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-      </article>
-      <article class="ministry" id="prayer">
-        <h2>Prayer Force</h2>
-        <p>Meets to pray for the assembly and for prayer requests sent to the church.</p>
-        <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-      </article>
+      <div class="section ministry-list">
+        <article class="ministry" id="pemem">
+          <h2>Men's Ministry (PEMEM)</h2>
+          <p>The fellowship for the men of the assembly.</p>
+          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
+        </article>
+        <article class="ministry" id="womens">
+          <h2>Women's Ministry</h2>
+          <p>The fellowship for the women of the assembly.</p>
+          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
+        </article>
+        <article class="ministry" id="pyfm">
+          <h2>Youth Ministry</h2>
+          <p>For the teenagers and young adults of the assembly.</p>
+          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
+        </article>
+        <article class="ministry" id="pensa">
+          <h2>PENSA (Pentecost Students and Associates)</h2>
+          <p>For students in secondary and tertiary schools.</p>
+          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
+        </article>
+        <article class="ministry" id="children">
+          <h2>Children's Ministry</h2>
+          <p>Sunday school and Bible teaching for the children of the assembly.</p>
+          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
+        </article>
+        <article class="ministry" id="choir">
+          <h2>Choir and Praise Team</h2>
+          <p>Leads the singing at our services.</p>
+          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
+        </article>
+        <article class="ministry" id="evangelism">
+          <h2>Evangelism Ministry</h2>
+          <p>Leads the assembly's outreach and follows up with new converts.</p>
+          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
+        </article>
+        <article class="ministry" id="ushering">
+          <h2>Ushers</h2>
+          <p>Welcome people to our services and help them find a seat.</p>
+          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
+        </article>
+        <article class="ministry" id="prayer">
+          <h2>Prayer Force</h2>
+          <p>Meets to pray for the assembly and for prayer requests sent to the church.</p>
+          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
+        </article>
+      </div>
     </div>
   </main>
 

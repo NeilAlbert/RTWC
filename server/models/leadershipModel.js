@@ -24,6 +24,20 @@ async function findAll() {
   return rows;
 }
 
+/** Flat list for the admin table, optionally one role only. */
+async function findForAdmin({ role } = {}) {
+  const where = role ? 'WHERE l.role = ?' : '';
+  const [rows] = await pool.query(
+    `SELECT ${SELECT_COLUMNS}
+     FROM leadership l
+     LEFT JOIN ministries m ON m.id = l.ministry_id
+     ${where}
+     ORDER BY l.display_order ASC, l.name ASC, l.id ASC`,
+    role ? [role] : []
+  );
+  return rows;
+}
+
 async function findById(id) {
   const [rows] = await pool.query(
     `SELECT ${SELECT_COLUMNS}
@@ -59,4 +73,4 @@ async function remove(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findAll, findById, create, update, remove };
+module.exports = { findAll, findForAdmin, findById, create, update, remove };

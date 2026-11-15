@@ -1,37 +1,13 @@
 /* Royal Temple Worship Centre, The Church of Pentecost.
-   One stylesheet for the whole public site. */
+   One stylesheet for the whole public site. Colours, sizes and spaces come from
+   css/tokens.css, which every page loads first.
+   Order: base, layout, components, page-specific styles. */
+
+/* ---------- Base ---------- */
 
 :root {
-  --navy: #1F3864;
-  --navy-dark: #16294A;
-  --gold: #B8860B;
-  --white: #FFFFFF;
-  --paper: #FAF8F4;
-  --ink: #222222;
-  --muted: #555555;
-  --line: #D8D4CC;
-  --slot: #E4E2DD;
-  /* Form errors only. Gold fails 4.5:1 contrast as text, so it is never used for text. */
-  --error: #A4241B;
-
-  --radius: 4px;
-  --fade: 150ms;
-
-  --space-1: 8px;
-  --space-2: 16px;
-  --space-3: 24px;
-  --space-4: 32px;
-  --space-5: 48px;
-
-  --text-small: 0.875rem;
-  --text-body: 1rem;
-  --text-lead: 1.125rem;
-  --text-h3: 1.25rem;
-  --text-h2: 1.5rem;
-  --text-h1: 2rem;
-
-  --serif: Georgia, "Times New Roman", serif;
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  /* Space at the left and right edge of the page. */
+  --gutter: var(--space-16);
 }
 
 *,
@@ -41,11 +17,12 @@
 }
 
 html {
-  font-family: var(--sans);
+  font-family: var(--font-sans);
   font-size: 100%;
-  line-height: 1.6;
-  color: var(--ink);
-  background-color: var(--paper);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  color: var(--text);
+  background-color: var(--surface-1);
 }
 
 body {
@@ -55,28 +32,32 @@ body {
 h1,
 h2,
 h3 {
-  font-family: var(--serif);
-  font-weight: 700;
-  line-height: 1.25;
+  margin: 0 0 var(--space-16);
+  font-family: var(--font-serif);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
   color: var(--navy);
-  margin: 0 0 var(--space-2);
 }
 
-h1 { font-size: var(--text-h1); }
-h2 { font-size: var(--text-h2); }
-h3 { font-size: var(--text-h3); }
+h1 { font-size: var(--text-36); }
+h2 { font-size: var(--text-28); }
+
+h3 {
+  font-size: var(--text-22);
+  line-height: var(--leading-snug);
+}
 
 p,
 ul,
 ol,
 dl {
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--space-16);
 }
 
 p,
 li,
 dd {
-  max-width: 68ch;
+  max-width: var(--measure);
 }
 
 img {
@@ -88,8 +69,8 @@ img {
 a {
   color: var(--navy);
   text-decoration: underline;
-  text-underline-offset: 3px;
-  transition: text-decoration-color var(--fade);
+  text-underline-offset: var(--space-4);
+  transition: color var(--transition), text-decoration-color var(--transition);
 }
 
 a:hover {
@@ -108,7 +89,7 @@ span[data-setting] {
 }
 
 :focus-visible {
-  outline: 3px solid var(--gold);
+  outline: 2px solid var(--navy);
   outline-offset: 2px;
 }
 
@@ -131,30 +112,136 @@ textarea {
 
 .skip-link {
   position: absolute;
-  left: var(--space-2);
-  top: -100px;
-  z-index: 10;
-  padding: var(--space-1) var(--space-2);
+  left: var(--space-16);
+  top: calc(var(--space-96) * -1);
+  z-index: 30;
+  padding: var(--space-8) var(--space-16);
   background-color: var(--navy);
-  color: var(--white);
+  color: var(--text-on-navy);
 }
 
 .skip-link:focus {
-  top: var(--space-1);
+  top: var(--space-8);
 }
 
+/* ---------- Layout ---------- */
+
 .wrap {
-  max-width: 1040px;
+  max-width: var(--container);
   margin-inline: auto;
-  padding-inline: var(--space-2);
+  padding-inline: var(--gutter);
+}
+
+/* Inside <main> every section is a full-width band. Its content lines up with
+   the header and footer because the band pads itself in to the container width. */
+main > .wrap {
+  max-width: none;
+  padding-inline: 0;
+}
+
+.page-title,
+.section {
+  padding-inline: max(var(--gutter), calc((100% - var(--container)) / 2 + var(--gutter)));
+}
+
+/* Top band of every page: solid navy with white text. */
+.page-title {
+  padding-block: var(--space-48);
+  background-color: var(--navy);
+  color: var(--text-on-navy);
+}
+
+.page-title h1,
+.page-title a {
+  color: var(--text-on-navy);
+}
+
+.page-title > p,
+.page-title > div > p {
+  font-size: var(--text-18);
+}
+
+.page-title > :last-child,
+.page-title > div > :last-child {
+  margin-bottom: 0;
+}
+
+.page-title img {
+  border-radius: var(--radius);
+}
+
+/* Bands alternate between the page background and the darker neutral. */
+.section {
+  padding-block: var(--space-48);
+}
+
+.section:nth-child(odd) {
+  background-color: var(--surface-2);
+}
+
+.section > :last-child {
+  margin-bottom: 0;
+}
+
+/* Section headings carry a short gold rule. */
+.section h2::after {
+  content: "";
+  display: block;
+  width: var(--space-48);
+  height: 3px;
+  margin-top: var(--space-12);
+  background-color: var(--gold);
+}
+
+.two-column {
+  display: grid;
+  gap: var(--space-32);
+}
+
+.two-column > * {
+  min-width: 0;
+}
+
+/* Home page: the photo fills the top band, under a solid navy tint that keeps
+   the white text readable. The navy background shows while the photo loads. */
+.page-title.two-column {
+  position: relative;
+  isolation: isolate;
+  grid-template-columns: 1fr;
+  padding-block: var(--space-64);
+}
+
+.page-title.two-column img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  object-fit: cover;
+}
+
+.page-title.two-column::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--photo-tint);
+}
+
+/* ---------- Components ---------- */
+
+.note {
+  font-size: var(--text-14);
+  color: var(--text-muted);
 }
 
 /* A fact the church still has to supply. Meant to be impossible to miss. */
 .to-add {
+  padding: 0 var(--space-4);
   border: 1px dashed var(--gold);
   border-radius: var(--radius);
-  padding: 0 4px;
-  font-weight: 700;
+  font-weight: var(--weight-bold);
 }
 
 /* Grey box that stands in for a real photo until one is supplied. */
@@ -163,74 +250,114 @@ textarea {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--space-2);
-  background-color: var(--slot);
-  border: 1px solid var(--line);
+  padding: var(--space-16);
+  background-color: var(--surface-2);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius);
-  color: var(--ink);
-  font-size: var(--text-small);
+  font-size: var(--text-14);
   text-align: center;
   overflow-wrap: anywhere;
 }
 
+.section:nth-child(odd) .photo-slot {
+  background-color: var(--surface-1);
+}
+
 .photo-slot strong {
-  font-size: var(--text-body);
+  font-size: var(--text-16);
 }
 
 .photo-slot-portrait { aspect-ratio: 4 / 5; }
 .photo-slot-wide { aspect-ratio: 3 / 2; }
 
-/* Buttons */
+/* Buttons: .button is the primary action, .button-plain the secondary one. */
 .button,
-.button-plain {
-  display: inline-block;
-  min-height: 44px;
-  padding: var(--space-1) var(--space-3);
-  border: 2px solid var(--navy);
+.button-plain,
+.menu-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--control-height);
+  padding: var(--space-8) var(--space-24);
+  border: 1px solid var(--navy);
   border-radius: var(--radius);
-  font-weight: 700;
-  line-height: 24px;
+  font-size: var(--text-16);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  text-align: center;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color var(--fade), border-color var(--fade), color var(--fade);
+  transition: background-color var(--transition), border-color var(--transition), color var(--transition);
 }
 
 .button {
   background-color: var(--navy);
-  color: var(--white);
+  color: var(--text-on-navy);
 }
 
 .button:hover {
-  background-color: var(--navy-dark);
-  border-color: var(--gold);
+  background-color: var(--navy-600);
+  border-color: var(--navy-600);
 }
 
-.button-plain {
-  background-color: var(--white);
+.button-plain,
+.menu-button {
+  background-color: var(--surface-0);
   color: var(--navy);
 }
 
-.button-plain:hover {
-  border-color: var(--gold);
+.button-plain:hover,
+.menu-button:hover {
+  background-color: var(--navy-50);
 }
 
 .button:disabled,
-.button-plain:disabled {
-  opacity: 0.6;
+.button-plain:disabled,
+.button[aria-disabled="true"],
+.button-plain[aria-disabled="true"] {
+  background-color: var(--surface-2);
+  border-color: var(--border-strong);
+  color: var(--text-muted);
   cursor: not-allowed;
+}
+
+a[aria-disabled="true"] {
+  pointer-events: none;
 }
 
 .button-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
+  gap: var(--space-16);
+  margin-bottom: var(--space-16);
+}
+
+/* On the navy band the primary button is gold and the secondary one is outlined in white. */
+.page-title .button {
+  background-color: var(--gold);
+  border-color: var(--gold);
+  color: var(--navy-900);
+}
+
+.page-title .button:hover {
+  background-color: var(--surface-0);
+  border-color: var(--surface-0);
+}
+
+.page-title .button-plain {
+  background-color: transparent;
+  border-color: var(--text-on-navy);
+  color: var(--text-on-navy);
+}
+
+.page-title .button-plain:hover {
+  background-color: var(--navy-700);
 }
 
 /* Header and navigation */
 .site-header {
-  background-color: var(--white);
-  border-bottom: 1px solid var(--line);
+  background-color: var(--surface-0);
+  border-bottom: 1px solid var(--border);
 }
 
 .site-header .wrap {
@@ -238,38 +365,33 @@ textarea {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-1) var(--space-2);
-  padding-block: var(--space-2);
+  gap: var(--space-8) var(--space-16);
+  padding-block: var(--space-12);
 }
 
 .site-name {
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-12);
   text-decoration: none;
-  line-height: 1.25;
+  line-height: var(--leading-snug);
 }
 
 .site-name strong {
   display: block;
-  font-family: var(--serif);
-  font-size: var(--text-lead);
+  font-family: var(--font-serif);
+  font-size: var(--text-18);
 }
 
 .site-name span span {
-  font-size: var(--text-small);
-  color: var(--muted);
+  font-size: var(--text-14);
+  color: var(--text-muted);
 }
 
 .menu-button {
-  min-height: 44px;
-  padding: var(--space-1) var(--space-2);
-  background-color: var(--white);
-  border: 2px solid var(--navy);
-  border-radius: var(--radius);
-  color: var(--navy);
-  font-weight: 700;
-  cursor: pointer;
+  padding-inline: var(--space-16);
 }
 
 .site-nav {
@@ -287,204 +409,189 @@ textarea {
   display: block;
 }
 
+.site-nav li {
+  max-width: none;
+  border-top: 1px solid var(--border);
+}
+
 .site-nav a {
-  display: block;
-  padding: var(--space-1) 0;
-  border-bottom: 1px solid var(--line);
-  font-weight: 700;
-  text-decoration: none;
-  transition: color var(--fade), border-color var(--fade);
+  display: flex;
+  align-items: center;
+  min-height: var(--control-height);
+  font-weight: var(--weight-medium);
+  text-decoration: underline 2px transparent;
+  text-underline-offset: var(--space-8);
 }
 
 .site-nav a:hover,
 .site-nav a[aria-current="page"] {
-  border-bottom-color: var(--gold);
+  text-decoration-color: var(--gold);
 }
 
-@media (min-width: 960px) {
-  .menu-button {
-    display: none;
-  }
-
-  .site-nav {
-    flex-basis: auto;
-  }
-
-  .site-nav ul,
-  .site-nav ul.is-open {
-    display: flex;
-    gap: var(--space-2);
-  }
-
-  .site-nav a {
-    border-bottom: 2px solid transparent;
-    font-size: var(--text-small);
-  }
+/* Tabs: the events filter and the live platform switch. */
+.event-views,
+.live-platforms {
+  display: flex;
+  gap: var(--space-8);
+  border-bottom: 1px solid var(--border-strong);
 }
 
-/* Page sections */
-.page-title {
-  padding-block: var(--space-5) var(--space-3);
+.event-views button,
+.live-platforms button {
+  min-height: var(--control-height);
+  margin-bottom: -1px;
+  padding: var(--space-8) var(--space-16);
+  background-color: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  color: var(--text-muted);
+  font-size: var(--text-16);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition);
 }
 
-.page-title p {
-  font-size: var(--text-lead);
+.event-views button:hover,
+.live-platforms button:hover {
+  background-color: transparent;
+  color: var(--navy);
 }
 
-.section {
-  padding-block: var(--space-5);
-  border-top: 1px solid var(--line);
+.event-views button[aria-pressed="true"],
+.live-platforms button[aria-pressed="true"] {
+  border-bottom-color: var(--navy);
+  color: var(--navy);
 }
 
-.two-column {
-  display: grid;
-  gap: var(--space-4);
+/* Cards: one standalone item each (an event, a sermon, a ministry, a leader). */
+.event,
+.ministry,
+.leader-profile {
+  max-width: none;
+  padding: var(--space-24);
+  background-color: var(--surface-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--transition);
 }
 
-.two-column > * {
-  min-width: 0;
+.event:hover,
+.ministry:hover,
+.leader-profile:hover {
+  border-color: var(--navy);
 }
 
-.note {
-  font-size: var(--text-small);
-  color: var(--muted);
+.event > :last-child,
+.ministry > :last-child {
+  margin-bottom: 0;
 }
 
-.status-message {
-  padding: var(--space-2);
-  background-color: var(--white);
-  border: 1px solid var(--line);
+/* Panels: blocks of information that sit on top of a band. */
+main .service-times,
+main .contact-details,
+.leader-list,
+.tenets,
+main form,
+.status-message,
+.section > p[role="status"]:not(:empty) {
+  max-width: var(--measure);
+  background-color: var(--surface-0);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
 }
 
+.status-message,
+.section > p[role="status"]:not(:empty) {
+  padding: var(--space-16);
+}
+
+.status-message {
+  margin: var(--space-16) 0 0;
+}
+
 .status-message.is-error {
-  border-color: var(--error);
-  color: var(--error);
+  background-color: var(--danger-tint);
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 .status-message:empty {
   display: none;
 }
 
-/* Service times and contact details */
+/* Lists of facts: one row each, divided by a line. */
 .service-times {
   padding: 0;
   list-style: none;
 }
 
 .service-times li {
-  padding-block: var(--space-1);
-  border-bottom: 1px solid var(--line);
+  max-width: none;
+  padding-block: var(--space-12);
+  border-bottom: 1px solid var(--border);
+}
+
+.service-times li:last-child {
+  border-bottom: 0;
+}
+
+main .service-times li {
+  padding-inline: var(--space-16);
 }
 
 .contact-details {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: var(--space-1) var(--space-2);
+}
+
+.contact-details dt,
+.contact-details dd {
+  margin: 0;
+  padding-block: var(--space-12);
+  border-bottom: 1px solid var(--border);
 }
 
 .contact-details dt {
-  font-weight: 700;
+  padding-right: var(--space-16);
+  font-weight: var(--weight-semibold);
 }
 
 .contact-details dd {
-  margin: 0;
   overflow-wrap: anywhere;
 }
 
+.contact-details dt:last-of-type,
+.contact-details dd:last-of-type {
+  border-bottom: 0;
+}
+
+main .contact-details {
+  padding-inline: var(--space-16);
+}
+
 .map-frame {
+  display: block;
   width: 100%;
   aspect-ratio: 4 / 3;
-  border: 1px solid var(--line);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius);
-}
-
-/* Events */
-.event-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-2) var(--space-4);
-  margin-bottom: var(--space-3);
-}
-
-.event-views {
-  display: flex;
-  gap: var(--space-1);
-}
-
-.event-views button {
-  min-height: 44px;
-  padding: var(--space-1) var(--space-2);
-  background-color: var(--white);
-  border: 2px solid var(--navy);
-  border-radius: var(--radius);
-  color: var(--navy);
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color var(--fade), color var(--fade);
-}
-
-.event-views button[aria-pressed="true"] {
-  background-color: var(--navy);
-  color: var(--white);
-}
-
-.event-list {
-  padding: 0;
-  list-style: none;
-}
-
-.event {
-  max-width: none;
-  padding-block: var(--space-3);
-  border-top: 1px solid var(--line);
-}
-
-.event h3 {
-  margin-bottom: var(--space-1);
-}
-
-.event-date {
-  margin-bottom: var(--space-1);
-  font-weight: 700;
-}
-
-.event-meta {
-  color: var(--muted);
-}
-
-.calendar-feed {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-  margin-bottom: var(--space-2);
-}
-
-.calendar-feed input {
-  flex: 1 1 240px;
-  min-width: 0;
-}
-
-a[aria-disabled="true"] {
-  opacity: 0.6;
-  pointer-events: none;
 }
 
 /* Forms */
+main form {
+  padding: var(--space-24);
+}
+
 .form-field {
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-16);
 }
 
 label {
   display: block;
-  margin-bottom: 4px;
-  font-weight: 700;
-}
-
-.checkbox-field label {
-  margin: 0;
-  font-weight: 400;
+  margin-bottom: var(--space-4);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
 }
 
 input[type="text"],
@@ -494,12 +601,12 @@ input[type="url"],
 select,
 textarea {
   width: 100%;
-  min-height: 44px;
-  padding: var(--space-1);
-  background-color: var(--white);
-  border: 1px solid var(--muted);
+  min-height: var(--control-height);
+  padding: var(--space-8) var(--space-12);
+  background-color: var(--surface-0);
+  border: 1px solid var(--border-input);
   border-radius: var(--radius);
-  transition: border-color var(--fade);
+  transition: border-color var(--transition);
 }
 
 input:hover,
@@ -508,95 +615,299 @@ textarea:hover {
   border-color: var(--navy);
 }
 
+input:disabled,
+input[readonly],
+select:disabled,
+textarea:disabled {
+  background-color: var(--surface-2);
+  border-color: var(--border-strong);
+  color: var(--text-muted);
+}
+
 textarea {
+  display: block;
   resize: vertical;
 }
 
-[aria-invalid="true"] {
-  border-color: var(--error);
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border-color: var(--danger);
 }
 
 /* The line is always reserved, so showing or clearing an error never moves the
    send button while someone is clicking it. */
 .field-error {
   display: block;
-  min-height: var(--space-3);
-  color: var(--error);
-  font-size: var(--text-small);
+  min-height: var(--space-24);
+  color: var(--danger);
+  font-size: var(--text-14);
 }
 
 .checkbox-field {
   display: flex;
   align-items: flex-start;
-  gap: var(--space-1);
-  margin-bottom: var(--space-2);
+  gap: var(--space-8);
+  margin-bottom: var(--space-16);
 }
 
 .checkbox-field input {
-  width: 24px;
-  height: 24px;
+  width: var(--space-24);
+  height: var(--space-24);
   flex-shrink: 0;
+  margin: 0;
   accent-color: var(--navy);
+}
+
+.checkbox-field label {
+  margin: 0;
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+}
+
+/* Footer */
+.site-footer {
+  padding-block: var(--space-48) var(--space-24);
+  background-color: var(--navy-900);
+  color: var(--navy-100);
+}
+
+.site-footer h2 {
+  font-size: var(--text-18);
+  line-height: var(--leading-snug);
+  color: var(--gold);
+}
+
+.site-footer a {
+  color: var(--text-on-navy);
+}
+
+.site-footer ul {
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer .service-times li,
+.site-footer .contact-details dt,
+.site-footer .contact-details dd {
+  border-bottom-color: var(--navy-700);
+}
+
+.site-footer .contact-details {
+  margin-bottom: var(--space-16);
+}
+
+.footer-columns {
+  display: grid;
+  gap: var(--space-32);
+  margin-bottom: var(--space-32);
+}
+
+.footer-small {
+  max-width: none;
+  margin: 0;
+  padding-top: var(--space-16);
+  border-top: 1px solid var(--navy-700);
+  font-size: var(--text-14);
+}
+
+/* On navy the focus outline is white so it stays visible. */
+.page-title :focus-visible,
+.site-footer :focus-visible,
+.live-offline :focus-visible,
+.skip-link:focus-visible {
+  outline-color: var(--text-on-navy);
+}
+
+/* ---------- Page-specific ---------- */
+
+/* Events and sermons */
+.event-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-16) var(--space-32);
+  margin-bottom: var(--space-32);
+}
+
+.event-views {
+  flex: 1 1 100%;
+}
+
+.event-list {
+  display: grid;
+  gap: var(--space-16);
+  padding: 0;
+  list-style: none;
+}
+
+.event-list:empty {
+  display: none;
+}
+
+.event h3 {
+  margin-bottom: var(--space-8);
+}
+
+.event-date {
+  margin-bottom: var(--space-8);
+  color: var(--gold-text);
+  font-size: var(--text-14);
+  font-weight: var(--weight-semibold);
+}
+
+.event-meta {
+  color: var(--text-muted);
+}
+
+.calendar-feed {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  max-width: var(--measure);
+  margin-bottom: var(--space-16);
+}
+
+.calendar-feed input {
+  flex: 1 1 240px;
+  min-width: 0;
 }
 
 .sermon-filters {
   display: grid;
-  gap: var(--space-2);
-  margin-bottom: var(--space-3);
+  gap: var(--space-16);
+  max-width: none;
+  margin-bottom: var(--space-24);
 }
 
-/* About page */
-.tenets details {
-  border-top: 1px solid var(--line);
+/* About: the Statement of Faith accordion */
+.tenets {
+  overflow: hidden;
+}
+
+.tenets details + details {
+  border-top: 1px solid var(--border);
+}
+
+.tenets details[open] {
+  background-color: var(--navy-50);
 }
 
 .tenets summary {
-  padding-block: var(--space-2);
+  position: relative;
+  display: block;
+  padding: var(--space-16) var(--space-64) var(--space-16) var(--space-24);
   color: var(--navy);
-  font-weight: 700;
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
   cursor: pointer;
+  transition: background-color var(--transition);
+}
+
+.tenets summary::-webkit-details-marker {
+  display: none;
 }
 
 .tenets summary:hover {
-  text-decoration: underline;
-  text-decoration-color: var(--gold);
-  text-underline-offset: 3px;
+  background-color: var(--navy-50);
 }
 
+.tenets summary:focus-visible {
+  outline-offset: -2px;
+}
+
+/* Plus sign made of two bars. The upright bar is removed when the item is open. */
+.tenets summary::before,
+.tenets summary::after {
+  content: "";
+  position: absolute;
+  background-color: var(--navy);
+}
+
+.tenets summary::before {
+  top: calc(50% - 1px);
+  right: var(--space-24);
+  width: var(--space-16);
+  height: 2px;
+}
+
+.tenets summary::after {
+  top: calc(50% - var(--space-8));
+  right: calc(var(--space-24) + var(--space-8) - 1px);
+  width: 2px;
+  height: var(--space-16);
+}
+
+.tenets details[open] summary::after {
+  display: none;
+}
+
+.tenets details > p {
+  margin-inline: var(--space-24);
+}
+
+.tenets details > p:last-child {
+  margin-bottom: 0;
+  padding-bottom: var(--space-16);
+}
+
+/* About: leadership */
 .leader-profile {
   display: grid;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
+  gap: var(--space-24);
+  max-width: calc(var(--measure) + var(--space-96));
+  margin-bottom: var(--space-24);
 }
 
 .leader-profile .photo-slot {
   max-width: 320px;
 }
 
+.leader-list {
+  padding-inline: var(--space-16);
+}
+
 .leader-list dt {
-  font-weight: 700;
+  padding-top: var(--space-12);
+  font-weight: var(--weight-semibold);
 }
 
 .leader-list dd {
-  margin: 0 0 var(--space-2);
+  margin: 0;
+  padding-bottom: var(--space-12);
+  border-bottom: 1px solid var(--border);
+}
+
+.leader-list dd:last-of-type {
+  border-bottom: 0;
 }
 
 /* Ministries */
-.ministry {
-  padding-block: var(--space-3);
-  border-top: 1px solid var(--line);
+.ministry-list {
+  display: grid;
+  gap: var(--space-16);
 }
 
 .ministry h2 {
-  margin-bottom: var(--space-1);
+  margin-bottom: var(--space-8);
+  font-size: var(--text-22);
+  line-height: var(--leading-snug);
+}
+
+.ministry h2::after {
+  display: none;
 }
 
 /* Live stream */
+.live-status {
+  font-weight: var(--weight-semibold);
+}
+
 .live-player {
   position: relative;
   aspect-ratio: 16 / 9;
-  margin-bottom: var(--space-2);
-  background-color: var(--navy);
+  margin-bottom: var(--space-16);
+  background-color: var(--navy-900);
   border-radius: var(--radius);
   overflow: hidden;
 }
@@ -608,42 +919,40 @@ textarea {
   border: 0;
 }
 
+/* Only the platform being watched is shown. */
+.live-player iframe[hidden] {
+  display: none;
+}
+
 .live-offline {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: var(--space-3);
-  color: var(--white);
+  padding: var(--space-24);
+  color: var(--text-on-navy);
 }
 
 .live-offline a {
-  color: var(--white);
+  color: var(--text-on-navy);
 }
 
 .live-platforms {
-  display: flex;
-  gap: var(--space-1);
-  margin-bottom: var(--space-2);
-}
-
-.live-platforms button[aria-pressed="true"] {
-  background-color: var(--navy);
-  color: var(--white);
-}
-
-.live-status {
-  font-weight: 700;
+  margin-bottom: var(--space-16);
 }
 
 /* Gallery */
 .photo-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: var(--space-2);
+  gap: var(--space-16);
   padding: 0;
   list-style: none;
+}
+
+.photo-grid:empty {
+  display: none;
 }
 
 .photo-grid li {
@@ -654,16 +963,16 @@ textarea {
   display: block;
   width: 100%;
   padding: 0;
-  background: none;
-  border: 1px solid var(--line);
+  background-color: var(--surface-2);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   cursor: pointer;
   overflow: hidden;
-  transition: border-color var(--fade);
+  transition: border-color var(--transition);
 }
 
 .photo-grid button:hover {
-  border-color: var(--gold);
+  border-color: var(--navy);
 }
 
 .photo-grid img {
@@ -672,76 +981,66 @@ textarea {
   object-fit: cover;
 }
 
+/* Lightbox: floats above the page, so it carries the overlay shadow. */
 .photo-viewer {
-  width: min(960px, calc(100% - var(--space-4)));
-  max-height: calc(100% - var(--space-4));
-  padding: var(--space-2);
-  border: 1px solid var(--line);
+  width: min(960px, calc(100% - var(--space-32)));
+  max-height: calc(100% - var(--space-32));
+  padding: var(--space-16);
+  background-color: var(--surface-0);
+  border: 0;
   border-radius: var(--radius);
+  box-shadow: var(--elevation-overlay);
+  color: var(--text);
 }
 
 .photo-viewer::backdrop {
-  background-color: rgb(34 34 34 / 0.8);
+  background-color: var(--scrim);
 }
 
 .photo-viewer img {
   width: auto;
   max-height: 70vh;
-  margin: 0 auto var(--space-2);
+  margin: 0 auto var(--space-16);
+  border-radius: var(--radius);
 }
 
-/* Footer */
-.site-footer {
-  margin-top: var(--space-4);
-  padding-block: var(--space-5) var(--space-3);
-  background-color: var(--navy);
-  color: var(--white);
-}
-
-.site-footer h2 {
-  font-size: var(--text-h3);
-  color: var(--white);
-}
-
-.site-footer a {
-  color: var(--white);
-}
-
-.site-footer ul {
-  padding: 0;
-  list-style: none;
-}
-
-.site-footer .to-add {
-  border-color: var(--white);
-}
-
-.footer-columns {
-  display: grid;
-  gap: var(--space-4);
-  margin-bottom: var(--space-4);
-}
-
-.footer-small {
-  margin: 0;
-  padding-top: var(--space-2);
-  border-top: 1px solid rgb(255 255 255 / 0.3);
-  font-size: var(--text-small);
-  max-width: none;
-}
+/* ---------- Wider screens ---------- */
 
 @media (min-width: 768px) {
   :root {
-    --text-h1: 2.5rem;
-    --text-h2: 1.75rem;
+    --gutter: var(--space-24);
   }
 
-  .wrap {
-    padding-inline: var(--space-3);
+  /* The header stays in view on screens with room for it. On phones it takes up
+     too much of the screen, so it scrolls away with the page. */
+  html {
+    scroll-padding-top: var(--space-96);
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .page-title,
+  .section {
+    padding-block: var(--space-64);
   }
 
   .two-column {
     grid-template-columns: 1fr 1fr;
+    gap: var(--space-48);
+  }
+
+  .page-title.two-column {
+    grid-template-columns: 1fr;
+    padding-block: var(--space-96);
+  }
+
+  .event-list,
+  .ministry-list {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .footer-columns {
@@ -757,9 +1056,52 @@ textarea {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --fade: 0s;
+@media (min-width: 1024px) {
+  h1 { font-size: var(--text-48); }
+
+  .site-header .wrap {
+    padding-block: var(--space-16);
+  }
+
+  .menu-button {
+    display: none;
+  }
+
+  .site-nav {
+    flex-basis: auto;
+  }
+
+  .site-name {
+    flex: 0 1 auto;
+  }
+
+  .site-nav ul,
+  .site-nav ul.is-open {
+    display: flex;
+    gap: var(--space-16);
+  }
+
+  .site-nav li {
+    border-top: 0;
+  }
+
+  .site-nav a {
+    font-size: var(--text-14);
+  }
+
+  .ministry-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .site-nav ul,
+  .site-nav ul.is-open {
+    gap: var(--space-24);
+  }
+
+  .site-nav a {
+    font-size: var(--text-16);
   }
 }
 

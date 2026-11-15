@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Events | Royal Temple Worship Centre Admin</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="admin-sidebar" id="admin-sidebar"></aside>
+
+    <div class="admin-main">
+      <header class="admin-topbar" id="admin-topbar"></header>
+
+      <main class="admin-content">
+        <div class="page-head has-action">
+          <div>
+            <h1>Events</h1>
+            <p>Conventions, revivals and other gatherings. Changes show on the website at once.</p>
+          </div>
+          <button type="button" class="btn btn-primary" id="add-event">Add event</button>
+        </div>
+
+        <div class="alert alert-error" id="page-alert" role="alert"></div>
+
+        <div class="filter-bar">
+          <div class="form-group">
+            <label for="event-when">Show</label>
+            <select id="event-when">
+              <option value="upcoming">Upcoming events</option>
+              <option value="past">Past events</option>
+              <option value="all">All events</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="event-table"></div>
+        <div id="event-pagination"></div>
+      </main>
+    </div>
+  </div>
+
+  <script src="js/adminApi.js"></script>
+  <script src="js/adminAuth.js"></script>
+  <script src="js/components/dom.js"></script>
+  <script src="js/components/toast.js"></script>
+  <script src="js/components/dialog.js"></script>
+  <script src="js/components/table.js"></script>
+  <script src="js/components/imageUpload.js"></script>
+  <script src="js/components/form.js"></script>
+  <script src="js/components/crud.js"></script>
+  <script src="js/pages/events.js"></script>
+</body>
+</html>

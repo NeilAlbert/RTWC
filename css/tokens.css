@@ -1,0 +1,96 @@
+/* Royal Temple Worship Centre, The Church of Pentecost.
+   Design tokens shared by the public site and the admin dashboard.
+   Every colour, size and space in the other stylesheets comes from this file. */
+
+:root {
+  /* Navy: the brand colour and its tonal scale */
+  --navy-900: #132444; /* footer, admin sidebar, text on gold */
+  --navy: #1F3864;     /* brand navy: headings, links, primary buttons, bands */
+  --navy-700: #2B4A7F; /* dividers on navy */
+  --navy-600: #3A5C93; /* hover on primary buttons */
+  --navy-100: #DCE4F1; /* light text on navy */
+  --navy-50: #EEF2F8;  /* tint: open accordion item, hover on secondary buttons, selected rows */
+
+  /* Gold. --gold fails 4.5:1 as small text on light surfaces, so it is used for fills,
+     rules and borders, and for text only on navy-900. Use --gold-text on light surfaces. */
+  --gold: #B8860B;
+  --gold-text: #7F5D07; /* 5.2:1 on surface-2, higher on surface-0 and surface-1 */
+
+  /* Warm neutrals */
+  --surface-0: #FFFFFF; /* raised panels, cards, inputs */
+  --surface-1: #FAF8F4; /* page background */
+  --surface-2: #F1EEE7; /* alternate bands, inset areas, placeholders */
+  --border: #E2DDD2;
+  --border-strong: #CFC8B8;
+  --border-input: #8A8272; /* form controls: 3:1 against every surface */
+  --text: #222222;
+  --text-muted: #5E584E;   /* 6:1 or better on every surface */
+  --text-on-navy: #FFFFFF;
+
+  /* Status: a solid colour and a tint. The solid passes 4.5:1 as text on its tint,
+     and white text passes on the solid. */
+  --success: #1E6B3A;
+  --success-tint: #E6F2EA;
+  --warning: #7A4F00;
+  --warning-tint: #FBF0D6;
+  --danger: #A4241B;
+  --danger-tint: #FBEAE8;
+
+  --scrim: rgb(19 36 68 / 0.8); /* behind the lightbox and dialogs */
+  --photo-tint: rgb(19 36 68 / 0.7); /* solid navy over the home page photo, so white text passes 4.5:1 */
+
+  /* Type */
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+
+  --text-12: 0.75rem;
+  --text-14: 0.875rem;
+  --text-16: 1rem;
+  --text-18: 1.125rem;
+  --text-22: 1.375rem;
+  --text-28: 1.75rem;
+  --text-36: 2.25rem;
+  --text-48: 3rem;
+
+  --leading-heading: 1.2; /* 28px and larger */
+  --leading-snug: 1.35;   /* 18px and 22px, labels */
+  --leading-body: 1.6;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --measure: 70ch; /* longest line of running text */
+
+  /* Space */
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-48: 48px;
+  --space-64: 64px;
+  --space-96: 96px;
+
+  /* Shape */
+  --radius: 4px;     /* controls, panels, images */
+  --radius-tag: 2px; /* small tags */
+  --control-height: 44px;
+  --container: 1200px;
+
+  /* Elevation. The overlay shadow is only for things that float above the page:
+     menus, dialogs, toasts and the lightbox. */
+  --elevation-0: none;
+  --elevation-overlay: 0 4px 16px rgb(20 30 50 / 0.12);
+
+  /* Motion: colour, background, border and underline changes only */
+  --transition: 150ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition: 0s;
+  }
+}

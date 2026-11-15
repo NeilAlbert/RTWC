@@ -8,7 +8,7 @@ const { getPagination, buildPaginationMeta } = require('../utils/pagination');
 
 const { NotFoundError } = require('../utils/errors');
 
-/** GET /api/sermons — public, ?speaker=&date=&page=&limit= */
+/** GET /api/sermons — public, ?speaker=&date=&q=&page=&limit= */
 async function getSermons(req, res, next) {
   try {
     const { page, limit, offset } = getPagination(req.query.page, req.query.limit, 10, 50);
@@ -16,6 +16,7 @@ async function getSermons(req, res, next) {
     const filter = {
       speaker: req.query.speaker || undefined,
       date: req.query.date || undefined,
+      q: req.query.q || undefined,
     };
 
     const total = await Sermon.countAll(filter);

@@ -12,12 +12,16 @@
  * =============================================================================
  */
 
-/** Error class carrying the HTTP status (0 = network error). */
+/**
+ * Error class carrying the HTTP status (0 = network error) and, when the server
+ * rejected particular fields, the list of { field, message } it sent back.
+ */
 class ApiError extends Error {
-  constructor(message, status = 0) {
+  constructor(message, status = 0, errors = []) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
+    this.errors = errors;
   }
 }
 
@@ -42,7 +46,9 @@ const AdminApi = (() => {
   }
 
   async function request(path, options = {}) {
-    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    // A file upload (FormData) sets its own Content-Type, with the boundary the server needs.
+    const isUpload = options.body instanceof FormData;
+    const headers = { ...(isUpload ? {} : { 'Content-Type': 'application/json' }), ...(options.headers || {}) };
     const token = getToken();
     if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -74,7 +80,8 @@ const AdminApi = (() => {
     if (!response.ok) {
       const message = (body && (body.message || body.error))
         || `The server returned an error (${response.status}).`;
-      throw new ApiError(message, response.status);
+      const fieldErrors = body && body.data && Array.isArray(body.data.errors) ? body.data.errors : [];
+      throw new ApiError(message, response.status, fieldErrors);
     }
 
     return body; // { success, data, message }
@@ -88,6 +95,8 @@ const AdminApi = (() => {
     put: (path, data) => request(path, { method: 'PUT', body: JSON.stringify(data) }),
     patch: (path, data) => request(path, { method: 'PATCH', body: JSON.stringify(data) }),
     delete: (path) => request(path, { method: 'DELETE' }),
+    /** Sends a file. `formData` is a FormData with the file in it. */
+    upload: (path, formData) => request(path, { method: 'POST', body: formData }),
   };
 })();
 

@@ -71,10 +71,15 @@ async function getLeadership(req, res, next) {
   }
 }
 
+/** A ministry is kept only for ministry leaders. */
+function memberValues(body) {
+  return { ...body, ministry_id: body.role === 'ministry_leader' ? body.ministry_id : null };
+}
+
 /** POST /api/leadership — admin only */
 async function createMember(req, res, next) {
   try {
-    const member = await Leadership.create(req.body);
+    const member = await Leadership.create(memberValues(req.body));
     return res.status(201).json({ success: true, message: 'Leadership member created successfully.', data: formatMember(member) });
   } catch (err) {
     return next(err);
@@ -86,7 +91,7 @@ async function updateMember(req, res, next) {
   try {
     const existing = await Leadership.findById(req.params.id);
     if (!existing) return next(new NotFoundError('Leadership member not found.'));
-    const member = await Leadership.update(req.params.id, req.body);
+    const member = await Leadership.update(req.params.id, memberValues(req.body));
     return res.json({ success: true, message: 'Leadership member updated successfully.', data: formatMember(member) });
   } catch (err) {
     return next(err);

@@ -16,6 +16,39 @@ async function findAll() {
   return rows;
 }
 
+/** Every ministry with the number of leaders linked to it. For the admin list. */
+async function findAllWithLeaderCount() {
+  const [rows] = await pool.query(
+    `SELECT m.id, m.name, m.slug, m.description, m.icon_url, m.created_at,
+            COUNT(l.id) AS leader_count
+     FROM ministries m
+     LEFT JOIN leadership l ON l.ministry_id = m.id
+     GROUP BY m.id, m.name, m.slug, m.description, m.icon_url, m.created_at
+     ORDER BY m.name ASC`
+  );
+  return rows;
+}
+
+/** A ministry with this name (ignoring case), other than the one being edited. */
+async function findByName(name, exceptId = 0) {
+  const [rows] = await pool.query(
+    'SELECT id FROM ministries WHERE LOWER(name) = LOWER(?) AND id <> ? LIMIT 1',
+    [name, exceptId]
+  );
+  return rows[0] || null;
+}
+
+/** True when another ministry already uses this slug. */
+async function slugTaken(slug, exceptId = 0) {
+  const [rows] = await pool.query('SELECT id FROM ministries WHERE slug = ? AND id <> ? LIMIT 1', [slug, exceptId]);
+  return rows.length > 0;
+}
+
+async function countLeaders(id) {
+  const [rows] = await pool.query('SELECT COUNT(*) AS total FROM leadership WHERE ministry_id = ?', [id]);
+  return rows[0].total;
+}
+
 async function findBySlug(slug) {
   const [rows] = await pool.query(
     'SELECT id, name, slug, description, icon_url, created_at FROM ministries WHERE slug = ? LIMIT 1',
@@ -53,4 +86,6 @@ async function remove(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findAll, findBySlug, findById, create, update, remove };
+module.exports = {
+  findAll, findAllWithLeaderCount, findByName, slugTaken, countLeaders, findBySlug, findById, create, update, remove,
+};

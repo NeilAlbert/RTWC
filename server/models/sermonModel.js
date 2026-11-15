@@ -9,24 +9,31 @@
  */
 const pool = require('../config/db');
 
-async function countAll({ speaker, date } = {}) {
+/** Turns a search phrase into a LIKE pattern. % and _ in the phrase match themselves. */
+function titlePattern(q) {
+  return `%${String(q).replace(/[\\%_]/g, (char) => `\\${char}`)}%`;
+}
+
+async function countAll({ speaker, date, q } = {}) {
   const where = [];
   const params = [];
 
   if (speaker) { where.push('speaker = ?'); params.push(speaker); }
   if (date) { where.push('sermon_date = ?'); params.push(date); }
+  if (q) { where.push('title LIKE ?'); params.push(titlePattern(q)); }
 
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
   const [rows] = await pool.query(`SELECT COUNT(*) AS total FROM sermons ${whereSql}`, params);
   return rows[0].total;
 }
 
-async function findAll({ speaker, date, limit, offset } = {}) {
+async function findAll({ speaker, date, q, limit, offset } = {}) {
   const where = [];
   const params = [];
 
   if (speaker) { where.push('speaker = ?'); params.push(speaker); }
   if (date) { where.push('sermon_date = ?'); params.push(date); }
+  if (q) { where.push('title LIKE ?'); params.push(titlePattern(q)); }
 
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
   params.push(limit, offset);
