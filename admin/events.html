@@ -4,54 +4,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>Events | Royal Temple Worship Centre Admin</title>
+  <title>Events | Royal Temple Worship Centre admin</title>
   <link rel="stylesheet" href="/css/tokens.css">
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <script src="/admin/js/adminAuth.js"></script>
 </head>
-<body>
-  <div class="admin-layout">
-    <aside class="admin-sidebar" id="admin-sidebar"></aside>
-
-    <div class="admin-main">
-      <header class="admin-topbar" id="admin-topbar"></header>
-
-      <main class="admin-content">
-        <div class="page-head has-action">
-          <div>
+<body data-page="events" data-title="Events">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="shell-main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content" id="main" tabindex="-1">
+        <div class="page-header">
+          <div class="page-header-text">
             <h1>Events</h1>
-            <p>Conventions, revivals and other gatherings. Changes show on the website at once.</p>
+            <p class="page-description">Events shown on the public Events page and the home page.</p>
           </div>
-          <button type="button" class="btn btn-primary" id="add-event">Add event</button>
+          <button class="button" type="button" id="page-action">Add event</button>
         </div>
 
-        <div class="alert alert-error" id="page-alert" role="alert"></div>
-
-        <div class="filter-bar">
-          <div class="form-group">
-            <label for="event-when">Show</label>
-            <select id="event-when">
-              <option value="upcoming">Upcoming events</option>
-              <option value="past">Past events</option>
-              <option value="all">All events</option>
-            </select>
-          </div>
-        </div>
-
-        <div id="event-table"></div>
-        <div id="event-pagination"></div>
+        <div id="page-root"></div>
       </main>
     </div>
   </div>
 
-  <script src="js/adminApi.js"></script>
-  <script src="js/adminAuth.js"></script>
-  <script src="js/components/dom.js"></script>
-  <script src="js/components/toast.js"></script>
-  <script src="js/components/dialog.js"></script>
-  <script src="js/components/table.js"></script>
-  <script src="js/components/imageUpload.js"></script>
-  <script src="js/components/form.js"></script>
-  <script src="js/components/crud.js"></script>
-  <script src="js/pages/events.js"></script>
+  <script type="module" src="/admin/js/pages/events.js"></script>
 </body>
 </html>

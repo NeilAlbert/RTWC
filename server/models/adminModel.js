@@ -1,36 +1,50 @@
 /**
- * =============================================================================
- * models/adminModel.js — SQL query functions for the admins table.
+ * models/adminModel.js: queries for the admins table. There is one admin account.
+ * Every query uses ? placeholders.
  *
- * ALL queries use parameterized placeholders (?) — never string concatenation
- * — to prevent SQL injection.
- * =============================================================================
+ * password_hash is returned only by the two "WithHash" functions, which the auth
+ * controller uses to compare passwords. It is never sent to a browser.
  */
 const pool = require('../config/db');
 
-/**
- * Find an admin by email. Includes password_hash — ONLY for use inside the
- * auth controller (login comparison). Never return this to a client.
- * @param {string} email
- */
-async function findByEmail(email) {
+/** For sign-in. The email must already be trimmed and lowercased. */
+async function findByEmailWithHash(email) {
   const [rows] = await pool.query(
-    'SELECT id, name, email, password_hash, created_at FROM admins WHERE email = ? LIMIT 1',
+    'SELECT id, name, email, password_hash, token_valid_after FROM admins WHERE email = ? LIMIT 1',
     [email]
   );
   return rows[0] || null;
 }
 
-/**
- * Get a public admin profile (no password hash). Used for token identity.
- * @param {number} id
- */
-async function findById(id) {
+/** For the password change. */
+async function findByIdWithHash(id) {
   const [rows] = await pool.query(
-    'SELECT id, name, email, created_at FROM admins WHERE id = ? LIMIT 1',
+    'SELECT id, name, email, password_hash, token_valid_after FROM admins WHERE id = ? LIMIT 1',
     [id]
   );
   return rows[0] || null;
 }
 
-module.exports = { findByEmail, findById };
+/** The admin without the password hash. Used to check every signed-in request. */
+async function findById(id) {
+  const [rows] = await pool.query(
+    'SELECT id, name, email, token_valid_after FROM admins WHERE id = ? LIMIT 1',
+    [id]
+  );
+  return rows[0] || null;
+}
+
+/** Saves a new password hash and retires every token issued up to validAfter (UTC string). */
+async function updatePassword(id, passwordHash, validAfter) {
+  await pool.query(
+    'UPDATE admins SET password_hash = ?, token_valid_after = ? WHERE id = ?',
+    [passwordHash, validAfter, id]
+  );
+}
+
+/** Retires every token issued up to validAfter (UTC string). */
+async function setTokenValidAfter(id, validAfter) {
+  await pool.query('UPDATE admins SET token_valid_after = ? WHERE id = ?', [validAfter, id]);
+}
+
+module.exports = { findByEmailWithHash, findByIdWithHash, findById, updatePassword, setTokenValidAfter };

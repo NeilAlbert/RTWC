@@ -4,49 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>Prayer Requests | Royal Temple Worship Centre Admin</title>
+  <title>Prayer Requests | Royal Temple Worship Centre admin</title>
   <link rel="stylesheet" href="/css/tokens.css">
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <script src="/admin/js/adminAuth.js"></script>
 </head>
-<body>
-  <div class="admin-layout">
-    <aside class="admin-sidebar" id="admin-sidebar"></aside>
-
-    <div class="admin-main">
-      <header class="admin-topbar" id="admin-topbar"></header>
-
-      <main class="admin-content">
-        <div class="page-head">
-          <h1>Prayer Requests</h1>
-          <p>Prayer requests sent from the website. A private request shows its name and text only when it is opened.</p>
-        </div>
-
-        <div class="alert alert-error" id="page-alert" role="alert"></div>
-
-        <div class="filter-bar">
-          <div class="form-group">
-            <label for="prayer-status">Status</label>
-            <select id="prayer-status">
-              <option value="">All requests</option>
-              <option value="new">New</option>
-              <option value="prayed_for">Prayed for</option>
-            </select>
+<body data-page="prayer-requests" data-title="Prayer Requests">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="shell-main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content" id="main" tabindex="-1">
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>Prayer Requests</h1>
+            <p class="page-description">This page is built in Phase 3. Until then, the previous version is kept in the admin-old folder.</p>
           </div>
         </div>
-
-        <div id="prayer-table"></div>
-        <div id="prayer-pagination"></div>
       </main>
     </div>
   </div>
 
-  <script src="js/adminApi.js"></script>
-  <script src="js/adminAuth.js"></script>
-  <script src="js/components/dom.js"></script>
-  <script src="js/components/toast.js"></script>
-  <script src="js/components/dialog.js"></script>
-  <script src="js/components/table.js"></script>
-  <script src="js/components/inbox.js"></script>
-  <script src="js/pages/prayer-requests.js"></script>
+  <script type="module" src="/admin/js/shell.js"></script>
 </body>
 </html>

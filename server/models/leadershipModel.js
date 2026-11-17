@@ -8,6 +8,7 @@
  * =============================================================================
  */
 const pool = require('../config/db');
+const { likePattern } = require('../utils/search');
 
 const SELECT_COLUMNS = `
   l.id, l.name, l.role, l.ministry_id, l.photo_url, l.bio, l.display_order, l.created_at,
@@ -24,16 +25,32 @@ async function findAll() {
   return rows;
 }
 
-/** Flat list for the admin table, optionally one role only. */
-async function findForAdmin({ role } = {}) {
-  const where = role ? 'WHERE l.role = ?' : '';
+/** WHERE and its values for the admin list: one role only, and/or `q` in the name. */
+function adminFilter({ role, q }) {
+  const conditions = [];
+  const params = [];
+  if (role) { conditions.push('l.role = ?'); params.push(role); }
+  if (q) { conditions.push('l.name LIKE ?'); params.push(likePattern(q)); }
+  return { where: conditions.length ? `WHERE ${conditions.join(' AND ')}` : '', params };
+}
+
+async function countForAdmin(filter = {}) {
+  const { where, params } = adminFilter(filter);
+  const [rows] = await pool.query(`SELECT COUNT(*) AS total FROM leadership l ${where}`, params);
+  return rows[0].total;
+}
+
+/** A page of the flat list for the admin table. */
+async function findForAdmin({ role, q, limit, offset }) {
+  const { where, params } = adminFilter({ role, q });
   const [rows] = await pool.query(
     `SELECT ${SELECT_COLUMNS}
      FROM leadership l
      LEFT JOIN ministries m ON m.id = l.ministry_id
      ${where}
-     ORDER BY l.display_order ASC, l.name ASC, l.id ASC`,
-    role ? [role] : []
+     ORDER BY l.display_order ASC, l.name ASC, l.id ASC
+     LIMIT ? OFFSET ?`,
+    [...params, limit, offset]
   );
   return rows;
 }
@@ -73,4 +90,4 @@ async function remove(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findAll, findForAdmin, findById, create, update, remove };
+module.exports = { findAll, countForAdmin, findForAdmin, findById, create, update, remove };

@@ -76,4 +76,4 @@ function uploadImage(req, res, next) {
   });
 }
 
-module.exports = { uploadImage };
+module.exports = { uploadImage, UPLOAD_DIR };

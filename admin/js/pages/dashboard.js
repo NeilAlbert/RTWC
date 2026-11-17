@@ -1,34 +1,55 @@
-/* Admin dashboard: five counts, each with a link to its page.
-   The counts come from GET /api/admin/stats. */
+/**
+ * admin/js/pages/dashboard.js: five counts, the newest unread messages and the
+ * next events. All of it comes from one request, shared with the sidebar.
+ */
+import { el, formatDate, formatDateTime } from '../components/dom.js';
+import { showLoading, showEmpty, showError } from '../components/states.js';
+import { loadStats, refreshCounts } from '../shell.js';
 
-document.addEventListener('DOMContentLoaded', async () => {
-  if (!AdminAuth.checkAuth()) return;
+const errorBox = document.getElementById('dashboard-error');
+const messagesBox = document.getElementById('new-messages');
+const eventsBox = document.getElementById('upcoming-events');
 
-  AdminAuth.initShell('dashboard', 'Dashboard');
+function showMessages(messages) {
+  if (messages.length === 0) {
+    showEmpty(messagesBox, 'There are no new messages.');
+    return;
+  }
+  messagesBox.replaceChildren(el('ul', { class: 'item-list' }, messages.map((message) => el('li', {},
+    el('a', { class: 'item-title', href: `/admin/messages.html?id=${encodeURIComponent(message.id)}`, text: message.name }),
+    el('p', { class: 'item-meta', text: formatDateTime(message.created_at) }),
+    el('p', { class: 'item-preview', text: message.preview })))));
+}
 
-  // Which count goes in which panel.
-  const PANELS = {
-    sermons: 'stat-sermons',
-    upcomingEvents: 'stat-events',
-    newMessages: 'stat-messages',
-    newPrayerRequests: 'stat-prayers',
-    subscribers: 'stat-newsletter',
-  };
+function showEvents(events) {
+  if (events.length === 0) {
+    showEmpty(eventsBox, 'There are no upcoming events.', { label: 'Add an event', href: '/admin/events.html' });
+    return;
+  }
+  eventsBox.replaceChildren(el('ul', { class: 'item-list' }, events.map((event) => el('li', {},
+    el('p', { class: 'item-title', text: event.title }),
+    el('p', { class: 'item-meta', text: [formatDate(event.event_date), event.event_time, event.location].filter(Boolean).join(', ') })))));
+}
 
-  function setValue(panelId, text) {
-    const value = document.querySelector(`#${panelId} .stat-value`);
-    if (value) value.textContent = text;
+async function load(request) {
+  errorBox.replaceChildren();
+  showLoading(messagesBox, 3);
+  showLoading(eventsBox, 3);
+
+  const result = await request;
+  if (!result.ok) {
+    showError(errorBox, result.message, () => load(refreshCounts()));
+    messagesBox.replaceChildren();
+    eventsBox.replaceChildren();
+    return;
   }
 
-  try {
-    const response = await AdminApi.get('/admin/stats');
-    Object.entries(PANELS).forEach(([key, panelId]) => setValue(panelId, String(response.data[key] ?? 0)));
-  } catch (err) {
-    const banner = document.getElementById('dashboard-error');
-    banner.textContent = err.status === 0
-      ? 'The counts could not be loaded because the server cannot be reached.'
-      : `The counts could not be loaded. ${err.message}`;
-    banner.classList.add('visible');
-    Object.values(PANELS).forEach((panelId) => setValue(panelId, '-'));
-  }
-});
+  const stats = result.data;
+  document.querySelectorAll('[data-stat]').forEach((node) => {
+    node.textContent = String(Number(stats[node.dataset.stat]) || 0);
+  });
+  showMessages(stats.recentMessages || []);
+  showEvents(stats.nextEvents || []);
+}
+
+load(loadStats());

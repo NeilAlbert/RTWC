@@ -35,13 +35,22 @@ const newsletterLimiter = rateLimit({
   message: { success: false, message: 'Too many requests. Please try again later.' },
 });
 
-/** Login attempts: max 10 per 15 minutes per IP (brute-force protection). */
+/** Sign-in: 10 attempts per 15 minutes per IP. The login page shows this message. */
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
   standardHeaders,
   legacyHeaders,
-  message: { success: false, message: 'Too many login attempts. Please try again later.' },
+  message: { success: false, data: null, message: 'Too many attempts. Please try again in a few minutes.' },
+});
+
+/** Password change: 10 attempts per 15 minutes per IP, so a stolen session cannot guess the current password. */
+const passwordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders,
+  legacyHeaders,
+  message: { success: false, data: null, message: 'Too many attempts. Please try again in a few minutes.' },
 });
 
 module.exports = {
@@ -49,4 +58,5 @@ module.exports = {
   prayerRequestsLimiter,
   newsletterLimiter,
   authLimiter,
+  passwordLimiter,
 };

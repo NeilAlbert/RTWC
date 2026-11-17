@@ -8,11 +8,7 @@
  * =============================================================================
  */
 const pool = require('../config/db');
-
-/** Turns a search phrase into a LIKE pattern. % and _ in the phrase match themselves. */
-function titlePattern(q) {
-  return `%${String(q).replace(/[\\%_]/g, (char) => `\\${char}`)}%`;
-}
+const { likePattern } = require('../utils/search');
 
 async function countAll({ speaker, date, q } = {}) {
   const where = [];
@@ -20,7 +16,7 @@ async function countAll({ speaker, date, q } = {}) {
 
   if (speaker) { where.push('speaker = ?'); params.push(speaker); }
   if (date) { where.push('sermon_date = ?'); params.push(date); }
-  if (q) { where.push('title LIKE ?'); params.push(titlePattern(q)); }
+  if (q) { where.push('(title LIKE ? OR speaker LIKE ?)'); params.push(likePattern(q), likePattern(q)); }
 
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
   const [rows] = await pool.query(`SELECT COUNT(*) AS total FROM sermons ${whereSql}`, params);
@@ -33,7 +29,7 @@ async function findAll({ speaker, date, q, limit, offset } = {}) {
 
   if (speaker) { where.push('speaker = ?'); params.push(speaker); }
   if (date) { where.push('sermon_date = ?'); params.push(date); }
-  if (q) { where.push('title LIKE ?'); params.push(titlePattern(q)); }
+  if (q) { where.push('(title LIKE ? OR speaker LIKE ?)'); params.push(likePattern(q), likePattern(q)); }
 
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
   params.push(limit, offset);
@@ -60,7 +56,7 @@ async function create({ title, speaker, description, video_url, thumbnail_url, s
   const [result] = await pool.query(
     `INSERT INTO sermons (title, speaker, description, video_url, thumbnail_url, sermon_date)
      VALUES (?, ?, ?, ?, ?, ?)`,
-    [title, speaker, description, video_url || null, thumbnail_url || null, sermon_date]
+    [title, speaker, description || null, video_url || null, thumbnail_url || null, sermon_date]
   );
   return findById(result.insertId);
 }
@@ -70,7 +66,7 @@ async function update(id, { title, speaker, description, video_url, thumbnail_ur
     `UPDATE sermons
      SET title = ?, speaker = ?, description = ?, video_url = ?, thumbnail_url = ?, sermon_date = ?
      WHERE id = ?`,
-    [title, speaker, description, video_url || null, thumbnail_url || null, sermon_date, id]
+    [title, speaker, description || null, video_url || null, thumbnail_url || null, sermon_date, id]
   );
   return findById(id);
 }

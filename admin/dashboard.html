@@ -4,60 +4,69 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>Dashboard | Royal Temple Worship Centre Admin</title>
+  <title>Dashboard | Royal Temple Worship Centre admin</title>
   <link rel="stylesheet" href="/css/tokens.css">
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <script src="/admin/js/adminAuth.js"></script>
 </head>
-<body>
-  <div class="admin-layout">
-    <aside class="admin-sidebar" id="admin-sidebar"></aside>
-
-    <div class="admin-main">
-      <header class="admin-topbar" id="admin-topbar"></header>
-
-      <main class="admin-content">
-        <div class="page-head">
-          <h1>Dashboard</h1>
-          <p>Overview of site content and pending items.</p>
-        </div>
-
-        <div class="alert alert-error" id="dashboard-error" role="alert"></div>
-
-        <div class="stats-grid">
-          <div class="stat-card" id="stat-sermons">
-            <div class="stat-value">-</div>
-            <div class="stat-label">Sermons</div>
-            <a class="stat-link" href="sermons.html">View<span class="visually-hidden"> sermons</span></a>
-          </div>
-          <div class="stat-card" id="stat-events">
-            <div class="stat-value">-</div>
-            <div class="stat-label">Upcoming events</div>
-            <a class="stat-link" href="events.html">View<span class="visually-hidden"> events</span></a>
-          </div>
-          <div class="stat-card" id="stat-messages">
-            <div class="stat-value">-</div>
-            <div class="stat-label">New messages</div>
-            <a class="stat-link" href="messages.html">View<span class="visually-hidden"> messages</span></a>
-          </div>
-          <div class="stat-card" id="stat-prayers">
-            <div class="stat-value">-</div>
-            <div class="stat-label">New prayer requests</div>
-            <a class="stat-link" href="prayer-requests.html">View<span class="visually-hidden"> prayer requests</span></a>
-          </div>
-          <div class="stat-card" id="stat-newsletter">
-            <div class="stat-value">-</div>
-            <div class="stat-label">Newsletter subscribers</div>
-            <a class="stat-link" href="newsletter.html">View<span class="visually-hidden"> newsletter subscribers</span></a>
+<body data-page="dashboard" data-title="Dashboard">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="shell-main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content" id="main" tabindex="-1">
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>Dashboard</h1>
+            <p class="page-description">What is on the website now, and what is waiting to be read.</p>
           </div>
         </div>
 
-        <p class="page-note"><a href="settings.html">Edit the church details shown on the website</a></p>
+        <div id="dashboard-error"></div>
+
+        <ul class="stat-grid">
+          <li class="stat">
+            <span class="stat-number" data-stat="sermons">0</span>
+            <span class="stat-label">Sermons</span>
+            <a class="stat-link" href="/admin/sermons.html">View<span class="visually-hidden"> sermons</span></a>
+          </li>
+          <li class="stat">
+            <span class="stat-number" data-stat="upcomingEvents">0</span>
+            <span class="stat-label">Upcoming events</span>
+            <a class="stat-link" href="/admin/events.html">View<span class="visually-hidden"> events</span></a>
+          </li>
+          <li class="stat">
+            <span class="stat-number" data-stat="newMessages">0</span>
+            <span class="stat-label">New messages</span>
+            <a class="stat-link" href="/admin/messages.html">View<span class="visually-hidden"> messages</span></a>
+          </li>
+          <li class="stat">
+            <span class="stat-number" data-stat="newPrayerRequests">0</span>
+            <span class="stat-label">New prayer requests</span>
+            <a class="stat-link" href="/admin/prayer-requests.html">View<span class="visually-hidden"> prayer requests</span></a>
+          </li>
+          <li class="stat">
+            <span class="stat-number" data-stat="subscribers">0</span>
+            <span class="stat-label">Newsletter subscribers</span>
+            <a class="stat-link" href="/admin/newsletter.html">View<span class="visually-hidden"> newsletter subscribers</span></a>
+          </li>
+        </ul>
+
+        <div class="panel-columns">
+          <section class="panel" aria-labelledby="new-messages-heading">
+            <div class="panel-header"><h2 id="new-messages-heading">New messages</h2></div>
+            <div id="new-messages"></div>
+          </section>
+          <section class="panel" aria-labelledby="upcoming-events-heading">
+            <div class="panel-header"><h2 id="upcoming-events-heading">Upcoming events</h2></div>
+            <div id="upcoming-events"></div>
+          </section>
+        </div>
       </main>
     </div>
   </div>
 
-  <script src="js/adminApi.js"></script>
-  <script src="js/adminAuth.js"></script>
-  <script src="js/pages/dashboard.js"></script>
+  <script type="module" src="/admin/js/pages/dashboard.js"></script>
 </body>
 </html>

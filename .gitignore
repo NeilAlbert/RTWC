@@ -11,3 +11,6 @@ backups/
 .claude/
 .freebuff/
 .github/
+
+# The previous admin, kept until the new one is confirmed. Not served.
+admin-old/

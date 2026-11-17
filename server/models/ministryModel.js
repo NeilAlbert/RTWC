@@ -8,6 +8,7 @@
  * =============================================================================
  */
 const pool = require('../config/db');
+const { likePattern } = require('../utils/search');
 
 async function findAll() {
   const [rows] = await pool.query(
@@ -16,15 +17,26 @@ async function findAll() {
   return rows;
 }
 
-/** Every ministry with the number of leaders linked to it. For the admin list. */
-async function findAllWithLeaderCount() {
+/** How many ministries there are, or how many have `q` in the name. */
+async function countAll({ q } = {}) {
+  const [rows] = q
+    ? await pool.query('SELECT COUNT(*) AS total FROM ministries WHERE name LIKE ?', [likePattern(q)])
+    : await pool.query('SELECT COUNT(*) AS total FROM ministries');
+  return rows[0].total;
+}
+
+/** A page of ministries, each with the number of leaders linked to it. For the admin list. */
+async function findAllWithLeaderCount({ q, limit, offset }) {
   const [rows] = await pool.query(
     `SELECT m.id, m.name, m.slug, m.description, m.icon_url, m.created_at,
             COUNT(l.id) AS leader_count
      FROM ministries m
      LEFT JOIN leadership l ON l.ministry_id = m.id
+     ${q ? 'WHERE m.name LIKE ?' : ''}
      GROUP BY m.id, m.name, m.slug, m.description, m.icon_url, m.created_at
-     ORDER BY m.name ASC`
+     ORDER BY m.name ASC, m.id ASC
+     LIMIT ? OFFSET ?`,
+    q ? [likePattern(q), limit, offset] : [limit, offset]
   );
   return rows;
 }
@@ -87,5 +99,5 @@ async function remove(id) {
 }
 
 module.exports = {
-  findAll, findAllWithLeaderCount, findByName, slugTaken, countLeaders, findBySlug, findById, create, update, remove,
+  findAll, countAll, findAllWithLeaderCount, findByName, slugTaken, countLeaders, findBySlug, findById, create, update, remove,
 };

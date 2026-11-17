@@ -1,35 +1,40 @@
 /**
- * =============================================================================
- * middleware/authMiddleware.js — JWT verification for admin routes.
+ * middleware/authMiddleware.js: lets a request through only for the signed-in admin.
  *
- * Reads the token from `Authorization: Bearer <token>`, verifies it against
- * JWT_SECRET, checks expiry, and attaches the admin payload to req.admin.
- * Rejects expired/invalid tokens with 401.
- * =============================================================================
+ * The token comes from "Authorization: Bearer <token>". It must be signed with
+ * JWT_SECRET, not expired, belong to an admin who still exists, and have been
+ * issued after that admin's token_valid_after (see utils/tokens.js). Anything
+ * else gets 401 with one message, so the reason is not revealed.
  */
-const jwt = require('jsonwebtoken');
-const logger = require('../utils/logger');
+const Admin = require('../models/adminModel');
+const { fromDbUtc, readToken } = require('../utils/tokens');
 
-function authMiddleware(req, res, next) {
+const SESSION_ENDED = 'Your session expired. Please log in again.';
+
+async function authMiddleware(req, res, next) {
   const header = req.headers.authorization || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
+  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+  const payload = token ? readToken(token) : null;
 
-  if (!token) {
-    return res.status(401).json({ success: false, message: 'Authentication required. Please log in.' });
+  if (!payload || !Number.isInteger(payload.sub) || !Number.isInteger(payload.iat)) {
+    return res.status(401).json({ success: false, data: null, message: SESSION_ENDED });
   }
 
+  let admin;
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // Attach the admin identity for downstream handlers.
-    req.admin = { id: decoded.sub, name: decoded.name, email: decoded.email };
-    return next();
+    admin = await Admin.findById(payload.sub);
   } catch (err) {
-    if (err.name === 'TokenExpiredError') {
-      return res.status(401).json({ success: false, message: 'Session expired. Please log in again.' });
-    }
-    logger.warn('Invalid JWT attempt', { message: err.message });
-    return res.status(401).json({ success: false, message: 'Invalid or expired token.' });
+    return next(err);
   }
+
+  const validAfter = admin ? fromDbUtc(admin.token_valid_after) : null;
+  if (!admin || (validAfter !== null && payload.iat <= validAfter)) {
+    return res.status(401).json({ success: false, data: null, message: SESSION_ENDED });
+  }
+
+  req.admin = { id: admin.id, name: admin.name, email: admin.email };
+  req.tokenIssuedAt = payload.iat;
+  return next();
 }
 
 module.exports = authMiddleware;

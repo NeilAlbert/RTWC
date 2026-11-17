@@ -22,7 +22,7 @@ function slugify(text) {
 function conflict(res, field, message) {
   return res.status(409).json({
     success: false,
-    message: 'Validation failed.',
+    message: 'Some fields need attention. Nothing was saved.',
     data: { errors: [{ field, message }] },
   });
 }

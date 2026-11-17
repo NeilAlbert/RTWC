@@ -4,46 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>Settings | Royal Temple Worship Centre Admin</title>
+  <title>Settings | Royal Temple Worship Centre admin</title>
   <link rel="stylesheet" href="/css/tokens.css">
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <script src="/admin/js/adminAuth.js"></script>
 </head>
-<body>
-  <div class="admin-layout">
-    <aside class="admin-sidebar" id="admin-sidebar"></aside>
-
-    <div class="admin-main">
-      <header class="admin-topbar" id="admin-topbar"></header>
-
-      <main class="admin-content">
-        <div class="page-head">
-          <h1>Site Settings</h1>
-          <p>The church details shown on the public website.</p>
-        </div>
-
-        <div class="alert alert-info">
-          Changes show on the website as soon as you save. A field left empty shows a marked placeholder on the site.
-        </div>
-        <div class="alert alert-success" id="settings-success" role="status"></div>
-        <div class="alert alert-error" id="settings-error" role="alert"></div>
-
-        <form id="settings-form" novalidate>
-          <div class="panel">
-            <div class="panel-title">Church Details and Live Stream</div>
-            <div class="form-grid" id="settings-fields"></div>
+<body data-page="settings" data-title="Settings">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="shell-main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content" id="main" tabindex="-1">
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>Settings</h1>
+            <p class="page-description">This page is built in Phase 3. Until then, the previous version is kept in the admin-old folder.</p>
           </div>
-
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary" id="save-settings-btn">Save changes</button>
-            <button type="button" class="btn btn-outline" id="reset-settings-btn">Discard changes</button>
-          </div>
-        </form>
+        </div>
       </main>
     </div>
   </div>
 
-  <script src="js/adminApi.js"></script>
-  <script src="js/adminAuth.js"></script>
-  <script src="js/pages/settings.js"></script>
+  <script type="module" src="/admin/js/shell.js"></script>
 </body>
 </html>

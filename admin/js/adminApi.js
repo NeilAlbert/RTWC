@@ -1,105 +1,84 @@
 /**
- * =============================================================================
- * admin/js/adminApi.js: shared fetch wrapper for the admin dashboard.
+ * admin/js/adminApi.js: the only place the admin talks to the server.
  *
- * - Attaches "Authorization: Bearer <token>" (from sessionStorage) to every
- *   request automatically.
- * - On any 401 response, invokes the configured unauthorized handler (which
- *   clears the token and redirects to login.html, because the token has expired).
- * - Throws descriptive errors; never fails silently.
- * - Returns the parsed JSON body, which follows the API's standard
- *   { success, data, message } shape.
- * =============================================================================
+ * Every call resolves to { ok, status, data, message, errors } and never throws.
+ * - The Bearer token is attached to each request.
+ * - A 401 ends the session and opens the login page. The sign-in request itself
+ *   is the one exception: there a 401 means a wrong email or password, and
+ *   redirecting would loop.
+ * - status is 0 when the server could not be reached.
+ * - errors is the list of { field, message } the server sent for a rejected form.
  */
+const API_BASE = '/api';
+const UNREACHABLE = 'Cannot reach the server. Please try again.';
+const SESSION_EXPIRED = 'Your session expired. Please log in again.';
+const FAILED = 'The server could not complete the request. Please try again.';
 
-/**
- * Error class carrying the HTTP status (0 = network error) and, when the server
- * rejected particular fields, the list of { field, message } it sent back.
- */
-class ApiError extends Error {
-  constructor(message, status = 0, errors = []) {
-    super(message);
-    this.name = 'ApiError';
-    this.status = status;
-    this.errors = errors;
+const auth = window.AdminAuth;
+
+async function request(method, path, body, { isLogin = false } = {}) {
+  const isFile = body instanceof FormData;
+  const headers = {};
+  // A file upload sets its own Content-Type, with the boundary the server needs.
+  if (body !== undefined && !isFile) headers['Content-Type'] = 'application/json';
+  const token = auth.getToken();
+  if (token && !isLogin) headers.Authorization = `Bearer ${token}`;
+
+  let payload = null;
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers,
+      body: body === undefined || isFile ? body : JSON.stringify(body),
+      cache: 'no-store',
+    });
+  } catch (err) {
+    return { ok: false, status: 0, data: null, message: UNREACHABLE, errors: [] };
   }
+
+  try {
+    payload = await response.json();
+  } catch (err) {
+    // Not JSON, for example a proxy's error page. The status decides the result.
+    payload = null;
+  }
+
+  if (response.status === 401 && !isLogin) {
+    auth.endSession('expired');
+    return { ok: false, status: 401, data: null, message: SESSION_EXPIRED, errors: [] };
+  }
+
+  const ok = response.ok && Boolean(payload) && payload.success !== false;
+  const data = payload && payload.data !== undefined ? payload.data : null;
+  const serverMessage = payload && typeof payload.message === 'string' ? payload.message : '';
+  return {
+    ok,
+    status: response.status,
+    data: ok ? data : null,
+    message: serverMessage || (ok ? '' : FAILED),
+    errors: !ok && data && Array.isArray(data.errors) ? data.errors : [],
+  };
 }
 
-const AdminApi = (() => {
-  /**
-   * Base URL of the backend API.
-   * The admin folder is served from the same origin as the API in production,
-   * so a relative path works. Change this if the API lives elsewhere.
-   */
-  const API_BASE = '/api';
-  const TOKEN_KEY = 'rtwc_admin_token';
+/** Builds "?a=1&b=2" from an object, leaving out empty values. */
+export function query(params = {}) {
+  const search = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') search.set(key, String(value));
+  });
+  const text = search.toString();
+  return text ? `?${text}` : '';
+}
 
-  let onUnauthorized = null;
-
-  function getToken() {
-    return sessionStorage.getItem(TOKEN_KEY);
-  }
-
-  /** Register the handler called when the API returns 401. */
-  function setUnauthorizedHandler(handler) {
-    onUnauthorized = handler;
-  }
-
-  async function request(path, options = {}) {
-    // A file upload (FormData) sets its own Content-Type, with the boundary the server needs.
-    const isUpload = options.body instanceof FormData;
-    const headers = { ...(isUpload ? {} : { 'Content-Type': 'application/json' }), ...(options.headers || {}) };
-    const token = getToken();
-    if (token) headers.Authorization = `Bearer ${token}`;
-
-    let response;
-    try {
-      response = await fetch(`${API_BASE}${path}`, { ...options, headers });
-    } catch {
-      throw new ApiError('The server could not be reached. Please check your connection and try again.', 0);
-    }
-
-    let body = null;
-    try {
-      body = await response.json();
-    } catch {
-      // Not JSON (for example an HTML error page). The status code is handled below.
-    }
-
-    if (response.status === 401) {
-      // Prefer the server's own message (e.g. "Invalid email or password." on
-      // the login page). Fall back to a session message when the body has none.
-      const message = (body && (body.message || body.error))
-        || 'You have been signed out. Please sign in again.';
-      // Only redirect for an expired/invalid session, NOT on the login page
-      // where a 401 simply means wrong credentials.
-      if (typeof onUnauthorized === 'function') onUnauthorized();
-      throw new ApiError(message, 401);
-    }
-
-    if (!response.ok) {
-      const message = (body && (body.message || body.error))
-        || `The server returned an error (${response.status}).`;
-      const fieldErrors = body && body.data && Array.isArray(body.data.errors) ? body.data.errors : [];
-      throw new ApiError(message, response.status, fieldErrors);
-    }
-
-    return body; // { success, data, message }
-  }
-
-  return {
-    setUnauthorizedHandler,
-    getToken,
-    get: (path) => request(path),
-    post: (path, data) => request(path, { method: 'POST', body: JSON.stringify(data) }),
-    put: (path, data) => request(path, { method: 'PUT', body: JSON.stringify(data) }),
-    patch: (path, data) => request(path, { method: 'PATCH', body: JSON.stringify(data) }),
-    delete: (path) => request(path, { method: 'DELETE' }),
-    /** Sends a file. `formData` is a FormData with the file in it. */
-    upload: (path, formData) => request(path, { method: 'POST', body: formData }),
-  };
-})();
-
-// Expose globally so adminAuth.js and page scripts can use it.
-window.AdminApi = AdminApi;
-window.ApiError = ApiError;
+export const api = {
+  get: (path) => request('GET', path),
+  post: (path, body) => request('POST', path, body),
+  put: (path, body) => request('PUT', path, body),
+  patch: (path, body) => request('PATCH', path, body),
+  delete: (path) => request('DELETE', path),
+  /** Sends one file. formData is a FormData holding it. */
+  upload: (path, formData) => request('POST', path, formData),
+  /** The password is sent exactly as typed. */
+  login: (email, password) => request('POST', '/auth/login', { email, password }, { isLogin: true }),
+};

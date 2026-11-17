@@ -4,52 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>Newsletter | Royal Temple Worship Centre Admin</title>
+  <title>Newsletter | Royal Temple Worship Centre admin</title>
   <link rel="stylesheet" href="/css/tokens.css">
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <script src="/admin/js/adminAuth.js"></script>
 </head>
-<body>
-  <div class="admin-layout">
-    <aside class="admin-sidebar" id="admin-sidebar"></aside>
-
-    <div class="admin-main">
-      <header class="admin-topbar" id="admin-topbar"></header>
-
-      <main class="admin-content">
-        <div class="page-head has-action">
-          <div>
+<body data-page="newsletter" data-title="Newsletter">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="shell-main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content" id="main" tabindex="-1">
+        <div class="page-header">
+          <div class="page-header-text">
             <h1>Newsletter</h1>
-            <p>People who asked to receive the church newsletter. The newest subscriber is listed first.</p>
-          </div>
-          <div class="page-head-action">
-            <button type="button" class="btn btn-primary" id="export-subscribers">Export as CSV</button>
-            <span class="hint" id="export-status" role="status"></span>
+            <p class="page-description">This page is built in Phase 3. Until then, the previous version is kept in the admin-old folder.</p>
           </div>
         </div>
-
-        <div class="alert alert-error" id="page-alert" role="alert"></div>
-
-        <form class="filter-bar" id="subscriber-search-form" role="search">
-          <div class="form-group">
-            <label for="subscriber-search">Search by email address</label>
-            <input type="search" id="subscriber-search" autocomplete="off" maxlength="255">
-          </div>
-          <button type="submit" class="btn btn-outline">Search</button>
-          <button type="button" class="btn-text" id="subscriber-search-clear" hidden>Clear search</button>
-        </form>
-
-        <div id="subscriber-table"></div>
-        <div id="subscriber-pagination"></div>
       </main>
     </div>
   </div>
 
-  <script src="js/adminApi.js"></script>
-  <script src="js/adminAuth.js"></script>
-  <script src="js/components/dom.js"></script>
-  <script src="js/components/toast.js"></script>
-  <script src="js/components/dialog.js"></script>
-  <script src="js/components/table.js"></script>
-  <script src="js/pages/newsletter.js"></script>
+  <script type="module" src="/admin/js/shell.js"></script>
 </body>
 </html>

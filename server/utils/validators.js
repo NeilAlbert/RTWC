@@ -7,6 +7,9 @@
 /** Where POST /api/admin/upload saves images, as the browser addresses them. */
 const UPLOAD_URL_PREFIX = '/assets/uploads/';
 
+/** The name the upload route gives a saved image: 32 hex characters and its type. */
+const UPLOAD_NAME_PATTERN = /^[a-f0-9]{32}\.(jpg|png|webp)$/;
+
 /** A web address that starts with http:// or https://. */
 function isHttpUrl(value) {
   try {
@@ -21,7 +24,7 @@ function isHttpUrl(value) {
 function isImageRef(value) {
   const text = String(value);
   if (text.startsWith(UPLOAD_URL_PREFIX)) {
-    return /^[a-z0-9]+\.(jpg|png|webp)$/.test(text.slice(UPLOAD_URL_PREFIX.length));
+    return UPLOAD_NAME_PATTERN.test(text.slice(UPLOAD_URL_PREFIX.length));
   }
   return isHttpUrl(text);
 }
@@ -34,4 +37,9 @@ function isCalendarDate(value) {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text;
 }
 
-module.exports = { UPLOAD_URL_PREFIX, isHttpUrl, isImageRef, isCalendarDate };
+const EVENT_CATEGORIES = ['convention', 'revival', 'camp_meeting', 'anniversary', 'other'];
+const LEADER_ROLES = ['pastor', 'pastors_wife', 'presiding_elder', 'secretary', 'elder', 'deacon', 'deaconess', 'ministry_leader'];
+
+module.exports = {
+  UPLOAD_URL_PREFIX, UPLOAD_NAME_PATTERN, EVENT_CATEGORIES, LEADER_ROLES, isHttpUrl, isImageRef, isCalendarDate,
+};

@@ -1,99 +1,59 @@
-/* Admin > Ministries: list, add, edit and delete ministries.
-   A ministry that still has leaders cannot be deleted; the server says so. */
+/**
+ * admin/js/pages/ministries.js: list, add, edit and delete ministries.
+ */
+import '../shell.js';
+import { createCrudPage } from '../components/crudPage.js';
+import { createImageUpload } from '../components/imageUpload.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-  if (!AdminAuth.checkAuth()) return;
-  AdminAuth.initShell('ministries', 'Ministries');
+const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
-  const { crudPage } = window.AdminUI;
+/** "Men's Ministry (PEMEM)" becomes "mens-ministry-pemem". The server makes slugs the same way. */
+function slugify(text) {
+  return String(text)
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 150);
+}
 
-  /** "Men's Ministry (PEMEM)" becomes "mens-ministry-pemem". The server makes slugs the same way. */
-  function slugify(text) {
-    return text
-      .toLowerCase()
-      .normalize('NFKD')
-      .replace(/[̀-ͯ]/g, '')
-      .replace(/['’]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  }
-
-  function isWebLink(value) {
-    return /^https?:\/\/\S+$/i.test(value);
-  }
-
-  crudPage({
-    noun: 'ministry',
-    tableLabel: 'Ministries',
-    tableHost: document.getElementById('ministry-table'),
-    alertHost: document.getElementById('page-alert'),
-    addButton: document.getElementById('add-ministry'),
-    nameOf: (row) => row.name,
-    columns: [
-      { label: 'Name', render: (row) => row.name },
-      { label: 'Slug', render: (row) => row.slug },
-      { label: 'Leaders', numeric: true, render: (row) => String(row.leader_count) },
-    ],
-    load: async () => {
-      const response = await AdminApi.get('/admin/ministries');
-      return { items: response.data.items, pagination: null };
+createCrudPage({
+  root: document.getElementById('page-root'),
+  addButton: document.getElementById('page-action'),
+  endpoint: '/admin/ministries',
+  noun: 'ministry',
+  nameOf: (row) => row.name,
+  caption: 'Ministries, by name',
+  emptyText: () => 'No ministries have been added yet.',
+  columns: [
+    { key: 'name', label: 'Name', rowHeader: true, wrap: true },
+    { key: 'slug', label: 'Slug' },
+    { key: 'leader_count', label: 'Leaders', numeric: true },
+  ],
+  fields: (row) => [
+    { name: 'name', label: 'Name', required: true, maxLength: 150, value: row ? row.name : '', requiredMessage: 'Enter a name.' },
+    {
+      name: 'slug',
+      label: 'Slug',
+      maxLength: 150,
+      value: row ? row.slug : '',
+      help: 'The short name used in web addresses: lowercase letters, numbers and hyphens. It is filled in from the name, and you can change it.',
+      validate: (value) => (!value || SLUG_PATTERN.test(value) ? '' : 'Use only lowercase letters, numbers and single hyphens, for example "youth-ministry".'),
     },
-    emptyText: () => 'No ministries have been added yet.',
-    fields: [
-      { name: 'name', label: 'Name', type: 'text', required: true, requiredMessage: 'Enter a name.', maxLength: 150 },
-      {
-        name: 'slug',
-        label: 'Slug',
-        type: 'text',
-        maxLength: 160,
-        hint: 'The short name used in web addresses. It is filled in from the name; change it only if you need to. Leave it empty to have one made for you.',
-        validate: (value) => (value && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(value)
-          ? 'Use only lowercase letters, numbers and single hyphens, for example "youth-ministry".'
-          : ''),
-      },
-      { name: 'description', label: 'Description', type: 'textarea', maxLength: 5000 },
-      { name: 'icon_upload', label: 'Icon image', type: 'image', hint: 'JPEG, PNG or WebP, 5 MB at most. Or give a link below instead.' },
-      {
-        name: 'icon_link',
-        label: 'Icon link',
-        type: 'url',
-        maxLength: 500,
-        hint: 'Used only when no image is uploaded above.',
-        validate: (value) => (value && !isWebLink(value) ? 'The link must start with http:// or https://.' : ''),
-      },
-    ],
-    // An uploaded icon is stored as a path on this site; anything else is a link.
-    toForm: (row) => {
-      const icon = row && row.icon_url ? row.icon_url : '';
-      const uploaded = icon.startsWith('/assets/uploads/');
-      return {
-        name: row ? row.name : '',
-        slug: row ? row.slug : '',
-        description: row ? row.description : '',
-        icon_upload: uploaded ? icon : '',
-        icon_link: uploaded ? '' : icon,
-      };
-    },
-    save: (values, row) => {
-      const payload = {
-        name: values.name,
-        slug: values.slug,
-        description: values.description,
-        icon_url: values.icon_upload || values.icon_link,
-      };
-      return row ? AdminApi.put(`/ministries/${row.id}`, payload) : AdminApi.post('/ministries', payload);
-    },
-    remove: (row) => AdminApi.delete(`/ministries/${row.id}`),
-    // The slug follows the name as it is typed, until the slug is edited by hand.
-    // When editing an existing ministry the slug is left alone.
-    onFormOpen: (form, row) => {
-      const nameInput = form.input('name');
-      const slugInput = form.input('slug');
-      let follow = !row;
-      slugInput.addEventListener('input', () => { follow = slugInput.value === ''; });
-      nameInput.addEventListener('input', () => {
-        if (follow) slugInput.value = slugify(nameInput.value);
-      });
-    },
-  });
+    createImageUpload({ name: 'icon_url', label: 'Icon', value: row ? row.icon_url : '' }),
+    { name: 'description', label: 'Description', type: 'textarea', maxLength: 5000, value: row ? row.description : '' },
+  ],
+  onFormReady(form, row) {
+    const name = form.fields.find((field) => field.name === 'name').input;
+    const slug = form.fields.find((field) => field.name === 'slug').input;
+    // The slug follows the name until someone types in the slug box. An existing
+    // ministry keeps its slug, because other pages may already link to it.
+    let follows = !row;
+    slug.addEventListener('input', () => { follows = false; });
+    name.addEventListener('input', () => {
+      if (follows) slug.value = slugify(name.value);
+    });
+  },
 });

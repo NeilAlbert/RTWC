@@ -8,6 +8,7 @@
  * =============================================================================
  */
 const pool = require('../config/db');
+const { likePattern } = require('../utils/search');
 
 async function findAll({ category, upcoming } = {}) {
   const where = [];
@@ -35,26 +36,33 @@ async function findAll({ category, upcoming } = {}) {
   return rows;
 }
 
-/** WHERE and ORDER BY for the admin list. `when` is 'upcoming', 'past' or 'all'. */
-function adminListClauses(when) {
-  if (when === 'upcoming') return { where: 'WHERE event_date >= CURDATE()', order: 'ORDER BY event_date ASC, id ASC' };
-  if (when === 'past') return { where: 'WHERE event_date < CURDATE()', order: 'ORDER BY event_date DESC, id DESC' };
-  return { where: '', order: 'ORDER BY event_date DESC, id DESC' };
+/** WHERE, its values and ORDER BY for the admin list. `when` is 'upcoming', 'past' or 'all'; `q` searches the title. */
+function adminListClauses(when, q) {
+  const conditions = [];
+  const params = [];
+  if (when === 'upcoming') conditions.push('event_date >= CURDATE()');
+  if (when === 'past') conditions.push('event_date < CURDATE()');
+  if (q) { conditions.push('title LIKE ?'); params.push(likePattern(q)); }
+  return {
+    where: conditions.length ? `WHERE ${conditions.join(' AND ')}` : '',
+    params,
+    order: when === 'upcoming' ? 'ORDER BY event_date ASC, id ASC' : 'ORDER BY event_date DESC, id DESC',
+  };
 }
 
-async function countForAdmin({ when } = {}) {
-  const { where } = adminListClauses(when);
-  const [rows] = await pool.query(`SELECT COUNT(*) AS total FROM events ${where}`);
+async function countForAdmin({ when, q } = {}) {
+  const { where, params } = adminListClauses(when, q);
+  const [rows] = await pool.query(`SELECT COUNT(*) AS total FROM events ${where}`, params);
   return rows[0].total;
 }
 
-async function findForAdmin({ when, limit, offset } = {}) {
-  const { where, order } = adminListClauses(when);
+async function findForAdmin({ when, q, limit, offset } = {}) {
+  const { where, params, order } = adminListClauses(when, q);
   const [rows] = await pool.query(
     `SELECT id, title, description, event_date, event_time, location, category, created_at
      FROM events ${where} ${order}
      LIMIT ? OFFSET ?`,
-    [limit, offset]
+    [...params, limit, offset]
   );
   return rows;
 }
@@ -71,7 +79,7 @@ async function create({ title, description, event_date, event_time, location, ca
   const [result] = await pool.query(
     `INSERT INTO events (title, description, event_date, event_time, location, category)
      VALUES (?, ?, ?, ?, ?, ?)`,
-    [title, description, event_date, event_time || null, location || null, category]
+    [title, description || null, event_date, event_time || null, location || null, category]
   );
   return findById(result.insertId);
 }
@@ -81,7 +89,7 @@ async function update(id, { title, description, event_date, event_time, location
     `UPDATE events
      SET title = ?, description = ?, event_date = ?, event_time = ?, location = ?, category = ?
      WHERE id = ?`,
-    [title, description, event_date, event_time || null, location || null, category, id]
+    [title, description || null, event_date, event_time || null, location || null, category, id]
   );
   return findById(id);
 }

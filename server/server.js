@@ -78,6 +78,8 @@ app.use('/admin', (req, res, next) => {
   });
   next();
 });
+// /admin opens the login page, which sends a signed-in admin on to the dashboard.
+app.get('/admin', (req, res) => res.redirect('/admin/login.html'));
 ['css', 'js', 'assets', 'admin'].forEach((folder) => {
   app.use(`/${folder}`, express.static(path.join(SITE_ROOT, folder), staticOptions));
 });
@@ -163,6 +165,25 @@ app.use(errorHandler);
 
 const PORT = Number(process.env.PORT) || 5000;
 
-app.listen(PORT, () => {
-  logger.info(`Royal Temple API listening on http://localhost:${PORT}`);
+/**
+ * The admin sign-in needs admins.token_valid_after. Without it every admin request
+ * would fail with a server error, so the server stops and names the migration.
+ * A database that cannot be reached at all is left to /api/health to report.
+ */
+async function checkAdminColumns() {
+  try {
+    await pool.query('SELECT token_valid_after FROM admins LIMIT 1');
+  } catch (err) {
+    if (err.code === 'ER_BAD_FIELD_ERROR') {
+      logger.error('The server cannot start. The admins table has no token_valid_after column. Back up the database, then run server/migrations/004_admin_additions.sql.');
+      process.exit(1);
+    }
+    logger.error('Startup check: the admins table could not be read', { code: err.code });
+  }
+}
+
+checkAdminColumns().then(() => {
+  app.listen(PORT, () => {
+    logger.info(`Royal Temple API listening on http://localhost:${PORT}`);
+  });
 });

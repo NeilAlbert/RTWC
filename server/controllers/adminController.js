@@ -13,58 +13,57 @@ const NewsletterSubscriber = require('../models/newsletterSubscriberModel');
 const { NotFoundError } = require('../utils/errors');
 const { getPagination, buildPaginationMeta } = require('../utils/pagination');
 
-/** GET /api/admin/sermons */
+/** Answers a list request with one page of rows and its pagination. */
+function sendPage(res, noun, items, total, page, limit) {
+  return res.json({
+    success: true,
+    data: { items, pagination: buildPaginationMeta(total, page, limit) },
+    message: noun + ' fetched successfully.',
+  });
+}
+
+/** GET /api/admin/sermons: newest first. ?q= searches the title and the speaker. */
 async function listSermons(req, res, next) {
   try {
-    const { page, limit, offset } = getPagination(req.query.page, req.query.limit, 20, 50);
+    const { page, limit, offset } = getPagination(req.query.page, req.query.limit, 20, 100);
     const filter = { q: req.query.q || undefined };
-
-    const total = await Sermon.countAll(filter);
-    const items = await Sermon.findAll({ ...filter, limit, offset });
-
-    return res.json({
-      success: true,
-      message: 'Sermons fetched successfully.',
-      data: { items, pagination: buildPaginationMeta(total, page, limit) },
-    });
+    const [total, items] = await Promise.all([Sermon.countAll(filter), Sermon.findAll({ ...filter, limit, offset })]);
+    return sendPage(res, 'Sermons', items, total, page, limit);
   } catch (err) {
     return next(err);
   }
 }
 
-/** GET /api/admin/events. The category is the stored value, not its display name. */
+/** GET /api/admin/events: ?when=upcoming|past|all, ?q= searches the title. The category is the stored value. */
 async function listEvents(req, res, next) {
   try {
-    const { page, limit, offset } = getPagination(req.query.page, req.query.limit, 20, 50);
-    const when = req.query.when || 'upcoming';
-
-    const total = await Event.countForAdmin({ when });
-    const items = await Event.findForAdmin({ when, limit, offset });
-
-    return res.json({
-      success: true,
-      message: 'Events fetched successfully.',
-      data: { items, pagination: buildPaginationMeta(total, page, limit) },
-    });
+    const { page, limit, offset } = getPagination(req.query.page, req.query.limit, 20, 100);
+    const filter = { when: req.query.when || 'upcoming', q: req.query.q || undefined };
+    const [total, items] = await Promise.all([Event.countForAdmin(filter), Event.findForAdmin({ ...filter, limit, offset })]);
+    return sendPage(res, 'Events', items, total, page, limit);
   } catch (err) {
     return next(err);
   }
 }
 
-/** GET /api/admin/ministries */
+/** GET /api/admin/ministries: by name, each with its number of leaders. ?q= searches the name. */
 async function listMinistries(req, res, next) {
   try {
-    const items = await Ministry.findAllWithLeaderCount();
-    return res.json({ success: true, message: 'Ministries fetched successfully.', data: { items } });
+    const { page, limit, offset } = getPagination(req.query.page, req.query.limit, 20, 100);
+    const filter = { q: req.query.q || undefined };
+    const [total, items] = await Promise.all([Ministry.countAll(filter), Ministry.findAllWithLeaderCount({ ...filter, limit, offset })]);
+    return sendPage(res, 'Ministries', items, total, page, limit);
   } catch (err) {
     return next(err);
   }
 }
 
-/** GET /api/admin/leadership */
+/** GET /api/admin/leadership: by display order. ?role= filters, ?q= searches the name. */
 async function listLeadership(req, res, next) {
   try {
-    const rows = await Leadership.findForAdmin({ role: req.query.role || undefined });
+    const { page, limit, offset } = getPagination(req.query.page, req.query.limit, 20, 100);
+    const filter = { role: req.query.role || undefined, q: req.query.q || undefined };
+    const [total, rows] = await Promise.all([Leadership.countForAdmin(filter), Leadership.findForAdmin({ ...filter, limit, offset })]);
     const items = rows.map((row) => ({
       id: row.id,
       name: row.name,
@@ -75,7 +74,7 @@ async function listLeadership(req, res, next) {
       bio: row.bio,
       display_order: row.display_order,
     }));
-    return res.json({ success: true, message: 'Leadership fetched successfully.', data: { items } });
+    return sendPage(res, 'Leadership', items, total, page, limit);
   } catch (err) {
     return next(err);
   }
@@ -182,20 +181,44 @@ async function deleteSubscriber(req, res, next) {
   }
 }
 
-/** GET /api/admin/stats — the five counts on the dashboard */
+/**
+ * GET /api/admin/stats: the five counts for the dashboard and the sidebar, the
+ * 5 most recent new messages and the next 3 upcoming events.
+ */
 async function getStats(req, res, next) {
   try {
-    const [sermons, upcomingEvents, newMessages, newPrayerRequests, subscribers] = await Promise.all([
+    const [sermons, upcomingEvents, newMessages, newPrayerRequests, subscribers, messages, events] = await Promise.all([
       Sermon.countAll(),
       Event.countForAdmin({ when: 'upcoming' }),
       ContactMessage.countAll({ status: 'new' }),
       PrayerRequest.countAll({ status: 'new' }),
       NewsletterSubscriber.countAll(),
+      ContactMessage.findAll({ status: 'new', limit: 5, offset: 0 }),
+      Event.findForAdmin({ when: 'upcoming', limit: 3, offset: 0 }),
     ]);
     return res.json({
       success: true,
+      data: {
+        sermons,
+        upcomingEvents,
+        newMessages,
+        newPrayerRequests,
+        subscribers,
+        recentMessages: messages.map((row) => ({
+          id: row.id,
+          name: row.name,
+          preview: String(row.message || '').slice(0, 140),
+          created_at: row.created_at,
+        })),
+        nextEvents: events.map((row) => ({
+          id: row.id,
+          title: row.title,
+          event_date: row.event_date,
+          event_time: row.event_time,
+          location: row.location,
+        })),
+      },
       message: 'Counts fetched successfully.',
-      data: { sermons, upcomingEvents, newMessages, newPrayerRequests, subscribers },
     });
   } catch (err) {
     return next(err);

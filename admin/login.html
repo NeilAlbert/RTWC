@@ -1,45 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-admin-page="login">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>Admin Login | Royal Temple Worship Centre</title>
+  <title>Log in | Royal Temple Worship Centre admin</title>
   <link rel="stylesheet" href="/css/tokens.css">
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <script src="/admin/js/adminAuth.js"></script>
 </head>
 <body>
-  <div class="login-page">
-    <div class="login-card">
-      <div class="login-brand">
-        <div class="brand-church">Royal Temple Worship Centre</div>
-        <div class="brand-role">Admin</div>
-      </div>
+  <main class="login">
+    <div class="panel login-panel">
+      <h1 class="login-church">Royal Temple Worship Centre</h1>
+      <p class="login-denomination">The Church of Pentecost. Website admin.</p>
 
-      <form id="login-form" novalidate>
-        <div class="alert alert-error" id="login-error" role="alert"></div>
+      <div class="banner banner-info" id="login-notice" role="status" hidden></div>
+      <div class="banner banner-error" id="login-error" role="alert" hidden></div>
 
-        <div class="form-group">
-          <label for="login-email">Email address</label>
-          <input type="email" id="login-email" name="email" autocomplete="username" required>
-          <span class="field-error" id="err-email"></span>
+      <form class="form" id="login-form" novalidate>
+        <div class="field">
+          <label class="field-label" for="login-email">Email address</label>
+          <input class="input" type="email" id="login-email" name="email" autocomplete="username" required>
+          <p class="field-error" id="login-email-error" hidden></p>
         </div>
 
-        <div class="form-group">
-          <label for="login-password">Password</label>
-          <input type="password" id="login-password" name="password" autocomplete="current-password" required>
-          <span class="field-error" id="err-password"></span>
+        <div class="field">
+          <label class="field-label" for="login-password">Password</label>
+          <input class="input" type="password" id="login-password" name="password" autocomplete="current-password" required>
+          <p class="field-error" id="login-password-error" hidden></p>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" id="login-btn">Sign in</button>
-
-        <p class="login-note">Authorized staff only. All access is logged.</p>
+        <button class="button button-block" type="submit" id="login-submit">Log in</button>
       </form>
     </div>
-  </div>
+  </main>
 
-  <script src="js/adminApi.js"></script>
-  <script src="js/adminAuth.js"></script>
-  <script src="js/pages/login.js"></script>
+  <script type="module" src="/admin/js/pages/login.js"></script>
 </body>
 </html>

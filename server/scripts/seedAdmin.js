@@ -1,92 +1,32 @@
 /**
- * =============================================================================
- * scripts/seedAdmin.js — creates the single admin account.
+ * scripts/seedAdmin.js: creates the one admin account.
  *
- * Reads name/email/password from command-line args or .env values, hashes the
- * password with bcrypt, and inserts into the admins table. Idempotent: if the
- * email already exists it does nothing.
+ * Usage (run inside the server folder):
  *
- * The email is stored trimmed and in lowercase, the same way the sign-in route
- * compares it. The password is hashed exactly as given and is never altered.
- * To change the password of an existing admin use scripts/resetAdminPassword.js.
+ *   node scripts/seedAdmin.js "Full Name" admin@example.org
+ *       Asks for the password twice. Nothing you type is shown. This is the
+ *       safest way: the password is not kept in the terminal's command history.
  *
- * Usage:
- *   node scripts/seedAdmin.js --name "Jane Doe" --email admin@royaltemple.org --password "a long password"
- *   # or via .env: ADMIN_NAME, ADMIN_EMAIL, ADMIN_PASSWORD
- * =============================================================================
+ *   node scripts/seedAdmin.js "Full Name" admin@example.org "the password"
+ *       Takes the password from the command line instead of asking.
+ *
+ * The password must be at least 12 characters. The site has one admin: if an
+ * admin already exists this script changes nothing. Use resetAdminPassword.js
+ * to change that admin's name, email or password.
  */
-const path = require('path');
+const { pool, readAccount, hashPassword, run } = require('./adminAccount');
 
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+const USAGE = 'Usage: node scripts/seedAdmin.js "Full Name" admin@example.org ["password"]';
 
-const bcrypt = require('bcrypt');
-const pool = require('../config/db');
-const logger = require('../utils/logger');
+run(async () => {
+  const { name, email, password } = await readAccount(USAGE);
 
-function parseArgs(argv) {
-  const args = {};
-  for (let i = 0; i < argv.length; i += 1) {
-    if (argv[i].startsWith('--')) {
-      const key = argv[i].slice(2);
-      const value = argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[i + 1] : true;
-      args[key] = value;
-    }
-  }
-  return args;
-}
-
-async function main() {
-  const args = parseArgs(process.argv.slice(2));
-  const name = args.name || process.env.ADMIN_NAME;
-  const email = String(args.email || process.env.ADMIN_EMAIL || '').trim().toLowerCase();
-  const password = args.password || process.env.ADMIN_PASSWORD;
-
-  if (!name || !email || !password) {
-    console.error('Usage: node scripts/seedAdmin.js --name "Jane Doe" --email admin@royaltemple.org --password "a long password"');
-    console.error('       (or provide ADMIN_NAME, ADMIN_EMAIL, ADMIN_PASSWORD in .env)');
-    process.exit(1);
+  const [rows] = await pool.query('SELECT COUNT(*) AS total FROM admins');
+  if (rows[0].total > 0) {
+    throw new Error('An admin account already exists, and the site has only one. Nothing was changed.\nTo change its details run: node scripts/resetAdminPassword.js "Full Name" admin@example.org');
   }
 
-  if (typeof password !== 'string' || password.length < 12) {
-    console.error('Password must be at least 12 characters long.');
-    process.exit(1);
-  }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    console.error('Invalid email address.');
-    process.exit(1);
-  }
-
-  try {
-    // Idempotency: skip if an account with this email already exists.
-    const [existing] = await pool.query('SELECT id FROM admins WHERE LOWER(TRIM(email)) = ? LIMIT 1', [email]);
-    if (existing.length > 0) {
-      logger.info('Admin seed skipped: account already exists', { email });
-      console.log(`Admin account for ${email} already exists. Nothing to do.`);
-      console.log('To change its password run: node scripts/resetAdminPassword.js ' + email);
-      await pool.end();
-      process.exit(0);
-    }
-
-    const passwordHash = await bcrypt.hash(password, 12);
-
-    const [result] = await pool.query(
-      'INSERT INTO admins (name, email, password_hash) VALUES (?, ?, ?)',
-      [name, email, passwordHash]
-    );
-
-    logger.info('Admin account created', { adminId: result.insertId, email });
-    console.log(`Admin account created successfully (id=${result.insertId}).`);
-
-    await pool.end();
-    process.exit(0);
-  } catch (err) {
-    logger.error('Failed to seed admin', { message: err.message });
-    console.error('Failed to seed admin:', err.message);
-    await pool.end();
-    process.exit(1);
-  }
-}
-
-main();
+  const passwordHash = await hashPassword(password);
+  await pool.query('INSERT INTO admins (name, email, password_hash) VALUES (?, ?, ?)', [name, email, passwordHash]);
+  console.log(`The admin account for ${email} was created. Sign in at /admin/login.html.`);
+});

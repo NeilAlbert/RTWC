@@ -11,7 +11,7 @@ function validateRequest(req, res, next) {
   if (!errors.isEmpty()) {
     return res.status(400).json({
       success: false,
-      message: 'Validation failed.',
+      message: 'Some fields need attention. Nothing was saved.',
       data: {
         errors: errors.array().map((e) => ({ field: e.path, message: e.msg })),
       },

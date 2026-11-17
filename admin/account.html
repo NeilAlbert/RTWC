@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Account | Royal Temple Worship Centre admin</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <script src="/admin/js/adminAuth.js"></script>
+</head>
+<body data-page="account" data-title="Account">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="shell-main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content" id="main" tabindex="-1">
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>Account</h1>
+            <p class="page-description">The one account that can sign in to this admin.</p>
+          </div>
+        </div>
+
+        <section class="panel panel-narrow" aria-labelledby="account-details-heading">
+          <div class="panel-header"><h2 id="account-details-heading">Details</h2></div>
+          <div id="account-details"></div>
+        </section>
+
+        <section class="panel panel-narrow" aria-labelledby="change-password-heading">
+          <div class="panel-header"><h2 id="change-password-heading">Change password</h2></div>
+          <div class="panel-body">
+            <p class="panel-intro" id="password-rules">Use at least 12 characters. A few unrelated words are easier to remember than a short mix of symbols. Changing the password signs out any other browser that is signed in.</p>
+            <div id="change-password"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="/admin/js/pages/account.js"></script>
+</body>
+</html>

@@ -1,132 +1,104 @@
-/* Shared admin components: the data table and its pagination.
-   The table shows one of four states: loading (flat grey rows), rows, empty
-   (a sentence and the main action), or error (a banner with "Try again"). */
+/**
+ * admin/js/components/table.js: the data table panel.
+ *
+ * createTable({
+ *   caption,            what the table lists, read by screen readers
+ *   columns: [{
+ *     key,              the row property shown when there is no render()
+ *     label,            the column heading
+ *     numeric,          true to right-align
+ *     wrap,             true for long text that may break onto more lines
+ *     rowHeader,        true on the one column that names the row
+ *     render(row),      returns a node or a string. Strings are placed as text
+ *   }],
+ *   actions(row),       returns [{ label, name, onClick, danger, disabled, hint }] for the last column.
+ *                       name is what the row is called, read out after the label by screen readers.
+ *                       hint is shown as text beside the button, to say why it is disabled
+ *   onRowClick(row),    makes the row-header cell a button that opens the row
+ *   empty: { text, action }   action is { label, onClick }
+ * })
+ *
+ * Returns { element, showLoading(), showRows(rows), showError(message, onRetry), footer }.
+ * `footer` is where a page puts its pagination.
+ */
+import { el } from './dom.js';
+import { showLoading, showEmpty, showError } from './states.js';
 
-(() => {
-  const { el } = window.AdminUI;
-  const SKELETON_ROWS = 5;
+export function createTable({ caption, columns, actions, onRowClick, empty }) {
+  const headRow = el('tr');
+  columns.forEach((column) => {
+    headRow.append(el('th', { scope: 'col', class: column.numeric ? 'is-numeric' : null, text: column.label }));
+  });
+  if (actions) headRow.append(el('th', { scope: 'col', class: 'cell-actions', text: 'Actions' }));
 
-  /**
-   * @param {object} options
-   * @param {string} options.label  what the table lists, for screen readers
-   * @param {Array<{label: string, render: Function, numeric?: boolean, actions?: boolean}>} options.columns
-   *        render(row) returns text or a node. Text is always inserted as text.
-   * @param {Function} [options.onRowClick]  called with the row when it is clicked. The row must
-   *        also have a button that does the same thing, for people using a keyboard.
-   */
-  function createTable({ label, columns, onRowClick }) {
-    const tbody = el('tbody');
-    const table = el('table', { class: 'data-table' }, [
-      el('caption', { class: 'visually-hidden', text: label }),
-      el('thead', {}, el('tr', {}, columns.map((column) => el('th', {
-        scope: 'col',
-        class: column.numeric ? 'is-numeric' : (column.actions ? 'is-actions' : ''),
-        text: column.label,
-      })))),
-      tbody,
-    ]);
-    const scroll = el('div', { class: 'table-scroll', tabindex: '0', role: 'group', 'aria-label': label }, table);
-    const state = el('div', { class: 'table-state', hidden: true });
-    const panel = el('div', { class: 'table-panel' }, [scroll, state]);
+  const body = el('tbody');
+  const table = el('table', { class: 'data-table' },
+    el('caption', { class: 'visually-hidden', text: caption }),
+    el('thead', {}, headRow),
+    body);
+  // Focusable so a keyboard user can scroll a table wider than the panel.
+  const scroll = el('div', { class: 'table-scroll', tabindex: '0', role: 'region', 'aria-label': caption }, table);
+  const state = el('div');
+  const footer = el('div');
+  const element = el('div', { class: 'panel' }, scroll, state, footer);
 
-    function show(part) {
-      scroll.hidden = part !== 'table';
-      state.hidden = part !== 'state';
-    }
-
-    function showLoading() {
-      table.setAttribute('aria-busy', 'true');
-      tbody.replaceChildren(...Array.from({ length: SKELETON_ROWS }, () => el('tr', { class: 'skeleton-row' },
-        columns.map(() => el('td', {}, el('span', { class: 'skeleton' }))))));
-      show('table');
-    }
-
-    function showRows(rows) {
-      table.removeAttribute('aria-busy');
-      tbody.replaceChildren(...rows.map((row) => el('tr', {
-        class: onRowClick ? 'is-clickable' : '',
-        // A click on a button or link inside the row is that control's own business.
-        on: onRowClick ? { click: (event) => { if (!event.target.closest('button, a')) onRowClick(row); } } : {},
-      }, columns.map((column) => el('td', {
-        class: column.numeric ? 'is-numeric' : (column.actions ? 'is-actions' : ''),
-        dataset: { label: column.label },
-      }, column.render(row))))));
-      show('table');
-    }
-
-    /** One plain sentence and, when given, the page's main action. */
-    function showEmpty(text, action) {
-      table.removeAttribute('aria-busy');
-      state.replaceChildren(el('p', { text }), action || '');
-      show('state');
-    }
-
-    /** A banner with the reason and a button that tries the load again. */
-    function showError(message, onRetry) {
-      table.removeAttribute('aria-busy');
-      state.replaceChildren(el('div', { class: 'alert alert-error visible', role: 'alert' }, [
-        el('p', { text: message }),
-        el('button', { type: 'button', class: 'btn btn-outline', text: 'Try again', on: { click: onRetry } }),
-      ]));
-      show('state');
-    }
-
-    return { element: panel, showLoading, showRows, showEmpty, showError };
+  function show(which) {
+    scroll.hidden = which !== 'rows';
+    state.hidden = which === 'rows';
+    footer.hidden = which !== 'rows';
   }
 
-  /** Page numbers to offer: first, last, and those next to the current page. null marks a gap. */
-  function pageList(current, last) {
-    const wanted = new Set([1, last, current - 1, current, current + 1]);
-    const pages = [...wanted].filter((page) => page >= 1 && page <= last).sort((a, b) => a - b);
-    const list = [];
-    pages.forEach((page, index) => {
-      if (index > 0 && page - pages[index - 1] > 1) list.push(null);
-      list.push(page);
-    });
-    return list;
+  function buildCell(column, row) {
+    const content = column.render ? column.render(row) : row[column.key];
+    const value = content === null || content === undefined ? '' : content;
+    const classes = [column.numeric ? 'is-numeric' : '', column.wrap ? 'cell-wrap' : ''].filter(Boolean).join(' ') || null;
+
+    if (!column.rowHeader) return el('td', { class: classes }, value);
+    if (!onRowClick) return el('th', { scope: 'row', class: classes }, value);
+    return el('th', { scope: 'row', class: classes },
+      el('button', { class: 'link-button', type: 'button', onclick: () => onRowClick(row) }, value));
   }
 
-  /**
-   * "Showing 21 to 40 of 130", Previous, page numbers, Next.
-   * @param {Function} onPage  called with the page number to load
-   */
-  function createPagination(onPage) {
-    const summary = el('p', { class: 'pagination-summary' });
-    const buttons = el('div', { class: 'pagination-buttons' });
-    const nav = el('nav', { class: 'pagination', 'aria-label': 'Pages', hidden: true }, [summary, buttons]);
-
-    function pageButton(text, page, { current = false, disabled = false, label } = {}) {
-      return el('button', {
+  function buildActions(row) {
+    const cell = el('td', { class: 'cell-actions' });
+    actions(row).forEach((action) => {
+      cell.append(el('button', {
+        class: action.danger ? 'link-button link-button-danger' : 'link-button',
         type: 'button',
-        class: current ? 'page-button is-current' : 'page-button',
-        text,
-        disabled,
-        'aria-current': current ? 'page' : null,
-        'aria-label': label,
-        on: { click: () => onPage(page) },
-      });
-    }
-
-    function update({ page, limit, total }) {
-      nav.hidden = total === 0;
-      if (total === 0) return;
-
-      const last = Math.max(1, Math.ceil(total / limit));
-      const from = (page - 1) * limit + 1;
-      const to = Math.min(page * limit, total);
-      summary.textContent = `Showing ${from} to ${to} of ${total}`;
-
-      buttons.replaceChildren(
-        pageButton('Previous', page - 1, { disabled: page <= 1 }),
-        ...pageList(page, last).map((number) => (number === null
-          ? el('span', { class: 'page-gap', text: '...' })
-          : pageButton(String(number), number, { current: number === page, label: `Page ${number}` }))),
-        pageButton('Next', page + 1, { disabled: page >= last })
-      );
-    }
-
-    return { element: nav, update };
+        disabled: Boolean(action.disabled),
+        onclick: () => action.onClick(row),
+        // A screen reader hears "Delete Easter sermon", not twenty plain "Delete"s.
+      }, action.label, action.name ? el('span', { class: 'visually-hidden', text: ` ${action.name}` }) : null));
+      // Why an action is switched off is written out, not left to a tooltip.
+      if (action.hint) cell.append(el('span', { class: 'cell-hint', text: action.hint }));
+    });
+    return cell;
   }
 
-  Object.assign(window.AdminUI, { createTable, createPagination });
-})();
+  return {
+    element,
+    footer,
+    showLoading() {
+      show('state');
+      showLoading(state);
+    },
+    showRows(rows) {
+      if (rows.length === 0) {
+        show('state');
+        showEmpty(state, empty.text, empty.action);
+        return;
+      }
+      body.replaceChildren(...rows.map((row) => {
+        const tr = el('tr');
+        columns.forEach((column) => tr.append(buildCell(column, row)));
+        if (actions) tr.append(buildActions(row));
+        return tr;
+      }));
+      show('rows');
+    },
+    showError(message, onRetry) {
+      show('state');
+      showError(state, message, onRetry);
+    },
+  };
+}

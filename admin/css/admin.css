@@ -1,16 +1,9 @@
-/* Royal Temple Worship Centre admin pages. A plain internal tool.
-   Colours, sizes and spaces come from /css/tokens.css, the same file the public
-   site uses. Every admin page loads it before this stylesheet.
-   Order: base, layout, components, page-specific styles. */
+/* Royal Temple Worship Centre admin.
+   Every colour, size and space comes from /css/tokens.css.
+   Flat: depth comes from surfaces, 1px borders and spacing. The only shadow is
+   --elevation-overlay, on dialogs, toasts and the mobile sidebar. */
 
 /* ---------- Base ---------- */
-
-:root {
-  --sidebar-width: 240px;
-  --topbar-height: var(--space-64);
-  /* Space around the content area. The sticky save bar uses it to reach the edges. */
-  --content-pad: var(--space-16);
-}
 
 *,
 *::before,
@@ -18,40 +11,81 @@
   box-sizing: border-box;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-}
-
 html {
-  font-family: var(--font-sans);
-  font-size: 100%;
-  font-weight: var(--weight-regular);
-  line-height: var(--leading-body);
-  color: var(--text);
-  background-color: var(--surface-1);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  min-height: 100vh;
+  margin: 0;
+  background: var(--surface-1);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-16);
+  line-height: var(--leading-body);
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol,
+dl,
+dd {
+  margin: 0;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--navy);
+  font-family: var(--font-serif);
+  font-weight: var(--weight-bold);
 }
 
 h1 {
-  font-family: var(--font-serif);
   font-size: var(--text-28);
-  font-weight: var(--weight-bold);
   line-height: var(--leading-heading);
-  color: var(--navy);
+}
+
+h2 {
+  font-size: var(--text-18);
+  line-height: var(--leading-snug);
+}
+
+h3 {
+  font-size: var(--text-16);
+  line-height: var(--leading-snug);
 }
 
 a {
   color: var(--navy);
-  text-underline-offset: var(--space-4);
-  transition: color var(--transition), text-decoration-color var(--transition);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--transition);
 }
 
 a:hover {
-  text-decoration-color: var(--gold);
+  color: var(--navy-600);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  color: inherit;
+  font: inherit;
 }
 
 :focus-visible {
@@ -59,507 +93,500 @@ a:hover {
   outline-offset: 2px;
 }
 
-/* ---------- Layout: sidebar, top bar, content ---------- */
-
-.admin-layout {
-  min-height: 100vh;
-}
-
-/* On a phone the sidebar is closed until the Menu button opens it. It then floats
-   over the page, below the top bar so the Menu button can close it again. */
-.admin-sidebar {
-  display: none;
-  flex-direction: column;
-  position: fixed;
-  top: var(--topbar-height);
-  bottom: 0;
-  left: 0;
-  z-index: 40;
-  width: var(--sidebar-width);
-  background-color: var(--navy-900);
-  box-shadow: var(--elevation-overlay);
-  color: var(--text-on-navy);
-}
-
-.admin-sidebar.open {
-  display: flex;
-}
-
-/* Solid scrim over the rest of the page while the sidebar is open. */
-.admin-sidebar.open::after {
-  content: "";
-  position: fixed;
-  top: var(--topbar-height);
-  right: 0;
-  bottom: 0;
-  left: var(--sidebar-width);
-  background-color: var(--scrim);
-}
-
-.admin-sidebar :focus-visible {
-  outline-color: var(--text-on-navy);
-}
-
-.sidebar-brand {
-  padding: var(--space-16);
-  border-bottom: 1px solid var(--navy-700);
-  line-height: var(--leading-snug);
-}
-
-.sidebar-brand .brand-church {
-  font-family: var(--font-serif);
-  font-size: var(--text-18);
-  font-weight: var(--weight-bold);
-}
-
-.sidebar-brand .brand-role {
-  font-size: var(--text-14);
-  color: var(--navy-100);
-}
-
-.sidebar-nav {
-  flex: 1;
-  padding: var(--space-8);
-  overflow-y: auto;
-}
-
-.sidebar-nav a {
-  display: flex;
-  align-items: center;
-  min-height: var(--control-height);
-  padding: var(--space-8) var(--space-16);
-  border-radius: var(--radius);
-  color: var(--text-on-navy);
-  font-weight: var(--weight-medium);
-  text-decoration: none;
-  transition: background-color var(--transition);
-}
-
-.sidebar-nav a:hover,
-.sidebar-nav a.active {
-  background-color: var(--navy-700);
-}
-
-.sidebar-nav a.active {
-  font-weight: var(--weight-semibold);
-}
-
-/* How many new items a page has: plain small text at the end of its link. */
-.nav-count {
-  margin-left: auto;
-  padding-left: var(--space-8);
-  color: var(--navy-100);
-  font-size: var(--text-14);
-  font-weight: var(--weight-regular);
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
   white-space: nowrap;
+  border: 0;
 }
 
-.sidebar-footer {
-  padding: var(--space-8);
-  border-top: 1px solid var(--navy-700);
+.muted {
+  color: var(--text-muted);
 }
 
-.sidebar-footer .sidebar-logout-link {
-  display: flex;
-  align-items: center;
-  min-height: var(--control-height);
-  padding: var(--space-8) var(--space-16);
-  color: var(--text-on-navy);
-}
-
-.admin-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.admin-topbar {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-16);
-  min-height: var(--topbar-height);
-  padding: var(--space-8) var(--content-pad);
-  background-color: var(--surface-0);
-  border-bottom: 1px solid var(--border);
-}
-
-.topbar-left,
-.topbar-user {
-  display: flex;
-  align-items: center;
-  gap: var(--space-16);
-  min-width: 0;
-}
-
-/* The Menu button and page title keep their width; the signed-in name gives way. */
-.topbar-left {
-  flex-shrink: 0;
-}
-
-.topbar-title {
+.skip-link {
+  position: absolute;
+  top: var(--space-8);
+  left: var(--space-8);
+  z-index: 60;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  background: var(--surface-0);
   color: var(--navy);
   font-weight: var(--weight-semibold);
-  white-space: nowrap;
 }
 
-/* One line only, so the top bar keeps its height on a narrow screen. */
-.topbar-user .user-name {
-  overflow: hidden;
-  font-size: var(--text-14);
-  color: var(--text-muted);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.skip-link:focus {
+  width: auto;
+  height: auto;
+  padding: var(--space-12) var(--space-16);
+  overflow: visible;
+  clip: auto;
+  border: 1px solid var(--navy);
+  border-radius: var(--radius);
 }
 
-.admin-content {
-  max-width: var(--container);
-  padding: var(--space-24) var(--content-pad);
-}
+/* ---------- Buttons ---------- */
 
-.page-head {
-  margin-bottom: var(--space-24);
-}
-
-.page-head p {
-  margin-top: var(--space-4);
-  color: var(--text-muted);
-}
-
-.page-note {
-  margin-top: var(--space-24);
-}
-
-/* ---------- Components ---------- */
-
-/* Buttons: the same primary and secondary styles as the public site. */
-.btn,
-.sidebar-toggle {
+.button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
   min-height: var(--control-height);
-  padding: var(--space-8) var(--space-24);
+  padding: var(--space-8) var(--space-16);
   border: 1px solid var(--navy);
   border-radius: var(--radius);
-  font: inherit;
+  background: var(--navy);
+  color: var(--text-on-navy);
+  font-size: var(--text-16);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-snug);
+  text-align: center;
   text-decoration: none;
-  white-space: nowrap;
   cursor: pointer;
   transition: background-color var(--transition), border-color var(--transition), color var(--transition);
 }
 
-.btn-primary {
-  background-color: var(--navy);
+.button:hover {
+  border-color: var(--navy-600);
+  background: var(--navy-600);
   color: var(--text-on-navy);
 }
 
-.btn-primary:hover {
-  background-color: var(--navy-600);
-  border-color: var(--navy-600);
-}
-
-.btn-outline,
-.sidebar-toggle {
-  background-color: var(--surface-0);
+.button-secondary {
+  border-color: var(--border-input);
+  background: var(--surface-0);
   color: var(--navy);
 }
 
-.btn-outline:hover,
-.sidebar-toggle:hover {
-  background-color: var(--navy-50);
+.button-secondary:hover {
+  border-color: var(--navy);
+  background: var(--navy-50);
+  color: var(--navy);
 }
 
-.btn:disabled {
-  background-color: var(--surface-2);
+.button-danger {
+  border-color: var(--danger);
+  background: var(--danger);
+}
+
+.button-danger:hover {
+  border-color: var(--navy-900);
+  background: var(--navy-900);
+}
+
+.button-block {
+  width: 100%;
+}
+
+.button:disabled,
+.button[aria-disabled="true"] {
   border-color: var(--border-strong);
+  background: var(--surface-2);
   color: var(--text-muted);
   cursor: not-allowed;
 }
 
-.btn-sm,
-.sidebar-toggle {
-  padding-inline: var(--space-16);
-}
-
-.btn-block {
-  width: 100%;
-}
-
-/* Panels sit on surface-0 with a border, above the page background. */
-.panel,
-.stat-card,
-.login-card {
-  background-color: var(--surface-0);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-.panel {
-  margin-bottom: var(--space-24);
-  padding: var(--space-24);
-}
-
-.panel-title {
-  margin-bottom: var(--space-16);
-  padding-bottom: var(--space-12);
-  border-bottom: 1px solid var(--border);
-  color: var(--navy);
-  font-size: var(--text-18);
-  font-weight: var(--weight-semibold);
-  line-height: var(--leading-snug);
-}
-
-/* Messages: a tinted banner with a border. Hidden until it has something to say. */
-.alert {
-  display: none;
-  margin-bottom: var(--space-16);
-  padding: var(--space-12) var(--space-16);
-  background-color: var(--surface-0);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-}
-
-.alert.visible,
-.alert-info {
-  display: block;
-}
-
-.alert-info {
-  background-color: var(--navy-50);
-  border-color: var(--navy-100);
-  color: var(--navy);
-}
-
-.alert-success {
-  background-color: var(--success-tint);
-  border-color: var(--success);
-  color: var(--success);
-}
-
-.alert-error {
-  background-color: var(--danger-tint);
-  border-color: var(--danger);
-  color: var(--danger);
-}
-
-/* Forms: the same controls as the public site. */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--space-16) var(--space-24);
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.form-group.full {
-  grid-column: 1 / -1;
-}
-
-.form-group label {
-  font-weight: var(--weight-semibold);
-  line-height: var(--leading-snug);
-}
-
-.form-group .hint {
-  font-size: var(--text-14);
-  color: var(--text-muted);
-}
-
-input,
-select,
-textarea {
-  width: 100%;
-  min-height: var(--control-height);
-  padding: var(--space-8) var(--space-12);
-  background-color: var(--surface-0);
-  border: 1px solid var(--border-input);
-  border-radius: var(--radius);
-  font: inherit;
-  color: var(--text);
-  transition: border-color var(--transition);
-}
-
-input:hover,
-select:hover,
-textarea:hover {
-  border-color: var(--navy);
-}
-
-input:disabled,
-select:disabled,
-textarea:disabled {
-  background-color: var(--surface-2);
-  border-color: var(--border-strong);
-  color: var(--text-muted);
-}
-
-textarea {
-  display: block;
-  min-height: var(--space-96);
-  resize: vertical;
-}
-
-input.invalid,
-input.invalid:hover,
-select.invalid,
-select.invalid:hover,
-textarea.invalid,
-textarea.invalid:hover {
-  border-color: var(--danger);
-}
-
-.field-error {
-  display: none;
-  color: var(--danger);
-  font-size: var(--text-14);
-}
-
-.field-error.visible {
-  display: block;
-}
-
-/* Save bar: stays at the bottom of the screen while a long form scrolls. */
-.form-actions {
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-8);
-  margin-inline: calc(var(--content-pad) * -1);
-  padding: var(--space-12) var(--content-pad);
-  background-color: var(--surface-0);
-  border-top: 1px solid var(--border);
-}
-
-/* Page header with the page's main action on the right. */
-.page-head.has-action {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-16);
-}
-
-/* Text buttons: the row actions in tables, "Remove", "Close" and "Dismiss". */
-.btn-text {
+/* A button that reads as a link, for row actions and "Remove". */
+.link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: var(--control-height);
   min-height: var(--control-height);
-  padding: var(--space-8) var(--space-12);
-  background-color: transparent;
+  padding: 0 var(--space-8);
   border: 0;
   border-radius: var(--radius);
+  background: none;
   color: var(--navy);
-  font: inherit;
+  font-size: var(--text-14);
   font-weight: var(--weight-semibold);
   text-decoration: underline;
-  text-underline-offset: var(--space-4);
+  text-underline-offset: 2px;
   cursor: pointer;
-  transition: text-decoration-color var(--transition);
+  transition: color var(--transition), background-color var(--transition);
 }
 
-.btn-text:hover {
-  text-decoration-color: var(--gold);
+.link-button:hover {
+  background: var(--navy-50);
 }
 
-.btn-text-danger {
+.link-button-danger {
   color: var(--danger);
 }
 
-/* Danger button: the confirm button of every delete. */
-.btn-danger {
-  background-color: var(--danger);
-  border-color: var(--danger);
+.link-button-danger:hover {
+  background: var(--danger-tint);
+}
+
+.link-button:disabled {
+  background: none;
+  color: var(--text-muted);
+  text-decoration: none;
+  cursor: not-allowed;
+}
+
+/* ---------- Shell ---------- */
+
+.shell {
+  min-height: 100vh;
+}
+
+.sidebar {
+  display: none;
+  flex-direction: column;
+  width: 240px;
+  background: var(--navy-900);
+  color: var(--navy-100);
+}
+
+.sidebar.is-open {
+  display: flex;
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 50;
+  max-width: calc(100vw - var(--space-48));
+  overflow-y: auto;
+  box-shadow: var(--elevation-overlay);
+}
+
+.sidebar-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--scrim);
+}
+
+.sidebar :focus-visible {
+  outline-color: var(--text-on-navy);
+  outline-offset: -2px;
+}
+
+.sidebar-brand {
+  padding: var(--space-24) var(--space-16) var(--space-16);
+  border-bottom: 1px solid var(--navy-700);
+}
+
+.sidebar-church {
+  color: var(--text-on-navy);
+  font-family: var(--font-serif);
+  font-size: var(--text-18);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-snug);
+}
+
+.sidebar-denomination {
+  color: var(--navy-100);
+  font-size: var(--text-14);
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: var(--space-8) 0;
+}
+
+.sidebar-group + .sidebar-group {
+  margin-top: var(--space-8);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--navy-700);
+}
+
+.sidebar-heading {
+  padding: var(--space-8) var(--space-16) var(--space-4);
+  color: var(--navy-100);
+  font-family: var(--font-sans);
+  font-size: var(--text-12);
+  font-weight: var(--weight-semibold);
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  width: 100%;
+  min-height: var(--control-height);
+  padding: var(--space-8) var(--space-16);
+  border: 0;
+  background: none;
+  color: var(--navy-100);
+  font-size: var(--text-16);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.sidebar-link:hover {
+  background: var(--navy);
   color: var(--text-on-navy);
 }
 
-.btn-danger:hover {
-  text-decoration: underline;
-}
-
-/* Status tag: small and rectangular. The status is always written as text. */
-.tag {
-  display: inline-block;
-  padding: 0 var(--space-8);
-  background-color: var(--surface-2);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-tag);
-  color: var(--text);
-  font-size: var(--text-12);
+.sidebar-link[aria-current="page"] {
+  background: var(--navy-700);
+  color: var(--text-on-navy);
   font-weight: var(--weight-semibold);
+}
+
+.sidebar-count {
+  min-width: var(--space-24);
+  padding: 0 var(--space-8);
+  border-radius: var(--radius-tag);
+  background: var(--gold);
+  color: var(--navy-900);
+  font-size: var(--text-12);
+  font-weight: var(--weight-bold);
   line-height: var(--space-24);
-  white-space: nowrap;
+  text-align: center;
 }
 
-.tag-success {
-  background-color: var(--success-tint);
-  border-color: var(--success);
-  color: var(--success);
+.sidebar-footer {
+  padding: var(--space-8) 0;
+  border-top: 1px solid var(--navy-700);
 }
 
-.tag-warning {
-  background-color: var(--warning-tint);
-  border-color: var(--warning);
-  color: var(--warning);
+.topbar {
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  align-items: center;
+  gap: var(--space-12);
+  min-height: 60px;
+  padding: var(--space-8) var(--space-16);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-0);
 }
 
-.tag-danger {
-  background-color: var(--danger-tint);
-  border-color: var(--danger);
-  color: var(--danger);
+.topbar-title {
+  color: var(--navy);
+  font-size: var(--text-16);
+  font-weight: var(--weight-semibold);
 }
 
-/* Filter bar: the controls above a table. */
-.filter-bar {
+.content {
+  width: 100%;
+  max-width: var(--container);
+  padding: var(--space-24) var(--space-16) var(--space-48);
+}
+
+.content:focus {
+  outline: none;
+}
+
+@media (min-width: 1024px) {
+  .shell {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  .sidebar,
+  .sidebar.is-open {
+    display: flex;
+    position: sticky;
+    inset: auto;
+    top: 0;
+    z-index: auto;
+    height: 100vh;
+    max-width: none;
+    overflow-y: auto;
+    box-shadow: none;
+  }
+
+  .sidebar-scrim,
+  .menu-button {
+    display: none;
+  }
+
+  .topbar {
+    padding: var(--space-8) var(--space-32);
+  }
+
+  .content {
+    padding: var(--space-32) var(--space-32) var(--space-64);
+  }
+}
+
+/* ---------- Page header ---------- */
+
+.page-header {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: var(--space-12) var(--space-16);
-  margin-bottom: var(--space-16);
+  justify-content: space-between;
+  gap: var(--space-16);
+  margin-bottom: var(--space-24);
+}
+
+.page-header-text {
+  max-width: var(--measure);
+}
+
+.page-description {
+  margin-top: var(--space-4);
+  color: var(--text-muted);
+}
+
+/* ---------- Panels ---------- */
+
+.panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-0);
+}
+
+.panel + .panel {
+  margin-top: var(--space-24);
+}
+
+.panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  padding: var(--space-16) var(--space-24);
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-body {
+  padding: var(--space-24);
+}
+
+.panel-narrow {
+  max-width: 640px;
+}
+
+.panel-columns {
+  display: grid;
+  gap: var(--space-24);
+}
+
+.panel-columns > .panel {
+  margin-top: 0;
+}
+
+@media (min-width: 1024px) {
+  .panel-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+.detail-list {
+  display: grid;
+  gap: var(--space-16);
+}
+
+.detail-list dt {
+  color: var(--text-muted);
+  font-size: var(--text-14);
+}
+
+.detail-list dd {
+  font-weight: var(--weight-medium);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Dashboard ---------- */
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-16);
+  margin-bottom: var(--space-24);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
   padding: var(--space-16);
-  background-color: var(--surface-0);
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  background: var(--surface-0);
 }
 
-.filter-bar .form-group {
-  flex: 1 1 240px;
-  max-width: 400px;
+.stat-number {
+  color: var(--navy);
+  font-family: var(--font-sans);
+  font-size: var(--text-36);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  font-variant-numeric: tabular-nums;
 }
 
-/* Data table. Sideways scrolling stays inside the panel, and the header row
-   stays in view while a long table scrolls. */
-.table-panel {
-  margin-bottom: var(--space-16);
-  background-color: var(--surface-0);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
+.stat-label {
+  flex: 1;
+  color: var(--text-muted);
+  font-size: var(--text-14);
+  line-height: var(--leading-snug);
 }
+
+.stat-link {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-width: var(--control-height);
+  min-height: var(--control-height);
+  font-size: var(--text-14);
+  font-weight: var(--weight-semibold);
+}
+
+@media (min-width: 1024px) {
+  .stat-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.item-list > li {
+  padding: var(--space-12) var(--space-24);
+  border-bottom: 1px solid var(--border);
+}
+
+.item-list > li:last-child {
+  border-bottom: 0;
+}
+
+.item-title {
+  font-weight: var(--weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+a.item-title {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+}
+
+.item-meta {
+  color: var(--text-muted);
+  font-size: var(--text-14);
+}
+
+.item-preview {
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Data table ---------- */
 
 .table-scroll {
+  /* Positioned, so text hidden for screen readers inside a cell stays inside this scroll box. */
+  position: relative;
   max-height: 70vh;
   overflow: auto;
 }
 
-.table-scroll:focus-visible {
-  outline-offset: -2px;
-}
-
-/* The table keeps a readable width on a phone and scrolls sideways inside its panel. */
 .data-table {
   width: 100%;
-  min-width: 640px;
   border-collapse: collapse;
+  font-size: var(--text-14);
 }
 
 .data-table th,
@@ -570,19 +597,27 @@ textarea.invalid:hover {
   vertical-align: middle;
 }
 
-.data-table th {
+.data-table thead th {
   position: sticky;
   top: 0;
   z-index: 1;
-  background-color: var(--surface-2);
-  color: var(--text-muted);
-  font-size: var(--text-14);
-  font-weight: var(--weight-medium);
+  border-bottom-color: var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: var(--weight-semibold);
   white-space: nowrap;
 }
 
-.data-table tbody tr:last-child td {
-  border-bottom: 0;
+.data-table tbody th {
+  font-weight: var(--weight-semibold);
+}
+
+.data-table tbody th .link-button {
+  justify-content: flex-start;
+  margin-left: calc(var(--space-8) * -1);
+  padding-top: var(--space-4);
+  padding-bottom: var(--space-4);
+  text-align: left;
 }
 
 .data-table tbody tr {
@@ -590,144 +625,341 @@ textarea.invalid:hover {
 }
 
 .data-table tbody tr:hover {
-  background-color: var(--surface-1);
+  background: var(--surface-1);
 }
 
-/* A row that opens its item when clicked. Its "Open" button does the same for keyboards. */
-.data-table .is-clickable {
-  cursor: pointer;
+.data-table tbody tr:last-child > * {
+  border-bottom: 0;
 }
 
 .data-table .is-numeric {
   text-align: right;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
-.data-table .is-actions {
-  text-align: right;
+.data-table .cell-actions {
+  width: 1%;
+  padding-top: 0;
+  padding-bottom: 0;
   white-space: nowrap;
+}
+
+.cell-wrap {
+  min-width: 160px;
+  overflow-wrap: anywhere;
 }
 
 .table-thumb {
   display: block;
-  width: var(--space-48);
-  height: var(--space-48);
-  border: 1px solid var(--border-strong);
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--border);
   border-radius: var(--radius);
+  background: var(--surface-2);
   object-fit: cover;
 }
 
-.table-thumb-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--surface-2);
+.cell-hint {
+  display: block;
+  min-width: 10em;
+  padding: 0 var(--space-8) var(--space-8);
   color: var(--text-muted);
   font-size: var(--text-12);
+  white-space: normal;
 }
 
-/* Loading: flat grey bars where the rows will be. */
-.skeleton {
-  display: block;
-  width: 70%;
-  height: var(--space-16);
-  background-color: var(--surface-2);
-  border-radius: var(--radius-tag);
-}
-
-.data-table .skeleton-row:hover {
-  background-color: transparent;
-}
-
-/* Empty and error states, inside the table panel. */
-.table-state {
-  padding: var(--space-32) var(--space-24);
-}
-
-.table-state > p {
+.page-problem {
   margin-bottom: var(--space-16);
 }
 
-.table-state .alert {
-  margin-bottom: 0;
+/* ---------- Status tag ---------- */
+
+.tag {
+  display: inline-block;
+  padding: 2px var(--space-8);
+  border-radius: var(--radius-tag);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--text-12);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  white-space: nowrap;
 }
 
-.table-state .alert p {
-  margin-bottom: var(--space-12);
+.tag-info {
+  background: var(--navy-50);
+  color: var(--navy);
 }
 
-/* Pagination */
+.tag-success {
+  background: var(--success-tint);
+  color: var(--success);
+}
+
+.tag-warning {
+  background: var(--warning-tint);
+  color: var(--warning);
+}
+
+.tag-danger {
+  background: var(--danger-tint);
+  color: var(--danger);
+}
+
+/* ---------- Pagination ---------- */
+
 .pagination {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-12) var(--space-16);
-  margin-bottom: var(--space-24);
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
+  border-top: 1px solid var(--border);
+  font-size: var(--text-14);
 }
 
 .pagination-summary {
   color: var(--text-muted);
-  font-size: var(--text-14);
 }
 
-.pagination-buttons {
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+/* ---------- Filter bar ---------- */
+
+.filter-bar {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
+  gap: var(--space-16);
+  margin-bottom: var(--space-16);
+}
+
+.filter-bar .field {
+  flex: 1 1 200px;
+  max-width: 320px;
+  margin: 0;
+}
+
+/* ---------- Forms ---------- */
+
+.form {
+  display: grid;
+  gap: var(--space-24);
+}
+
+.field {
+  display: grid;
   gap: var(--space-4);
 }
 
-.page-button {
-  min-width: var(--control-height);
+.field-label {
+  color: var(--text);
+  font-size: var(--text-14);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.field-optional {
+  color: var(--text-muted);
+  font-weight: var(--weight-regular);
+}
+
+.field-help {
+  color: var(--text-muted);
+  font-size: var(--text-14);
+  line-height: var(--leading-snug);
+}
+
+.field-error {
+  color: var(--danger);
+  font-size: var(--text-14);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.input {
+  display: block;
+  width: 100%;
   min-height: var(--control-height);
   padding: var(--space-8) var(--space-12);
-  background-color: var(--surface-0);
   border: 1px solid var(--border-input);
   border-radius: var(--radius);
+  background: var(--surface-0);
+  color: var(--text);
+  transition: border-color var(--transition), background-color var(--transition);
+}
+
+textarea.input {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.input:hover {
+  border-color: var(--navy);
+}
+
+.input[aria-invalid="true"] {
+  border-color: var(--danger);
+  background: var(--danger-tint);
+}
+
+.input:disabled {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
+.field-check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  min-height: var(--control-height);
+}
+
+.field-check input {
+  width: var(--space-24);
+  height: var(--space-24);
+  margin: 0;
+  accent-color: var(--navy);
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+}
+
+/* On a long form the actions stay in view at the bottom of the window. */
+.form-actions.is-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin: 0 calc(var(--space-24) * -1) calc(var(--space-24) * -1);
+  padding: var(--space-12) var(--space-24);
+  border-top: 1px solid var(--border-strong);
+  background: var(--surface-0);
+}
+
+/* ---------- Image upload ---------- */
+
+.upload-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.upload-preview {
+  display: block;
+  width: 96px;
+  height: 96px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  object-fit: cover;
+}
+
+.upload-input {
+  max-width: 100%;
+  min-height: var(--control-height);
+  font-size: var(--text-14);
+}
+
+.upload-input::file-selector-button {
+  min-height: var(--control-height);
+  margin-right: var(--space-12);
+  padding: var(--space-8) var(--space-16);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius);
+  background: var(--surface-0);
   color: var(--navy);
   font: inherit;
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
   cursor: pointer;
   transition: background-color var(--transition), border-color var(--transition);
 }
 
-.page-button:hover {
-  background-color: var(--navy-50);
+.upload-input::file-selector-button:hover {
   border-color: var(--navy);
+  background: var(--navy-50);
 }
 
-.page-button.is-current {
-  background-color: var(--navy);
-  border-color: var(--navy);
-  color: var(--text-on-navy);
-}
+/* ---------- Banners and states ---------- */
 
-.page-button:disabled {
-  background-color: var(--surface-2);
-  border-color: var(--border-strong);
-  color: var(--text-muted);
-  cursor: not-allowed;
-}
-
-.page-gap {
-  padding-inline: var(--space-4);
-  color: var(--text-muted);
-}
-
-/* Dialog: floats above the page, so it carries the overlay shadow. The scrim is
-   a solid colour with no blur. */
-.dialog {
-  --content-pad: var(--space-24);
-  width: min(640px, calc(100% - var(--space-32)));
-  max-height: calc(100dvh - var(--space-32));
-  margin: auto;
-  background-color: var(--surface-0);
-  border: 0;
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
+  border: 1px solid var(--border-strong);
   border-radius: var(--radius);
-  box-shadow: var(--elevation-overlay);
+  background: var(--surface-0);
+}
+
+.banner-error {
+  border-color: var(--danger);
+  background: var(--danger-tint);
+  color: var(--danger);
+  font-weight: var(--weight-semibold);
+}
+
+.banner-info {
+  border-color: var(--navy);
+  background: var(--navy-50);
+  color: var(--navy);
+  font-weight: var(--weight-semibold);
+}
+
+.state {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-12);
+  padding: var(--space-24);
+}
+
+.state .banner {
+  width: 100%;
+}
+
+.skeleton {
+  display: grid;
+  gap: var(--space-12);
+  padding: var(--space-24);
+}
+
+.skeleton-row {
+  height: var(--space-16);
+  border-radius: var(--radius-tag);
+  background: var(--surface-2);
+}
+
+.skeleton-row:nth-child(3n + 2) {
+  width: 80%;
+}
+
+.skeleton-row:nth-child(3n) {
+  width: 60%;
+}
+
+/* ---------- Dialog ---------- */
+
+.dialog {
+  width: min(560px, calc(100vw - var(--space-32)));
+  max-height: calc(100vh - var(--space-32));
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface-0);
   color: var(--text);
-  overflow: hidden;
+  box-shadow: var(--elevation-overlay);
 }
 
 .dialog[open] {
@@ -735,312 +967,108 @@ textarea.invalid:hover {
   flex-direction: column;
 }
 
+.dialog-wide {
+  width: min(720px, calc(100vw - var(--space-32)));
+}
+
+/* The fallback is the --scrim value, for browsers where ::backdrop cannot read tokens. */
 .dialog::backdrop {
-  background-color: var(--scrim);
+  background: var(--scrim, rgb(19 36 68 / 0.8));
 }
 
-.dialog-small {
-  width: min(440px, calc(100% - var(--space-32)));
-}
-
-.dialog-head {
+.dialog-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-16);
-  padding: var(--space-8) var(--space-12) var(--space-8) var(--content-pad);
+  padding: var(--space-8) var(--space-8) var(--space-8) var(--space-24);
   border-bottom: 1px solid var(--border);
 }
 
 .dialog-title {
-  font-family: var(--font-serif);
   font-size: var(--text-22);
-  font-weight: var(--weight-bold);
-  line-height: var(--leading-snug);
-  color: var(--navy);
+  overflow-wrap: anywhere;
 }
 
 .dialog-body {
-  padding: var(--content-pad) var(--content-pad) 0;
+  padding: var(--space-24);
   overflow-y: auto;
 }
 
-.dialog-actions {
+.dialog-footer {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-8);
-  margin-top: var(--space-24);
-  padding-bottom: var(--content-pad);
+  justify-content: flex-end;
+  gap: var(--space-12);
+  padding: var(--space-16) var(--space-24);
+  border-top: 1px solid var(--border);
 }
 
-/* The whole item in a dialog: its facts, then what the visitor wrote. */
-.detail-list {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: var(--space-8) var(--space-16);
-  margin-bottom: var(--space-16);
-}
+/* ---------- Toast ---------- */
 
-.detail-list dt {
-  color: var(--text-muted);
-  font-size: var(--text-14);
-  font-weight: var(--weight-medium);
-  line-height: var(--space-24);
-}
-
-.detail-list dd {
-  overflow-wrap: anywhere;
-}
-
-.detail-text {
-  margin-bottom: var(--space-24);
-  padding: var(--space-16);
-  background-color: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
-}
-
-.dialog-body > .alert {
-  margin: var(--space-16) 0 0;
-}
-
-.page-head-action {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-4);
-}
-
-/* Forms built by the form kit. */
-.kit-form-fields {
-  display: grid;
-  gap: var(--space-16);
-}
-
-.kit-form .alert {
-  margin: var(--space-16) 0 0;
-}
-
-.kit-form .form-actions {
-  margin-top: var(--space-24);
-}
-
-/* Image upload field: a square preview beside the file chooser. */
-.image-field {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: var(--space-16);
-}
-
-.image-preview {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: var(--space-96);
-  height: var(--space-96);
-  background-color: var(--surface-2);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  color: var(--text-muted);
-  font-size: var(--text-12);
-  overflow: hidden;
-}
-
-.image-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.image-field-controls {
-  display: flex;
-  flex: 1 1 200px;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-4);
-  min-width: 0;
-}
-
-/* Toasts: short messages that float above the page and close themselves. */
 .toast-region {
+  display: grid;
   position: fixed;
   right: var(--space-16);
   bottom: var(--space-16);
-  z-index: 60;
-  display: flex;
-  flex-direction: column;
+  left: var(--space-16);
+  z-index: 70;
+  justify-items: end;
   gap: var(--space-8);
-  width: min(360px, calc(100% - var(--space-32)));
+  pointer-events: none;
 }
 
 .toast {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-12);
-  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-16);
-  background-color: var(--surface-0);
-  border: 1px solid var(--border-strong);
+  max-width: 360px;
+  padding: var(--space-12) var(--space-16);
+  border: 1px solid var(--navy-900);
   border-radius: var(--radius);
+  background: var(--navy-900);
+  color: var(--text-on-navy);
+  font-size: var(--text-14);
+  font-weight: var(--weight-semibold);
   box-shadow: var(--elevation-overlay);
 }
 
-.toast-success {
-  border-color: var(--success);
-  color: var(--success);
-}
+/* ---------- Login ---------- */
 
-.toast-error {
-  border-color: var(--danger);
-  color: var(--danger);
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-code {
-  font-family: ui-monospace, Consolas, "Courier New", monospace;
-  font-size: var(--text-14);
-}
-
-/* ---------- Page-specific ---------- */
-
-/* Dashboard counts: one panel per count, all the same size. */
-.stats-grid {
+.login {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--space-16);
-}
-
-.stat-card {
-  padding: var(--space-16) var(--space-24);
-}
-
-.stat-card .stat-label {
-  font-size: var(--text-14);
-  font-weight: var(--weight-medium);
-  color: var(--text-muted);
-}
-
-.stat-card .stat-link {
-  display: inline-flex;
-  align-items: center;
-  min-width: var(--control-height);
-  min-height: var(--control-height);
-  font-weight: var(--weight-semibold);
-}
-
-.stat-card .stat-value {
-  font-family: var(--font-serif);
-  font-size: var(--text-36);
-  font-weight: var(--weight-bold);
-  font-variant-numeric: tabular-nums;
-  line-height: var(--leading-heading);
-  color: var(--navy);
-}
-
-/* Login page */
-.login-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   min-height: 100vh;
+  place-items: center;
   padding: var(--space-24) var(--space-16);
 }
 
-.login-card {
+.login-panel {
   width: 100%;
   max-width: 400px;
   padding: var(--space-32) var(--space-24);
 }
 
-.login-brand {
-  margin-bottom: var(--space-24);
+.login-church {
+  font-size: var(--text-22);
   line-height: var(--leading-snug);
 }
 
-.login-brand .brand-church {
-  font-family: var(--font-serif);
-  font-size: var(--text-22);
-  font-weight: var(--weight-bold);
-  color: var(--navy);
-}
-
-.login-brand .brand-role {
+.login-denomination {
+  margin-bottom: var(--space-24);
   color: var(--text-muted);
+  font-size: var(--text-14);
 }
 
-/* The sign-in error is shown under the form, above the note. */
-.login-card form {
-  display: flex;
-  flex-direction: column;
-}
-
-.login-card .form-group {
+.login .banner {
   margin-bottom: var(--space-16);
 }
 
-.login-card .alert {
-  order: 1;
-  margin: var(--space-16) 0 0;
-}
-
-.login-card .login-note {
-  order: 2;
-  margin-top: var(--space-16);
-  font-size: var(--text-14);
+.panel-intro {
+  max-width: var(--measure);
+  margin-bottom: var(--space-24);
   color: var(--text-muted);
 }
 
-/* ---------- Wider screens: the sidebar is always open ---------- */
+/* ---------- Hidden ---------- */
 
-@media (min-width: 768px) {
-  :root {
-    --content-pad: var(--space-32);
-  }
-
-  .admin-layout {
-    display: flex;
-  }
-
-  .admin-sidebar,
-  .admin-sidebar.open {
-    display: flex;
-    position: sticky;
-    top: 0;
-    flex-shrink: 0;
-    height: 100vh;
-    box-shadow: var(--elevation-0);
-  }
-
-  .admin-sidebar.open::after {
-    display: none;
-  }
-
-  .sidebar-toggle {
-    display: none;
-  }
-
-  .admin-content {
-    padding-block: var(--space-32);
-  }
-
-  .login-card {
-    padding: var(--space-32);
-  }
-}
-
-/* Last in the file so that it wins over any class that sets display. */
+/* Last in the file, so the hidden attribute always wins over a component's own display. */
 [hidden] {
   display: none;
 }

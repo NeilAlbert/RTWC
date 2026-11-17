@@ -1,73 +1,108 @@
-/* Shared admin component: dialogs.
-   Built on the browser's own <dialog>, opened with showModal(). The browser then
-   keeps keyboard focus inside the dialog, makes the page behind it inert, and
-   closes it on Escape. When it closes, focus goes back to whatever opened it. */
+/**
+ * admin/js/components/dialog.js: dialogs and the confirm dialog.
+ *
+ * Built on the browser's own <dialog>, opened with showModal(). The browser then
+ * keeps focus inside the dialog, makes the rest of the page inert, and puts focus
+ * back where it was when the dialog closes. Escape closes it. A click on the
+ * scrim does not, so a half-filled form is not lost by a stray click.
+ *
+ * openDialog({
+ *   title,
+ *   body,                node shown in the scrolling part
+ *   actions,             [{ label, variant: 'primary' | 'secondary' | 'danger', onClick, autofocus }]
+ *   wide,                true for a wider dialog
+ *   canClose(),          optional. Return false (or a promise of false) to keep it open
+ *   onClose(),           called after it has closed
+ * })
+ * Returns { element, close(), forceClose() }. close() asks canClose first.
+ *
+ * confirmDialog({ title, message, confirmLabel, danger }) resolves to true or false.
+ * Every delete in the admin goes through it.
+ */
+import { el, uid } from './dom.js';
 
-(() => {
-  const { el, uniqueId } = window.AdminUI;
+const VARIANTS = { primary: 'button', secondary: 'button button-secondary', danger: 'button button-danger' };
 
-  /**
-   * Opens a dialog.
-   * @param {object} options
-   * @param {string} options.title
-   * @param {Node|Node[]} options.body
-   * @param {boolean} [options.small]  narrow dialog, for confirmations
-   * @param {Function} [options.onClose]  called once, after it has closed
-   * @returns {{ dialog: HTMLDialogElement, close: Function }}
-   */
-  function openDialog({ title, body, small = false, onClose }) {
-    const trigger = document.activeElement;
-    const titleId = uniqueId('dialog-title');
+export function openDialog({ title, body, actions = [], wide = false, canClose, onClose }) {
+  const titleId = uid('dialog-title');
+  const dialog = el('dialog', { class: wide ? 'dialog dialog-wide' : 'dialog', 'aria-labelledby': titleId });
+  let closing = false;
 
-    const dialog = el('dialog', { class: small ? 'dialog dialog-small' : 'dialog', 'aria-labelledby': titleId }, [
-      el('div', { class: 'dialog-head' }, [
-        el('h2', { class: 'dialog-title', id: titleId, text: title }),
-        el('button', { type: 'button', class: 'btn-text', text: 'Close', on: { click: () => dialog.close() } }),
-      ]),
-      el('div', { class: 'dialog-body' }, body),
-    ]);
-
-    dialog.addEventListener('close', () => {
-      dialog.remove();
-      if (trigger && document.contains(trigger) && typeof trigger.focus === 'function') trigger.focus();
-      if (onClose) onClose();
-    });
-
-    document.body.append(dialog);
-    dialog.showModal();
-    return { dialog, close: () => dialog.close() };
+  function forceClose() {
+    dialog.close();
   }
 
-  /**
-   * Asks a yes or no question before something that cannot be undone.
-   * Resolves true only when the confirm button is pressed.
-   * @returns {Promise<boolean>}
-   */
-  function confirmAction({ title, message, confirmLabel = 'Delete', danger = true }) {
-    return new Promise((resolve) => {
-      let confirmed = false;
-      const cancel = el('button', { type: 'button', class: 'btn btn-outline', text: 'Cancel' });
-      const confirm = el('button', { type: 'button', class: danger ? 'btn btn-danger' : 'btn btn-primary', text: confirmLabel });
-
-      const { close } = openDialog({
-        title,
-        small: true,
-        body: [
-          el('p', { class: 'dialog-message', text: message }),
-          el('div', { class: 'dialog-actions' }, [confirm, cancel]),
-        ],
-        onClose: () => resolve(confirmed),
-      });
-
-      cancel.addEventListener('click', close);
-      confirm.addEventListener('click', () => {
-        confirmed = true;
-        close();
-      });
-      // Start on Cancel, so pressing Enter by habit does not delete anything.
-      cancel.focus();
-    });
+  async function close() {
+    if (closing) return;
+    closing = true;
+    const allowed = canClose ? await canClose() : true;
+    closing = false;
+    if (allowed !== false) forceClose();
   }
 
-  Object.assign(window.AdminUI, { openDialog, confirmAction });
-})();
+  dialog.append(
+    el('div', { class: 'dialog-header' },
+      el('h2', { class: 'dialog-title', id: titleId, text: title }),
+      el('button', { class: 'link-button', type: 'button', text: 'Close', onclick: close })),
+    el('div', { class: 'dialog-body' }, body));
+
+  if (actions.length > 0) {
+    const footer = el('div', { class: 'dialog-footer' });
+    actions.forEach((action) => {
+      footer.append(el('button', {
+        class: VARIANTS[action.variant] || VARIANTS.secondary,
+        type: 'button',
+        text: action.label,
+        autofocus: Boolean(action.autofocus),
+        onclick: () => action.onClick({ close, forceClose }),
+      }));
+    });
+    dialog.append(footer);
+  }
+
+  // Escape is handled here rather than left to the browser. Chrome lets a page stop
+  // its own Escape-to-close only after a recent click or key press, so a changed
+  // form could otherwise close without asking. Taking the key first means canClose
+  // is always asked.
+  dialog.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    event.stopPropagation();
+    close();
+  });
+  dialog.addEventListener('cancel', (event) => {
+    event.preventDefault();
+    close();
+  });
+  dialog.addEventListener('close', () => {
+    dialog.remove();
+    if (onClose) onClose();
+  });
+
+  document.body.append(dialog);
+  dialog.showModal();
+  return { element: dialog, close, forceClose };
+}
+
+export function confirmDialog({ title, message, confirmLabel = 'Delete', cancelLabel = 'Cancel', danger = true }) {
+  return new Promise((resolve) => {
+    let confirmed = false;
+    openDialog({
+      title,
+      body: el('p', { text: message }),
+      actions: [
+        // Focus starts on Cancel, so pressing Enter by habit does not delete anything.
+        { label: cancelLabel, variant: 'secondary', autofocus: true, onClick: ({ forceClose }) => forceClose() },
+        {
+          label: confirmLabel,
+          variant: danger ? 'danger' : 'primary',
+          onClick: ({ forceClose }) => {
+            confirmed = true;
+            forceClose();
+          },
+        },
+      ],
+      onClose: () => resolve(confirmed),
+    });
+  });
+}

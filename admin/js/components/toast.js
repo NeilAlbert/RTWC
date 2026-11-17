@@ -1,43 +1,20 @@
-/* Shared admin component: toast messages.
-   Short confirmations that an action worked or failed. They close themselves
-   after 5 seconds, so an error a person must act on is always shown in the page
-   as well (in the form or the table), never only here. */
+/**
+ * admin/js/components/toast.js: a short message that goes away after 5 seconds.
+ *
+ * For confirmations such as "Sermon saved". An error must also be shown where it
+ * happened (a field error or a banner): a toast is never the only place it appears.
+ */
+import { el } from './dom.js';
 
-(() => {
-  const { el } = window.AdminUI;
-  const SHOW_MS = 5000;
-  let region = null;
+const SHOW_FOR_MS = 5000;
+let region = null;
 
-  function getRegion() {
-    if (!region) {
-      region = el('div', { class: 'toast-region', role: 'status', 'aria-live': 'polite' });
-      document.body.append(region);
-    }
-    return region;
+export function toast(message) {
+  if (!region) {
+    region = el('div', { class: 'toast-region', role: 'status', 'aria-live': 'polite' });
+    document.body.append(region);
   }
-
-  /** @param {string} message  @param {'success'|'error'} [type] */
-  function toast(message, type = 'success') {
-    let timer = null;
-    const item = el('div', { class: `toast toast-${type}` }, [
-      el('span', { class: 'toast-text', text: message }),
-      el('button', {
-        type: 'button',
-        class: 'btn-text',
-        text: 'Dismiss',
-        on: { click: () => close() },
-      }),
-    ]);
-
-    function close() {
-      clearTimeout(timer);
-      item.remove();
-    }
-
-    getRegion().append(item);
-    timer = setTimeout(close, SHOW_MS);
-    return close;
-  }
-
-  window.AdminUI.toast = toast;
-})();
+  const item = el('p', { class: 'toast', text: message });
+  region.append(item);
+  window.setTimeout(() => item.remove(), SHOW_FOR_MS);
+}

@@ -24,24 +24,32 @@ function notFound(req, res) {
  * @param {import('express').NextFunction} next
  */
 function errorHandler(err, req, res, next) { // eslint-disable-line no-unused-vars
-  logger.error('Unhandled error', {
-    route: req.originalUrl,
-    method: req.method,
-    message: err.message,
-  });
-
-  // Validation/HTTP-status errors (e.g. 404 thrown by controllers) keep their code.
   const status = err.status || err.statusCode || 500;
 
+  // A database error carries the failed SQL in its message, so only its code is logged.
+  const isDatabaseError = Boolean(err.sqlState || err.sqlMessage);
   if (status >= 500) {
+    logger.error('Request failed', {
+      route: req.path,
+      method: req.method,
+      code: err.code,
+      message: isDatabaseError ? 'Database error' : err.message,
+    });
     return res.status(500).json({
       success: false,
-      message: 'An internal server error occurred.',
+      data: null,
+      message: 'The server has a problem and could not complete the request.',
     });
+  }
+
+  // A body that is not valid JSON, or is too large.
+  if (err.type === 'entity.parse.failed' || err.type === 'entity.too.large') {
+    return res.status(status).json({ success: false, data: null, message: 'The request could not be read.' });
   }
 
   return res.status(status).json({
     success: false,
+    data: null,
     message: err.message || 'Request failed.',
   });
 }

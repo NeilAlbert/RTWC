@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS admins (
   name          VARCHAR(120)     NOT NULL,
   email         VARCHAR(255)     NOT NULL,
   password_hash VARCHAR(255)     NOT NULL,
+  -- Tokens issued at or before this moment (UTC) are refused. Set on password change, reset and log out.
+  token_valid_after DATETIME      NULL,
   created_at    TIMESTAMP        NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_admins_email (email)
@@ -167,7 +169,10 @@ INSERT INTO site_settings (setting_key, setting_value) VALUES
   ('next_service_title', ''),
   ('next_service_date', ''),
   ('next_service_time', ''),
-  ('previous_broadcast_url', '')
+  ('previous_broadcast_url', ''),
+  ('announcement_enabled', '0'),
+  ('announcement_text', ''),
+  ('announcement_link', '')
 ON DUPLICATE KEY UPDATE setting_key = setting_key;
 
 SET FOREIGN_KEY_CHECKS = 1;

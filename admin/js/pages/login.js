@@ -1,74 +1,88 @@
-/* Admin login page. */
+/**
+ * admin/js/pages/login.js: the login form.
+ *
+ * adminAuth.js has already run in the <head>: with a live token it has sent the
+ * browser to the dashboard, and it never redirects this page to itself.
+ */
+import { api } from '../adminApi.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-  if (AdminAuth.hasValidToken()) {
-    window.location.replace('dashboard.html');
+const auth = window.AdminAuth;
+
+const NOTICES = {
+  expired: 'Your session expired. Please log in again.',
+  idle: 'You were logged out after 30 minutes without activity.',
+  'logged-out': 'You have logged out.',
+};
+
+const form = document.getElementById('login-form');
+const email = document.getElementById('login-email');
+const password = document.getElementById('login-password');
+const submit = document.getElementById('login-submit');
+const notice = document.getElementById('login-notice');
+const error = document.getElementById('login-error');
+
+function showBanner(node, message) {
+  node.textContent = message;
+  node.hidden = !message;
+}
+
+function setFieldError(input, message) {
+  const node = document.getElementById(`${input.id}-error`);
+  node.textContent = message;
+  node.hidden = !message;
+  if (message) {
+    input.setAttribute('aria-invalid', 'true');
+    input.setAttribute('aria-describedby', node.id);
+  } else {
+    input.removeAttribute('aria-invalid');
+    input.removeAttribute('aria-describedby');
+  }
+}
+
+/** The message for a failed sign-in, by what the server answered. */
+function failureMessage(result) {
+  if (result.status === 0) return 'Cannot reach the server. Please try again.';
+  if (result.status === 401) return 'Invalid email or password';
+  if (result.status === 429) return 'Too many attempts. Please try again in a few minutes.';
+  return 'The server has a problem and could not log you in. Please try again later.';
+}
+
+showBanner(notice, NOTICES[auth.takeNotice()] || '');
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  showBanner(error, '');
+  showBanner(notice, '');
+
+  // The password is sent exactly as typed. Only the email is trimmed.
+  const emailValue = email.value.trim();
+  const passwordValue = password.value;
+  setFieldError(email, emailValue ? '' : 'Enter your email address.');
+  setFieldError(password, passwordValue ? '' : 'Enter your password.');
+  if (!emailValue) {
+    email.focus();
+    return;
+  }
+  if (!passwordValue) {
+    password.focus();
     return;
   }
 
-  const form = document.getElementById('login-form');
-  const emailInput = document.getElementById('login-email');
-  const passwordInput = document.getElementById('login-password');
-  const errEmail = document.getElementById('err-email');
-  const errPassword = document.getElementById('err-password');
-  const errorAlert = document.getElementById('login-error');
-  const submitBtn = document.getElementById('login-btn');
+  submit.disabled = true;
+  submit.textContent = 'Logging in';
+  const result = await api.login(emailValue, passwordValue);
 
-  function showFieldError(input, el, message) {
-    el.textContent = message || '';
-    el.classList.toggle('visible', Boolean(message));
-    input.classList.toggle('invalid', Boolean(message));
+  if (result.ok && result.data && result.data.token) {
+    if (auth.startSession(result.data.token)) {
+      window.location.replace(auth.homeUrl);
+      return;
+    }
+    showBanner(error, 'This browser is blocking the storage the admin needs to keep you logged in. Allow site data for this address and try again.');
+  } else {
+    showBanner(error, failureMessage(result));
+    password.value = '';
+    password.focus();
   }
-
-  function clearErrors() {
-    showFieldError(emailInput, errEmail, '');
-    showFieldError(passwordInput, errPassword, '');
-    errorAlert.classList.remove('visible');
-    errorAlert.textContent = '';
-  }
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearErrors();
-
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    let valid = true;
-
-    if (!email) {
-      showFieldError(emailInput, errEmail, 'Please enter your email address.');
-      valid = false;
-    } else if (!emailRegex.test(email)) {
-      showFieldError(emailInput, errEmail, 'That does not look like an email address.');
-      valid = false;
-    }
-
-    if (!password) {
-      showFieldError(passwordInput, errPassword, 'Please enter your password.');
-      valid = false;
-    }
-
-    if (!valid) return;
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Signing in';
-
-    try {
-      await AdminAuth.login(email, password);
-      window.location.replace('dashboard.html');
-    } catch (err) {
-      // One message per kind of failure. A wrong email and a wrong password read the same.
-      let message = 'You could not be signed in. Please try again.';
-      if (err.status === 401) message = 'Invalid email or password';
-      else if (err.status === 429) message = 'Too many attempts. Please try again in a few minutes.';
-      else if (err.status === 0) message = 'Cannot reach the server. Please try again.';
-      else if (err.status >= 500) message = 'The server has a problem and could not sign you in. Please try again later.';
-      errorAlert.textContent = message;
-      errorAlert.classList.add('visible');
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Sign in';
-    }
-  });
+  submit.disabled = false;
+  submit.textContent = 'Log in';
 });
