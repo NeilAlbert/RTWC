@@ -272,7 +272,16 @@ main .info-panel .service-times li {
 }
 
 .home-visit .section-head {
-  margin-bottom: 0;
+  margin-bottom: var(--space-32);
+}
+
+.home-visit-main {
+  min-width: 0;
+}
+
+/* The sign-up's heading sits at the same level as "Visit Us", one size smaller. */
+.home-newsletter .newsletter-heading {
+  font-size: var(--text-h3);
 }
 
 .home-visit .contact-details {
@@ -312,8 +321,12 @@ main .info-panel .service-times li {
     gap: var(--space-64);
   }
 
+}
+
+@media (min-width: 1024px) {
+  /* Visit on one side, the newsletter sign-up on the other. */
   .home-visit {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: var(--space-64);
   }
 }

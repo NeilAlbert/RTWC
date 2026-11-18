@@ -28,7 +28,9 @@
   flex: 1 1 auto;
   min-width: 0;
   min-height: var(--button-height);
-  border-color: var(--border-strong);
+  /* --border-input, not --border-strong: a form control's edge needs 3:1 against
+     the page, and --border-strong is 1.6:1 on white. */
+  border-color: var(--border-input);
 }
 
 .newsletter-row input:hover {
@@ -42,6 +44,18 @@
 .newsletter-row button {
   flex: 0 0 auto;
   min-width: 9.5rem;
+}
+
+/* While sending: the same muted look as every disabled button on the site. */
+.newsletter-row .button-gold:disabled {
+  background-color: var(--surface-2);
+  border-color: var(--border-strong);
+  color: var(--text-muted);
+  cursor: progress;
+}
+
+.newsletter-row .button:disabled {
+  cursor: progress;
 }
 
 .newsletter-error,

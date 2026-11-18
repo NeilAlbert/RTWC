@@ -1623,8 +1623,9 @@ textarea[aria-invalid="true"] {
     gap: var(--space-48);
   }
 
+  /* Two by two up to 1199px, then name, contact, pages and sign-up in one row. */
   .footer-columns {
-    grid-template-columns: 4fr 5fr 3fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .leader-profile {
@@ -1678,6 +1679,12 @@ textarea[aria-invalid="true"] {
 
   .ministry-list {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .footer-columns {
+    grid-template-columns: 3fr 4fr 3fr 4fr;
   }
 }
 
