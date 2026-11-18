@@ -1434,6 +1434,22 @@ textarea[aria-invalid="true"] {
   max-width: 320px;
 }
 
+.leader-photo {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+/* Ministry leaders on the About page: one per line, each with a link to the ministry. */
+.leader-ministries {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .leader-list {
   padding-inline: var(--space-16);
 }
@@ -1467,6 +1483,87 @@ textarea[aria-invalid="true"] {
 
 .ministry h2::after {
   display: none;
+}
+
+/* Loading, empty and error message: one row across the whole grid. */
+.ministry-status {
+  grid-column: 1 / -1;
+  max-width: none;
+  margin: 0;
+  padding: var(--space-16);
+  background-color: var(--surface-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.ministry-status:empty {
+  display: none;
+}
+
+/* Shown only when an icon was uploaded in Admin > Ministries. */
+.ministry-icon {
+  width: var(--space-48);
+  height: var(--space-48);
+  margin-bottom: var(--space-12);
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+/* "Led by" under a ministry's description: one row per leader. */
+.ministry-leaders {
+  margin-bottom: var(--space-16);
+}
+
+.ministry-leaders-label {
+  margin-bottom: var(--space-8);
+  font-size: var(--text-14);
+  font-weight: var(--weight-semibold);
+  color: var(--text-muted);
+}
+
+.ministry-leader-list {
+  display: grid;
+  gap: var(--space-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ministry-leader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.ministry-leader-photo {
+  flex: none;
+  width: var(--space-64);
+  height: var(--space-64);
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+.photo-slot.ministry-leader-photo {
+  padding: var(--space-4);
+  font-size: var(--text-12);
+}
+
+.ministry-leader-text {
+  display: grid;
+  min-width: 0;
+}
+
+.ministry-leader-name {
+  font-family: var(--font-heading);
+  font-size: var(--text-18);
+  line-height: var(--leading-snug);
+  overflow-wrap: anywhere;
+}
+
+.ministry-leader-role {
+  font-size: var(--text-14);
+  font-variant: small-caps;
+  color: var(--text-muted);
 }
 
 /* Live stream */

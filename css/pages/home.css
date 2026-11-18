@@ -126,6 +126,11 @@ main .info-panel .service-times li {
   border-bottom: 1px solid var(--border-strong);
 }
 
+/* Nothing to draw until the ministries have loaded; the status line shows instead. */
+.ministry-index:empty {
+  display: none;
+}
+
 .ministry-index li {
   max-width: none;
   border-top: 1px solid var(--border-strong);

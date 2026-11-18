@@ -15,13 +15,15 @@ const { NotFoundError } = require('../utils/errors');
 const cache = require('../utils/cache');
 
 const CACHE_TTL = 60; // seconds; cleared at once by any admin change
-const clearCache = () => cache.invalidate('leadership:');
+// The public ministries list names each ministry's leaders, so a leader change clears both.
+const clearCache = () => cache.invalidate('leadership:', 'ministries:');
 
 function formatMember(row) {
   return {
     id: row.id,
     name: row.name,
     role: row.role,
+    ministryId: row.ministry_name ? row.ministry_id : null,
     ministry: row.ministry_name || null,
     ministrySlug: row.ministry_slug || null,
     photoUrl: row.photo_url,

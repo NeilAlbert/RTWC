@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Backups | Royal Temple Worship Centre admin</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <script src="/admin/js/adminAuth.js"></script>
+</head>
+<body data-page="backups" data-title="Backups">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="shell-main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content" id="main" tabindex="-1">
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1>Backups</h1>
+            <p class="page-description">A backup is one encrypted file with the website's content: events, sermons, ministries, leaders, messages, prayer requests, the newsletter list and settings. Admin accounts are never included.</p>
+          </div>
+        </div>
+
+        <div id="page-root" class="backup-panels"></div>
+
+        <section class="panel" aria-labelledby="device-copy-heading">
+          <div class="panel-header"><h2 id="device-copy-heading">Keep a copy on your own device</h2></div>
+          <div class="panel-body">
+            <p class="backup-note">Backups saved on the server are lost if the server itself is lost or replaced. After making a backup, download it and keep it somewhere safe that is not the server, such as a computer or an external drive. Keep its passphrase in a password manager, apart from the file.</p>
+          </div>
+        </section>
+
+        <div id="restore-root" class="backup-restore-root"></div>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="/admin/js/pages/backups.js"></script>
+</body>
+</html>

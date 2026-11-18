@@ -23,6 +23,7 @@ const redis = require('../config/redis');
 const standardHeaders = true;
 const legacyHeaders = false;
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
+const ONE_HOUR = 60 * 60 * 1000;
 
 let hashKey = null;
 /** A key derived from JWT_SECRET, made on first use (server.js checks JWT_SECRET is set). */
@@ -49,7 +50,10 @@ class RedisOrMemoryStore {
     this.redisStore = null;
   }
 
+  // A store may be shared by two limiters with the same window (the login count is),
+  // so it is set up only once.
   init(options) {
+    if (this.options) return;
     this.options = options;
     this.memory.init(options);
   }
@@ -98,17 +102,21 @@ class RedisOrMemoryStore {
   resetKey(key) { return this.run('resetKey', key); }
 }
 
-function limiter(name, limit, message) {
+function limiter(name, limit, message, { windowMs = FIFTEEN_MINUTES, skipFailedRequests = false, store } = {}) {
   return rateLimit({
-    windowMs: FIFTEEN_MINUTES,
+    windowMs,
+    skipFailedRequests,
     limit,
     standardHeaders,
     legacyHeaders,
     keyGenerator,
-    store: new RedisOrMemoryStore(name),
+    store: store || new RedisOrMemoryStore(name),
     message,
   });
 }
+
+/** The sign-in count, shared with the restore's admin password check below. */
+const loginStore = new RedisOrMemoryStore('login');
 
 const TRY_LATER = { success: false, message: 'Too many requests. Please try again later.' };
 const TOO_MANY_ATTEMPTS = { success: false, data: null, message: 'Too many attempts. Please try again in a few minutes.' };
@@ -123,12 +131,55 @@ const prayerRequestsLimiter = limiter('prayer', 5, TRY_LATER);
 const newsletterLimiter = limiter('newsletter', 5, TOO_MANY_ATTEMPTS);
 
 /** Sign-in: 10 attempts per 15 minutes per IP. The login page shows this message. */
-const authLimiter = limiter('login', 10, TOO_MANY_ATTEMPTS);
+const authLimiter = limiter('login', 10, TOO_MANY_ATTEMPTS, { store: loginStore });
+
+/**
+ * A restore asks for the admin password again. A wrong one counts toward the
+ * same 10 sign-in attempts per 15 minutes as the login page (the count is
+ * shared), and once that is used up the restore is refused too. A correct
+ * password is not counted. The route sets res.locals.wrongAdminPassword.
+ */
+const restorePasswordLimiter = rateLimit({
+  windowMs: FIFTEEN_MINUTES,
+  limit: 10,
+  standardHeaders,
+  legacyHeaders,
+  keyGenerator,
+  store: loginStore,
+  skipSuccessfulRequests: true,
+  requestWasSuccessful: (req, res) => !res.locals.wrongAdminPassword,
+  message: TOO_MANY_ATTEMPTS,
+  // Sharing the sign-in store is the point here, so the check against sharing is off.
+  validate: { unsharedStore: false },
+});
 
 /** Password change: 10 attempts per 15 minutes per IP, so a stolen session cannot guess the current password. */
 const passwordLimiter = limiter('password', 10, TOO_MANY_ATTEMPTS);
 
+/**
+ * Making a backup: 5 per hour per IP. A request the server refuses, such as
+ * passphrases that do not match or a backup already running, is not counted,
+ * so a typing mistake does not use up the hour.
+ */
+const backupLimiter = limiter('backup', 5, {
+  success: false, data: null, message: 'Too many backups have been started in the last hour. Please try again later.',
+}, { windowMs: ONE_HOUR, skipFailedRequests: true });
+
+const TOO_MANY_RESTORES = { success: false, data: null, message: 'Too many restore requests in the last hour. Please try again later.' };
+
+/** Restore steps, each 5 per hour per IP: uploading or choosing a file, and applying it (refusals not counted). */
+const restoreUploadLimiter = limiter('restore-upload', 5, TOO_MANY_RESTORES, { windowMs: ONE_HOUR, skipFailedRequests: true });
+const restoreApplyLimiter = limiter('restore-apply', 5, TOO_MANY_RESTORES, { windowMs: ONE_HOUR, skipFailedRequests: true });
+
+/** Checking a file with its passphrase: 5 per hour per IP, and every try counts, wrong passphrases included. */
+const restoreInspectLimiter = limiter('restore-inspect', 5, TOO_MANY_RESTORES, { windowMs: ONE_HOUR });
+
 module.exports = {
+  backupLimiter,
+  restoreUploadLimiter,
+  restoreInspectLimiter,
+  restoreApplyLimiter,
+  restorePasswordLimiter,
   contactLimiter,
   prayerRequestsLimiter,
   newsletterLimiter,

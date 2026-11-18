@@ -73,7 +73,8 @@ async function getMinistries(req, res, next) {
 /** GET /api/ministries/:slug — public */
 async function getMinistryBySlug(req, res, next) {
   try {
-    const ministry = await Ministry.findBySlug(req.params.slug);
+    // Not cached: a cache key per requested slug would let made-up slugs fill the cache.
+    const ministry = await Ministry.findBySlugWithLeaders(req.params.slug);
     if (!ministry) return next(new NotFoundError('Ministry not found.'));
     return res.json({ success: true, message: 'Ministry fetched successfully.', data: ministry });
   } catch (err) {

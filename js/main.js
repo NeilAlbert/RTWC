@@ -190,5 +190,14 @@
     header.before(bar);
   });
 
-  window.rtwc = { settings, formatDate, formatTime };
+  // GET a public API path and return its data, or throw with a short reason.
+  async function getJSON(path) {
+    const response = await fetch(path, { headers: { Accept: 'application/json' } });
+    if (!response.ok) throw new Error(`${path} returned HTTP ${response.status}.`);
+    const payload = await response.json();
+    if (!payload || !payload.success) throw new Error(`${path} returned an invalid response.`);
+    return payload.data;
+  }
+
+  window.rtwc = { settings, formatDate, formatTime, getJSON };
 })();

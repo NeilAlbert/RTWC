@@ -25,6 +25,7 @@
   <script src="js/loader.js" defer></script>
   <script src="js/main.js" defer></script>
   <script src="js/newsletter.js" defer></script>
+  <script src="js/pages/about.js" defer></script>
 </head>
 <body>
   <div id="page-loader" role="status" aria-live="polite">
@@ -162,30 +163,32 @@
 
       <section class="section" id="leadership">
         <h2>Leadership</h2>
-        <!-- ADD: leaders' names are edited here in about.html. No names have been supplied yet. -->
+        <!-- Names come from Admin > Leadership (GET /api/leadership) and are filled in by
+             js/pages/about.js. A group with nobody in it yet keeps its [ADD] placeholder. -->
         <div class="leader-profile">
-          <div class="photo-slot photo-slot-portrait" role="img" aria-label="Space for a photo of the Resident Pastor.">
+          <div class="photo-slot photo-slot-portrait" id="pastor-photo" role="img" aria-label="Space for a photo of the Resident Pastor.">
             <strong>Photo: Resident Pastor</strong>
             <span>800 &times; 1000 px</span>
             <span>assets/images/resident-pastor.jpg</span>
           </div>
           <div>
             <h3>Resident Pastor</h3>
-            <p><span class="to-add">[ADD: name of the Resident Pastor]</span></p>
-            <p><span class="to-add">[ADD: two or three sentences about the Resident Pastor]</span></p>
+            <p id="pastor-name"><span class="to-add">[ADD: name of the Resident Pastor]</span></p>
+            <p id="pastor-bio"><span class="to-add">[ADD: two or three sentences about the Resident Pastor]</span></p>
           </div>
         </div>
-        <dl class="leader-list">
+        <dl class="leader-list" id="leader-list">
           <dt>Presiding Elder</dt>
-          <dd><span class="to-add">[ADD: name of the Presiding Elder]</span></dd>
+          <dd data-leaders="presiding_elder"><span class="to-add">[ADD: name of the Presiding Elder]</span></dd>
           <dt>Church Secretary</dt>
-          <dd><span class="to-add">[ADD: name of the Church Secretary]</span></dd>
+          <dd data-leaders="secretary"><span class="to-add">[ADD: name of the Church Secretary]</span></dd>
           <dt>Elders</dt>
-          <dd><span class="to-add">[ADD: names of the elders]</span></dd>
+          <dd data-leaders="elder"><span class="to-add">[ADD: names of the elders]</span></dd>
           <dt>Deacons and Deaconesses</dt>
-          <dd><span class="to-add">[ADD: names of the deacons and deaconesses]</span></dd>
+          <dd data-leaders="deacon deaconess"><span class="to-add">[ADD: names of the deacons and deaconesses]</span></dd>
+          <dt>Ministry Leaders</dt>
+          <dd data-leaders="ministry_leader">Listed on the <a href="ministries.html">Ministries page</a>.</dd>
         </dl>
-        <p>Ministry leaders are listed on the <a href="ministries.html">Ministries page</a>.</p>
       </section>
 
       <section class="section">

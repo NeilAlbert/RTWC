@@ -25,6 +25,7 @@
   <script src="js/loader.js" defer></script>
   <script src="js/main.js" defer></script>
   <script src="js/newsletter.js" defer></script>
+  <script src="js/pages/ministries.js" defer></script>
 </head>
 <body>
   <div id="page-loader" role="status" aria-live="polite">
@@ -71,54 +72,10 @@
         <p>These are the ministries of the assembly. To join one, speak to its leader after a service or <a href="contact.html">contact the church office</a>.</p>
       </section>
 
-      <!-- VERIFY: confirm this list matches the ministries of the assembly. Meeting times and
-           leaders are edited here in ministries.html. -->
-      <div class="section ministry-list">
-        <article class="ministry" id="pemem">
-          <h2>Men's Ministry (PEMEM)</h2>
-          <p>The fellowship for the men of the assembly.</p>
-          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-        </article>
-        <article class="ministry" id="womens">
-          <h2>Women's Ministry</h2>
-          <p>The fellowship for the women of the assembly.</p>
-          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-        </article>
-        <article class="ministry" id="pyfm">
-          <h2>Youth Ministry</h2>
-          <p>For the teenagers and young adults of the assembly.</p>
-          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-        </article>
-        <article class="ministry" id="pensa">
-          <h2>PENSA (Pentecost Students and Associates)</h2>
-          <p>For students in secondary and tertiary schools.</p>
-          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-        </article>
-        <article class="ministry" id="children">
-          <h2>Children's Ministry</h2>
-          <p>Sunday school and Bible teaching for the children of the assembly.</p>
-          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-        </article>
-        <article class="ministry" id="choir">
-          <h2>Choir and Praise Team</h2>
-          <p>Leads the singing at our services.</p>
-          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-        </article>
-        <article class="ministry" id="evangelism">
-          <h2>Evangelism Ministry</h2>
-          <p>Leads the assembly's outreach and follows up with new converts.</p>
-          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-        </article>
-        <article class="ministry" id="ushering">
-          <h2>Ushers</h2>
-          <p>Welcome people to our services and help them find a seat.</p>
-          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-        </article>
-        <article class="ministry" id="prayer">
-          <h2>Prayer Force</h2>
-          <p>Meets to pray for the assembly and for prayer requests sent to the church.</p>
-          <p>Meets: <span class="to-add">[ADD: day and time]</span><br>Leader: <span class="to-add">[ADD: name]</span></p>
-        </article>
+      <!-- The ministries come from Admin > Ministries (GET /api/ministries) and are drawn by
+           js/pages/ministries.js. Each one's slug is its anchor, so ministries.html#choir opens it. -->
+      <div class="section ministry-list" id="ministry-list">
+        <p class="ministry-status" id="ministries-status" role="status">Loading the ministries.</p>
       </div>
     </div>
   </main>

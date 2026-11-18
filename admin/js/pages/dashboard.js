@@ -1,10 +1,13 @@
 /**
  * admin/js/pages/dashboard.js: five counts, the newest unread messages and the
- * next events. All of it comes from one request, shared with the sidebar.
+ * next events, from one request shared with the sidebar. The last backup line
+ * comes from GET /api/admin/backups/summary.
  */
 import { el, formatDate, formatDateTime } from '../components/dom.js';
 import { showLoading, showEmpty, showError } from '../components/states.js';
 import { loadStats, refreshCounts } from '../shell.js';
+import { api } from '../adminApi.js';
+import { KINDS, localDateTime, startDownload } from '../components/backupTools.js';
 
 const errorBox = document.getElementById('dashboard-error');
 const messagesBox = document.getElementById('new-messages');
@@ -53,3 +56,47 @@ async function load(request) {
 }
 
 load(loadStats());
+
+// ---------------------------------------------------------------------------
+// The last backup, and a notice when none has been downloaded in 35 days
+// ---------------------------------------------------------------------------
+const backupBox = document.getElementById('dashboard-backup');
+
+async function loadBackup() {
+  const result = await api.get('/admin/backups/summary');
+  if (!result.ok) {
+    backupBox.replaceChildren(el('p', { class: 'muted', text: 'The backup information could not be loaded.' }));
+    return;
+  }
+  const { latest, downloadNotice } = result.data;
+  const link = el('a', { href: '/admin/backups.html', text: 'Backups' });
+  const line = latest
+    ? el('p', {}, `Last backup: ${localDateTime(latest.startedAt)}, ${(KINDS[latest.kind] || KINDS.manual).label.toLowerCase()}. `, link)
+    : el('p', {}, 'No backup has been made yet. ', link);
+  const items = [line];
+  if (downloadNotice) {
+    const problem = el('p', { class: 'field-error', role: 'alert', hidden: true });
+    const action = latest && latest.fileAvailable
+      ? el('button', {
+        class: 'button button-secondary',
+        type: 'button',
+        text: 'Download the latest backup',
+        onclick: async () => {
+          problem.hidden = true;
+          const started = await startDownload(latest.id);
+          if (!started.ok) {
+            problem.textContent = started.message;
+            problem.hidden = false;
+          } else {
+            window.setTimeout(loadBackup, 2000);
+          }
+        },
+      })
+      : el('a', { class: 'button button-secondary', href: '/admin/backups.html', text: 'Go to Backups' });
+    items.push(el('div', { class: 'banner banner-info', role: 'status' },
+      el('span', { text: 'No backup has been downloaded to your device recently.' }), action), problem);
+  }
+  backupBox.replaceChildren(...items);
+}
+
+loadBackup();

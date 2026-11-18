@@ -57,7 +57,7 @@ const optional = { values: 'falsy' };
 /** GET /api/admin/stats: counts, recent new messages and next events. Takes no input. */
 router.get('/stats', validateRequest, getStats);
 
-/** GET /api/admin/status: whether Redis is set up and working. Takes no input. */
+/** GET /api/admin/status: whether Redis and backups are set up and working. Takes no input. */
 router.get('/status', getStatus);
 
 // ---------------------------------------------------------------------------
@@ -112,13 +112,17 @@ router.delete('/events/:id', idRule, validateRequest, deleteEvent);
 // The controller also refuses a name or slug another ministry already has, and
 // refuses to delete a ministry that still has leaders.
 // ---------------------------------------------------------------------------
-const ministryText = sanitizeBody(['name', 'slug', 'description'], { maxLength: 5000 });
+const ministryText = sanitizeBody(['name', 'slug', 'description', 'meeting_time'], { maxLength: 5000 });
 const ministryRules = [
   body('name').isString().bail().trim().isLength({ min: 1, max: 150 }).withMessage('Enter a name of 150 characters or fewer.'),
   body('slug').optional(optional).isString().bail().trim().isLength({ max: 150 }).matches(/^[a-z0-9]+(-[a-z0-9]+)*$/)
     .withMessage('The slug may only have lowercase letters, numbers and single hyphens, for example "youth-ministry".'),
   body('description').optional(optional).isString().isLength({ max: 5000 })
     .withMessage('The description must be 5000 characters or fewer.'),
+  body('meeting_time').optional(optional).isString().bail().trim().isLength({ max: 150 })
+    .withMessage('The meeting time must be 150 characters or fewer.'),
+  body('display_order').optional(optional).isInt({ min: 0, max: 9999 })
+    .withMessage('Enter a whole number from 0 to 9999.'),
   body('icon_url').optional(optional).isString().bail().trim().isLength({ max: 500 }).custom(isImageRef)
     .withMessage('The icon must be an uploaded image or a link that starts with http:// or https://.'),
 ];

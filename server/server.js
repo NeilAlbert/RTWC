@@ -22,6 +22,7 @@ const facebookGalleryRoutes = require('./routes/facebookGallery');
 const copNewsRoutes = require('./routes/copNews');
 const siteSettingsRoutes = require('./routes/siteSettings');
 const adminRoutes = require('./routes/admin');
+const adminBackupsRoutes = require('./routes/adminBackups');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
 
@@ -40,6 +41,8 @@ if (missingSettings.length > 0) {
 // database is configured.
 const pool = require('./config/db');
 const redis = require('./config/redis');
+const { recoverInterruptedRuns } = require('./services/backupService');
+const backupScheduler = require('./jobs/backupScheduler');
 
 const app = express();
 
@@ -130,9 +133,11 @@ app.use(express.json({ limit: '1mb' }));
 // Authorization header, not a cookie, so a forged cross-site request carries no
 // credentials. (The csurf setup that was here made every request fail with HTTP 500.)
 
-// Request log. Bodies and tokens are never logged.
+// Request log. Bodies and tokens are never logged. A backup download ticket is
+// part of its address, so it is replaced before the address is written down.
 app.use((req, res, next) => {
-  logger.info(`${req.method} ${req.originalUrl}`, { ip: req.ip });
+  const address = req.originalUrl.replace(/^(\/api\/admin\/backups\/download\/)[^/?#]*/, '$1[ticket]');
+  logger.info(`${req.method} ${address}`, { ip: req.ip });
   next();
 });
 
@@ -174,6 +179,8 @@ app.use('/api/youtube', youtubeLiveRoutes);
 app.use('/api/facebook', facebookGalleryRoutes);
 app.use('/api/cop-news', copNewsRoutes);
 app.use('/api/settings', siteSettingsRoutes);
+// Before /api/admin, because its download route is reached with a ticket instead of a sign-in.
+app.use('/api/admin/backups', adminBackupsRoutes);
 app.use('/api/admin', adminRoutes);
 
 // The 404 and error handlers must come after every route.
@@ -200,6 +207,9 @@ async function checkAdminColumns() {
 }
 
 checkAdminColumns().then(() => {
+  // A backup cut off by a crash or restart is marked failed and its partial file removed.
+  // Then the clean-up finishes before the first check for this month's automatic backup.
+  recoverInterruptedRuns().then(() => backupScheduler.start());
   app.listen(PORT, () => {
     logger.info(`Royal Temple API listening on http://localhost:${PORT}`);
   });

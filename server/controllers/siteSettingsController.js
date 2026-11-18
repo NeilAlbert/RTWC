@@ -4,7 +4,7 @@
  * kept in the site_settings table.
  *
  * GET /api/settings: public. Every key and value as one object, cached for 60
- *   seconds. The public pages fill themselves in from it.
+ *   seconds, except the backup_* keys. The public pages fill themselves in from it.
  * GET /api/admin/settings: admin. The same values, never cached, plus the
  *   length limit of each key, so the form can say how much fits.
  * PUT /api/settings: admin. Changes only the keys sent. A key that is not in
@@ -87,10 +87,19 @@ async function getSettingsObject() {
   return settings;
 }
 
+/** The settings visitors may see: everything except the backup settings, which only the admin uses. */
+async function getPublicSettingsObject() {
+  const settings = await getSettingsObject();
+  Object.keys(settings).forEach((key) => {
+    if (key.startsWith('backup_')) delete settings[key];
+  });
+  return settings;
+}
+
 /** GET /api/settings: public */
 async function getSettings(req, res, next) {
   try {
-    const data = await cache.wrap(CACHE_KEY, CACHE_TTL, getSettingsObject);
+    const data = await cache.wrap(CACHE_KEY, CACHE_TTL, getPublicSettingsObject);
     return res.json({ success: true, message: 'Settings fetched successfully.', data });
   } catch (err) {
     return next(err);

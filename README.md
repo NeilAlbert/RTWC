@@ -12,13 +12,24 @@ Website of The Church of Pentecost, Royal Temple Worship Centre.
 
 ## Running the site and signing in to the admin
 
-1. In `server/`, copy `.env.example` to `.env` and fill in the database settings
-   (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`) and a `JWT_SECRET` of at
-   least 32 characters. For a hosted database such as Aiven, set `DB_SSL_CA` to the path
-   of its `ca.pem`. For MySQL on the same computer, set `DB_SSL=false`. The server will
-   not start until the database settings and `JWT_SECRET` are there, and it says which
-   one is missing.
-2. In `server/`, run `npm install`, then `npm start`.
+1. In `server/`, copy `.env.example` to `.env` and fill it in. Each setting has a comment
+   saying what it is for and where to find it.
+   - Required: `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, and a `JWT_SECRET` of at
+     least 32 characters (`openssl rand -hex 64`). The server will not start without them
+     and says which one is missing.
+   - Server: `PORT` (default 5000), `CORS_ORIGIN`, `TRUST_PROXY_HOPS` (default 1).
+   - Database: `DB_PORT` (default 3306). For a hosted database such as Aiven, set
+     `DB_SSL_CA` to the path of its `ca.pem`. For MySQL on the same computer, set
+     `DB_SSL=false`.
+   - Email notifications: `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASSWORD`,
+     `ADMIN_NOTIFICATION_EMAIL`. Fill in all of them or none.
+   - Live streaming and gallery: `PAGE_ID`, `FB_PAGE_ACCESS_TOKEN`, `YOUTUBE_API_KEY`.
+   - Redis (optional): `REDIS_ENABLED`, `REDIS_URL`, `REDIS_PREFIX`.
+   - Backups: `BACKUP_DIR`, `BACKUP_PASSPHRASE`, `BACKUP_MAX_BYTES`,
+     `BACKUP_MAX_UPLOAD_MB`, `BACKUP_KEEP_AUTO`.
+2. In `server/`, run `npm install`, then `npm run check:env`. It checks `.env` and the
+   database connection, prints names only (never values), and exits with an error when
+   something required is wrong. Then run `npm start`.
 3. Open `http://localhost:5000/api/ready`. It must say `"database":"ok"`.
    (`/api/health` only says the server is running; it does not check the database.)
 4. Open `http://localhost:5000/admin` and log in. Do not open the admin pages from
@@ -43,6 +54,7 @@ The admin is being rebuilt in four phases. After Phase 3 these pages work:
 | Newsletter | Subscribers, search, remove, and "Export as CSV" of the whole list |
 | Settings | Church details, service times, page text, live stream links and the site announcement |
 | Account | The admin name and email, and "Change password" |
+| Backups | Make, download, delete and restore encrypted backups, and the automatic monthly backup |
 
 Site status and Help open a placeholder until Phase 4.
 
@@ -104,6 +116,14 @@ appears to come from one address and they share one sign-in limit. (The older na
 Redis is optional and off by default. It shares the cache and the rate limits between
 several copies of the server. See `server/REDIS.md`.
 
+### Backups
+
+Admin > Backups makes an encrypted backup of the content (never the admin accounts),
+downloads it to your device, restores from it, and can make one every month by itself.
+Run migration 006 first. Automatic backups need `BACKUP_PASSPHRASE` in `server/.env`.
+Keep downloaded copies and their passphrases somewhere other than the server: a lost
+passphrase cannot be recovered. See `server/BACKUPS.md`.
+
 ## Where to edit content
 
 | Content | Where |
@@ -153,6 +173,7 @@ files in `server/migrations/` that it has not had yet, in this order:
 | `002_remove_giving.sql` | Removes the rest of giving |
 | `003_remove_sample_settings.sql` | Clears sample contact details that older schemas inserted |
 | `004_admin_additions.sql` | Adds `admins.token_valid_after` and the three announcement settings. The API will not start without it |
+| `006_backups.sql` | Adds the `backup_runs` table and the three automatic backup settings for Admin > Backups |
 
 Run one with, for example, `mysql -u root -p royal_temple < migrations/004_admin_additions.sql`
 from the `server/` folder.

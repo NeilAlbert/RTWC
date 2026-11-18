@@ -1,0 +1,11 @@
+# Never copied into a Docker image: backups hold private messages, prayer requests
+# and email addresses, and .env holds the passwords and keys.
+backups/
+server/backups/
+*.rtwcbackup
+*.rtwcbackup.partial
+**/.env
+**/.env.*
+**/.env.backup-*
+server/logs/
+node_modules/

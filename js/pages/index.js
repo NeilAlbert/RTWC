@@ -1,5 +1,43 @@
-/* Home page: the next three events from the events API, and the featured verse
-   from Admin > Settings. */
+/* Home page: the ministries from Admin > Ministries, the next three events from
+   the events API, and the featured verse from Admin > Settings. */
+
+// The ministries index: number, name and description, each a link to its place
+// on the Ministries page (ministries.html#slug).
+(async () => {
+  const list = document.getElementById('home-ministries');
+  const status = document.getElementById('home-ministries-status');
+  if (!list || !status) return;
+
+  function span(className, text) {
+    const element = document.createElement('span');
+    element.className = className;
+    element.textContent = text;
+    return element;
+  }
+
+  try {
+    const ministries = await window.rtwc.getJSON('/api/ministries');
+    if (!Array.isArray(ministries)) throw new Error('/api/ministries did not return a list.');
+    if (ministries.length === 0) {
+      status.textContent = 'No ministries to show yet.';
+      return;
+    }
+
+    list.replaceChildren(...ministries.map(ministry => {
+      const item = document.createElement('li');
+      const link = document.createElement('a');
+      link.href = `ministries.html#${encodeURIComponent(ministry.slug)}`;
+      link.append(span('ministry-index-name', ministry.name));
+      if (ministry.description) link.append(' ', span('ministry-index-text', ministry.description));
+      item.append(link);
+      return item;
+    }));
+    status.textContent = '';
+  } catch (error) {
+    console.error('Could not load the ministries.', error);
+    status.textContent = 'The ministries could not be loaded. Please try again later.';
+  }
+})();
 
 (async () => {
   const list = document.getElementById('home-events');

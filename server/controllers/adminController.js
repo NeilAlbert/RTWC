@@ -13,6 +13,7 @@ const PrayerRequest = require('../models/prayerRequestModel');
 const NewsletterSubscriber = require('../models/newsletterSubscriberModel');
 const { getPagination, buildPaginationMeta } = require('../utils/pagination');
 const redis = require('../config/redis');
+const backupService = require('../services/backupService');
 
 /** Answers a list request with one page of rows and its pagination. */
 function sendPage(res, noun, items, total, page, limit) {
@@ -134,15 +135,24 @@ const REDIS_STATUS = {
 
 /**
  * GET /api/admin/status: the parts of the site that can be checked from here.
- * For now only Redis: { redis: { status, label, message } }.
+ * { redis: { status, label, message }, backups: { status, label, message } }.
+ * status is ok, needs_attention or not_set_up.
  */
-function getStatus(req, res) {
-  const { status, label } = REDIS_STATUS[redis.getState()];
-  return res.json({
-    success: true,
-    message: 'Status fetched successfully.',
-    data: { redis: { status, label, message: redis.describeState() } },
-  });
+async function getStatus(req, res, next) {
+  try {
+    const { status, label } = REDIS_STATUS[redis.getState()];
+    const backups = await backupService.healthSummary();
+    return res.json({
+      success: true,
+      message: 'Status fetched successfully.',
+      data: {
+        redis: { status, label, message: redis.describeState() },
+        backups: { status: backups.status, label: backups.label, message: backups.message },
+      },
+    });
+  } catch (err) {
+    return next(err);
+  }
 }
 
 module.exports = {

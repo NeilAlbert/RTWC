@@ -1,11 +1,17 @@
 node_modules/
 .env
-.env.local
-.env.*.local
+.env.*
+.env.backup-*
+# Templates with no real values stay committable.
+!.env.example
+!.env.compose.example
 
 # Server runtime artifacts
 server/logs/
 backups/
+# Encrypted backups from Admin > Backups, wherever BACKUP_DIR points.
+*.rtwcbackup
+*.rtwcbackup.partial
 *.log
 .agents/
 .claude/

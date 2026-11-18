@@ -7,6 +7,7 @@ import { api } from '../adminApi.js';
 import { createCrudPage } from '../components/crudPage.js';
 import { createField } from '../components/form.js';
 import { createImageUpload } from '../components/imageUpload.js';
+import { tag } from '../components/tag.js';
 
 const ROLES = [
   { value: 'pastor', label: 'Pastor' },
@@ -38,6 +39,12 @@ function photo(row) {
   return el('img', { class: 'table-thumb', src: row.photo_url, alt: '', width: '48', height: '48', loading: 'lazy' });
 }
 
+// A ministry leader whose ministry is gone gets a visible tag, so the broken link can be fixed.
+function ministryCell(row) {
+  if (row.role !== 'ministry_leader') return '';
+  return row.ministry_name || tag('Ministry missing', 'danger');
+}
+
 function ministryHelp() {
   if (ministriesFailed) return 'The list of ministries could not be loaded. Close this form and try again.';
   if (ministries.length === 0) return 'There are no ministries yet. Add one on the Ministries page first.';
@@ -57,7 +64,7 @@ createCrudPage({
     { label: 'Photo', render: photo },
     { key: 'name', label: 'Name', rowHeader: true, wrap: true },
     { label: 'Role', render: (row) => roleLabel[row.role] || row.role },
-    { label: 'Ministry', render: (row) => row.ministry_name || '' },
+    { label: 'Ministry', render: ministryCell },
     { key: 'display_order', label: 'Order', numeric: true },
   ],
   fields: (row) => [

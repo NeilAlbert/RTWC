@@ -65,9 +65,11 @@ CREATE TABLE IF NOT EXISTS ministries (
   id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
   name        VARCHAR(150) NOT NULL,
   slug        VARCHAR(160) NOT NULL,
-  description TEXT,
-  icon_url    VARCHAR(500),
-  created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  description   TEXT,
+  meeting_time  VARCHAR(150),          -- the "Meets:" line on the Ministries page
+  icon_url      VARCHAR(500),
+  display_order INT          NOT NULL DEFAULT 0, -- order on the website, lowest first
+  created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_ministries_slug (slug)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -145,6 +147,35 @@ CREATE TABLE IF NOT EXISTS site_settings (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------
+-- backup_runs: one row per backup made on the Backups page (migration 006).
+-- The files are kept in BACKUP_DIR on the server, never in the database. Times are UTC.
+-- The unique key on (kind, period_key) lets each month's automatic backup run once.
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS backup_runs (
+  id              INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+  kind            ENUM('manual','automatic','pre_restore') NOT NULL,
+  period_key      VARCHAR(7)      NULL,
+  status          ENUM('running','success','failed') NOT NULL DEFAULT 'running',
+  filename        VARCHAR(120)    NOT NULL,
+  size_bytes      BIGINT UNSIGNED NULL,
+  includes_images TINYINT(1)      NOT NULL DEFAULT 0,
+  table_counts    JSON            NULL,
+  image_count     INT UNSIGNED    NOT NULL DEFAULT 0,
+  sha256          CHAR(64)        NULL,
+  error_message   VARCHAR(255)    NULL,
+  attempts        TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  started_at      DATETIME        NOT NULL,
+  finished_at     DATETIME        NULL,
+  downloaded_at   DATETIME        NULL,
+  deleted_at      DATETIME        NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_backup_runs_filename (filename),
+  UNIQUE KEY uq_backup_runs_period (kind, period_key),
+  KEY idx_backup_runs_status (status),
+  KEY idx_backup_runs_started (started_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------------
 -- Create every setting key. No church facts are seeded: the address, phone
 -- numbers, email, mission and vision must be typed in by the church in
 -- Admin > Settings. Until then the site shows a marked placeholder.
@@ -173,6 +204,10 @@ INSERT INTO site_settings (setting_key, setting_value) VALUES
   ('announcement_enabled', '0'),
   ('announcement_text', ''),
   ('announcement_link', ''),
+  -- Automatic monthly backup (Admin > Backups). Not sent to visitors.
+  ('backup_auto_enabled', '0'),
+  ('backup_keep_auto', '6'),
+  ('backup_auto_images', '0'),
   -- Placeholders: the home page hides the featured verse until both are replaced.
   ('featured_verse_text', '[ADD: verse text]'),
   ('featured_verse_ref', '[ADD: reference]')

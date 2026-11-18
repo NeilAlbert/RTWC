@@ -1,16 +1,27 @@
 /* Newsletter sign-up (js/newsletter.js). Works on light surfaces and, with
    .newsletter-navy, on the navy bands and the footer. */
 
+/* The row depends on the room the sign-up has, not the window: it stacks on
+   phones (under 480px the room is always less than 22rem) and in a narrow
+   footer column. */
 .newsletter {
   max-width: 36rem;
+  container-type: inline-size;
 }
 
 .newsletter-heading {
   margin-bottom: var(--space-16);
 }
 
-.newsletter-form {
+/* Not a panel: style.css puts every form inside <main> on a white panel, which
+   this one, sitting straight on its band, must not get. */
+.newsletter .newsletter-form {
+  max-width: none;
   margin: 0;
+  padding: 0;
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
 }
 
 .newsletter-form label {
@@ -98,7 +109,7 @@
   overflow: hidden;
 }
 
-@media (min-width: 480px) {
+@container (min-width: 22rem) {
   .newsletter-row {
     flex-direction: row;
   }

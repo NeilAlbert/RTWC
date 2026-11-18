@@ -129,17 +129,9 @@
           <h2 id="ministries-title">Our Ministries</h2>
           <p class="lead">These are the ministries of the assembly. To join one, speak to its leader after a service or <a href="contact.html">contact the church office</a>.</p>
         </div>
-        <ol class="ministry-index">
-          <li><a href="ministries.html#pemem"><span class="ministry-index-name">Men's Ministry (PEMEM)</span> <span class="ministry-index-text">The fellowship for the men of the assembly.</span></a></li>
-          <li><a href="ministries.html#womens"><span class="ministry-index-name">Women's Ministry</span> <span class="ministry-index-text">The fellowship for the women of the assembly.</span></a></li>
-          <li><a href="ministries.html#pyfm"><span class="ministry-index-name">Youth Ministry</span> <span class="ministry-index-text">For the teenagers and young adults of the assembly.</span></a></li>
-          <li><a href="ministries.html#pensa"><span class="ministry-index-name">PENSA (Pentecost Students and Associates)</span> <span class="ministry-index-text">For students in secondary and tertiary schools.</span></a></li>
-          <li><a href="ministries.html#children"><span class="ministry-index-name">Children's Ministry</span> <span class="ministry-index-text">Sunday school and Bible teaching for the children of the assembly.</span></a></li>
-          <li><a href="ministries.html#choir"><span class="ministry-index-name">Choir and Praise Team</span> <span class="ministry-index-text">Leads the singing at our services.</span></a></li>
-          <li><a href="ministries.html#evangelism"><span class="ministry-index-name">Evangelism Ministry</span> <span class="ministry-index-text">Leads the assembly's outreach and follows up with new converts.</span></a></li>
-          <li><a href="ministries.html#ushering"><span class="ministry-index-name">Ushers</span> <span class="ministry-index-text">Welcome people to our services and help them find a seat.</span></a></li>
-          <li><a href="ministries.html#prayer"><span class="ministry-index-name">Prayer Force</span> <span class="ministry-index-text">Meets to pray for the assembly and for prayer requests sent to the church.</span></a></li>
-        </ol>
+        <!-- Drawn from Admin > Ministries (GET /api/ministries) by js/pages/index.js. -->
+        <ol class="ministry-index" id="home-ministries"></ol>
+        <p class="empty-state" id="home-ministries-status" role="status">Loading the ministries.</p>
         <p class="section-more"><a class="link-arrow" href="ministries.html">All ministries</a></p>
       </section>
 

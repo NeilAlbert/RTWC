@@ -1198,6 +1198,110 @@ textarea.input {
   border-radius: var(--radius);
 }
 
+/* ---------- Backups ---------- */
+
+/* minmax(0, 1fr): a wide table scrolls inside its panel instead of widening the page. */
+.backup-panels {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-24);
+  margin-bottom: var(--space-24);
+}
+
+.backup-panels .panel + .panel {
+  margin-top: 0;
+}
+
+.backup-form > .field,
+.backup-form > .banner {
+  max-width: 640px;
+}
+
+.backup-actions {
+  align-items: center;
+}
+
+.backup-progress {
+  color: var(--text-muted);
+}
+
+.backup-summary {
+  color: var(--text-muted);
+  font-size: var(--text-14);
+}
+
+.backup-note {
+  max-width: var(--measure);
+}
+
+.banner-warning {
+  border-color: var(--warning);
+  background: var(--warning-tint);
+  color: var(--warning);
+  font-weight: var(--weight-semibold);
+}
+
+.backup-restore-root {
+  margin-top: var(--space-24);
+}
+
+/* Each restore step is set apart by a rule; the last one, which changes the site, by a red one. */
+.restore-step {
+  display: grid;
+  gap: var(--space-16);
+  max-width: 640px;
+}
+
+.restore-step + .restore-step {
+  padding-top: var(--space-24);
+  border-top: 1px solid var(--border);
+}
+
+.restore-step.restore-final {
+  border-top: 2px solid var(--danger);
+}
+
+.restore-step-heading {
+  font-size: var(--text-18);
+}
+
+.restore-source {
+  font-weight: var(--weight-medium);
+  overflow-wrap: anywhere;
+}
+
+.restore-summary {
+  padding: var(--space-16);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+
+.restore-summary-line {
+  font-weight: var(--weight-semibold);
+}
+
+.dashboard-backup {
+  margin-top: var(--space-24);
+}
+
+.status-link {
+  margin-top: var(--space-16);
+}
+
+.dashboard-backup .panel-body {
+  display: grid;
+  gap: var(--space-16);
+}
+
+/* ---------- Help ---------- */
+
+.help-text {
+  display: grid;
+  gap: var(--space-12);
+  max-width: var(--measure);
+}
+
 /* ---------- Hidden ---------- */
 
 /* Last in the file, so the hidden attribute always wins over a component's own display. */

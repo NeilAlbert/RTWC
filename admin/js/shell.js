@@ -36,6 +36,7 @@ const GROUPS = [
     heading: 'Site',
     links: [
       { key: 'settings', label: 'Settings' },
+      { key: 'backups', label: 'Backups' },
       { key: 'status', label: 'Site status' },
     ],
   },
