@@ -12,7 +12,7 @@ const cache = require('../utils/cache');
 const logger = require('../utils/logger');
 
 const COP_NEWS_URL = 'https://thecophq.org/wp-json/wp/v2/posts?per_page=6&_embed';
-const TTL = 30 * 60 * 1000; // 30 minutes
+const TTL = 30 * 60; // 30 minutes, in seconds
 
 function stripHtml(html) {
   return String(html || '')
@@ -43,7 +43,7 @@ async function fetchLatestNews() {
 /** GET /api/cop-news/latest — cached ~30 minutes */
 async function getLatestNews(req, res, next) {
   try {
-    const data = await cache.remember('cop-news:latest', TTL, fetchLatestNews);
+    const data = await cache.wrap('cop-news:latest', TTL, fetchLatestNews, { localTtlCap: false });
     return res.json({ success: true, message: 'COP news fetched.', data: { items: data, error: false } });
   } catch (err) {
     logger.warn('COP news fetch failed', { message: err.message });

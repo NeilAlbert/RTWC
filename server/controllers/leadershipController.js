@@ -12,6 +12,10 @@
  */
 const Leadership = require('../models/leadershipModel');
 const { NotFoundError } = require('../utils/errors');
+const cache = require('../utils/cache');
+
+const CACHE_TTL = 60; // seconds; cleared at once by any admin change
+const clearCache = () => cache.invalidate('leadership:');
 
 function formatMember(row) {
   return {
@@ -29,7 +33,7 @@ function formatMember(row) {
 /** GET /api/leadership — public, grouped by role */
 async function getLeadership(req, res, next) {
   try {
-    const rows = await Leadership.findAll();
+    const rows = await cache.wrap('leadership:rows', CACHE_TTL, () => Leadership.findAll());
 
     const groups = {
       pastoralPair: [],
@@ -80,6 +84,7 @@ function memberValues(body) {
 async function createMember(req, res, next) {
   try {
     const member = await Leadership.create(memberValues(req.body));
+    await clearCache();
     return res.status(201).json({ success: true, message: 'Leadership member created successfully.', data: formatMember(member) });
   } catch (err) {
     return next(err);
@@ -92,6 +97,7 @@ async function updateMember(req, res, next) {
     const existing = await Leadership.findById(req.params.id);
     if (!existing) return next(new NotFoundError('Leadership member not found.'));
     const member = await Leadership.update(req.params.id, memberValues(req.body));
+    await clearCache();
     return res.json({ success: true, message: 'Leadership member updated successfully.', data: formatMember(member) });
   } catch (err) {
     return next(err);
@@ -103,6 +109,7 @@ async function deleteMember(req, res, next) {
   try {
     const deleted = await Leadership.remove(req.params.id);
     if (!deleted) return next(new NotFoundError('Leadership member not found.'));
+    await clearCache();
     return res.json({ success: true, message: 'Leadership member deleted successfully.', data: null });
   } catch (err) {
     return next(err);

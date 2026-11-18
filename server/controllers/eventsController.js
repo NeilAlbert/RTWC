@@ -6,6 +6,10 @@
 const Event = require('../models/eventModel');
 const { NotFoundError } = require('../utils/errors');
 const { createCalendarFeed } = require('../utils/ical');
+const cache = require('../utils/cache');
+
+const CACHE_TTL = 60; // seconds; cleared at once by any admin change
+const clearCache = () => cache.invalidate('events:');
 
 const CATEGORY_MAP = {
   convention: 'Convention',
@@ -26,7 +30,10 @@ async function getEvents(req, res, next) {
 
     const upcomingBool = upcoming === undefined ? undefined : upcoming === 'true';
 
-    const rows = await Event.findAll({ category, upcoming: upcomingBool });
+    // category and upcoming are checked against fixed lists by the route, so the
+    // number of possible keys is small.
+    const key = `events:list:category=${category || 'all'}:upcoming=${upcomingBool === undefined ? 'any' : upcomingBool}`;
+    const rows = await cache.wrap(key, CACHE_TTL, () => Event.findAll({ category, upcoming: upcomingBool }));
     const data = rows.map(formatEvent);
 
     return res.json({ success: true, message: 'Events fetched successfully.', data });
@@ -68,6 +75,7 @@ async function getEventById(req, res, next) {
 async function createEvent(req, res, next) {
   try {
     const event = await Event.create(req.body);
+    await clearCache();
     return res.status(201).json({ success: true, message: 'Event created successfully.', data: formatEvent(event) });
   } catch (err) {
     return next(err);
@@ -80,6 +88,7 @@ async function updateEvent(req, res, next) {
     const existing = await Event.findById(req.params.id);
     if (!existing) return next(new NotFoundError('Event not found.'));
     const event = await Event.update(req.params.id, req.body);
+    await clearCache();
     return res.json({ success: true, message: 'Event updated successfully.', data: formatEvent(event) });
   } catch (err) {
     return next(err);
@@ -91,6 +100,7 @@ async function deleteEvent(req, res, next) {
   try {
     const deleted = await Event.remove(req.params.id);
     if (!deleted) return next(new NotFoundError('Event not found.'));
+    await clearCache();
     return res.json({ success: true, message: 'Event deleted successfully.', data: null });
   } catch (err) {
     return next(err);

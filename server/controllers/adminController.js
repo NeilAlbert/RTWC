@@ -12,6 +12,7 @@ const PrayerRequest = require('../models/prayerRequestModel');
 const NewsletterSubscriber = require('../models/newsletterSubscriberModel');
 const { NotFoundError } = require('../utils/errors');
 const { getPagination, buildPaginationMeta } = require('../utils/pagination');
+const redis = require('../config/redis');
 
 /** Answers a list request with one page of rows and its pagination. */
 function sendPage(res, noun, items, total, page, limit) {
@@ -225,7 +226,28 @@ async function getStats(req, res, next) {
   }
 }
 
+/** The admin status label for each Redis state. */
+const REDIS_STATUS = {
+  connected: { status: 'ok', label: 'OK' },
+  disabled: { status: 'not_set_up', label: 'Not set up' },
+  degraded: { status: 'needs_attention', label: 'Needs attention' },
+};
+
+/**
+ * GET /api/admin/status: the parts of the site that can be checked from here.
+ * For now only Redis: { redis: { status, label, message } }.
+ */
+function getStatus(req, res) {
+  const { status, label } = REDIS_STATUS[redis.getState()];
+  return res.json({
+    success: true,
+    message: 'Status fetched successfully.',
+    data: { redis: { status, label, message: redis.describeState() } },
+  });
+}
+
 module.exports = {
+  getStatus,
   listSermons,
   listEvents,
   listMinistries,

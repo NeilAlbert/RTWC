@@ -19,7 +19,8 @@ Website of The Church of Pentecost, Royal Temple Worship Centre.
    not start until the database settings and `JWT_SECRET` are there, and it says which
    one is missing.
 2. In `server/`, run `npm install`, then `npm start`.
-3. Open `http://localhost:5000/api/health`. It must say `"database":"connected"`.
+3. Open `http://localhost:5000/api/ready`. It must say `"database":"ok"`.
+   (`/api/health` only says the server is running; it does not check the database.)
 4. Open `http://localhost:5000/admin` and log in. Do not open the admin pages from
    another local server (for example Live Server on port 5500) or by double-clicking the
    file: the login cannot reach the API from there.
@@ -83,15 +84,19 @@ A password you still know can be changed in Admin > Account instead.
 | Message on the login page | Meaning |
 | --- | --- |
 | Invalid email or password | The email or the password is wrong. Reset the password with the command above. |
-| Too many attempts. Please try again in a few minutes. | More than 10 attempts in 15 minutes from one address. Wait, or restart the API, which clears the count. |
+| Too many attempts. Please try again in a few minutes. | More than 10 attempts in 15 minutes from one address. Wait, or restart the API, which clears the count (with Redis set up the count survives a restart; see `server/REDIS.md`). |
 | Cannot reach the server. Please try again. | The API is not running, or the page was not opened from the API address. |
-| The server has a problem and could not log you in. | Usually the database. Check `/api/health` and `server/logs/server.log`. |
+| The server has a problem and could not log you in. | Usually the database. Check `/api/ready` and `server/logs/server.log`. |
 
 If the API stops at start-up and names `token_valid_after`, run migration 004 (see Database).
 
-`TRUST_PROXY` in `.env` is the number of proxies in front of the API: 1 behind nginx, 0
+`TRUST_PROXY_HOPS` in `.env` is the number of proxies in front of the API: 1 behind nginx, 0
 when browsers reach the API directly. If it is too low on a live host, every visitor
-appears to come from one address and they share one sign-in limit.
+appears to come from one address and they share one sign-in limit. (The older name
+`TRUST_PROXY` still works.)
+
+Redis is optional and off by default. It shares the cache and the rate limits between
+several copies of the server. See `server/REDIS.md`.
 
 ## Where to edit content
 

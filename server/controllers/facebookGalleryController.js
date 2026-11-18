@@ -7,11 +7,12 @@
  * Graceful error handling: failures return an empty list, never a crash.
  * =============================================================================
  */
+const crypto = require('crypto');
 const cache = require('../utils/cache');
 const logger = require('../utils/logger');
 
 const GRAPH_BASE = 'https://graph.facebook.com/v20.0';
-const PAGE_TTL = 15 * 60 * 1000; // 15 minutes
+const PAGE_TTL = 15 * 60; // 15 minutes, in seconds
 
 function graphUrl(path, params = {}) {
   const url = new URL(`${GRAPH_BASE}/${path}`);
@@ -72,9 +73,11 @@ async function fetchPhotosPage(afterCursor) {
 async function getPhotos(req, res, next) {
   try {
     const after = req.query.after || null;
-    const cacheKey = `fb:photos:${after || 'first'}`;
+    // The cursor is hashed so the key stays short whatever the visitor sends.
+    const page = after ? crypto.createHash('sha256').update(after).digest('hex').slice(0, 32) : 'first';
 
-    const data = await cache.remember(cacheKey, PAGE_TTL, () => fetchPhotosPage(after));
+    // localTtlCap false: Facebook data cannot go out of date because of an admin edit.
+    const data = await cache.wrap(`fb:photos:${page}`, PAGE_TTL, () => fetchPhotosPage(after), { localTtlCap: false });
     return res.json({ success: true, message: 'Photos fetched.', data });
   } catch (err) {
     logger.warn('Facebook gallery fetch failed', { message: err.message });

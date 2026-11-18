@@ -7,6 +7,22 @@ const Sermon = require('../models/sermonModel');
 const { getPagination, buildPaginationMeta } = require('../utils/pagination');
 
 const { NotFoundError } = require('../utils/errors');
+const cache = require('../utils/cache');
+
+const CACHE_TTL = 60; // seconds; cleared at once by any admin change
+const CACHED_PAGES = 20;
+const clearCache = () => cache.invalidate('sermons:');
+
+/**
+ * The cache key for a sermon list, or null when the list is not cached.
+ * Only the plain list is cached: page (the first 20) and limit, both already
+ * checked by the route. A search (q, speaker or date) goes straight to the
+ * database, so visitors cannot fill the cache by typing endless searches.
+ */
+function listCacheKey(filter, page, limit) {
+  if (filter.speaker || filter.date || filter.q || page > CACHED_PAGES) return null;
+  return `sermons:list:page=${page}:limit=${limit}`;
+}
 
 /** GET /api/sermons — public, ?speaker=&date=&q=&page=&limit= */
 async function getSermons(req, res, next) {
@@ -19,14 +35,15 @@ async function getSermons(req, res, next) {
       q: req.query.q || undefined,
     };
 
-    const total = await Sermon.countAll(filter);
-    const items = await Sermon.findAll({ ...filter, limit, offset });
+    const load = async () => {
+      const total = await Sermon.countAll(filter);
+      const items = await Sermon.findAll({ ...filter, limit, offset });
+      return { items, pagination: buildPaginationMeta(total, page, limit) };
+    };
+    const key = listCacheKey(filter, page, limit);
+    const data = key ? await cache.wrap(key, CACHE_TTL, load) : await load();
 
-    return res.json({
-      success: true,
-      message: 'Sermons fetched successfully.',
-      data: { items, pagination: buildPaginationMeta(total, page, limit) },
-    });
+    return res.json({ success: true, message: 'Sermons fetched successfully.', data });
   } catch (err) {
     return next(err);
   }
@@ -47,6 +64,7 @@ async function getSermonById(req, res, next) {
 async function createSermon(req, res, next) {
   try {
     const sermon = await Sermon.create(req.body);
+    await clearCache();
     return res.status(201).json({ success: true, message: 'Sermon created successfully.', data: sermon });
   } catch (err) {
     return next(err);
@@ -59,6 +77,7 @@ async function updateSermon(req, res, next) {
     const existing = await Sermon.findById(req.params.id);
     if (!existing) return next(new NotFoundError('Sermon not found.'));
     const sermon = await Sermon.update(req.params.id, req.body);
+    await clearCache();
     return res.json({ success: true, message: 'Sermon updated successfully.', data: sermon });
   } catch (err) {
     return next(err);
@@ -70,6 +89,7 @@ async function deleteSermon(req, res, next) {
   try {
     const deleted = await Sermon.remove(req.params.id);
     if (!deleted) return next(new NotFoundError('Sermon not found.'));
+    await clearCache();
     return res.json({ success: true, message: 'Sermon deleted successfully.', data: null });
   } catch (err) {
     return next(err);

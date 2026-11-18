@@ -5,9 +5,10 @@
  * checks its input with express-validator and validateRequest, and passes the
  * free text of a saved form through sanitizeBody, which strips HTML tags.
  *
- * The public site reads sermons, events, ministries and leaders straight from
- * the database on every request. Nothing about them is cached on the server, so
- * a change saved here shows on the public API at once and there is no cache to clear.
+ * The public site caches its lists of sermons, events, ministries and leaders
+ * for 60 seconds (utils/cache.js). Each save or delete here clears the matching
+ * cache in its controller, so the change shows on the public site at once, on
+ * every copy of the server.
  */
 const express = require('express');
 const { body, param, query } = require('express-validator');
@@ -39,6 +40,7 @@ const {
   listSubscribers,
   deleteSubscriber,
   getStats,
+  getStatus,
 } = require('../controllers/adminController');
 
 const router = express.Router();
@@ -56,6 +58,9 @@ const optional = { values: 'falsy' };
 
 /** GET /api/admin/stats: counts, recent new messages and next events. Takes no input. */
 router.get('/stats', validateRequest, getStats);
+
+/** GET /api/admin/status: whether Redis is set up and working. Takes no input. */
+router.get('/status', getStatus);
 
 // ---------------------------------------------------------------------------
 // Sermons

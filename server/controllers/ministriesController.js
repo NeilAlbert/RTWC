@@ -5,6 +5,11 @@
  */
 const Ministry = require('../models/ministryModel');
 const { NotFoundError } = require('../utils/errors');
+const cache = require('../utils/cache');
+
+const CACHE_TTL = 60; // seconds; cleared at once by any admin change
+// Leaders are listed with their ministry's name, so a ministry change clears both.
+const clearCache = () => cache.invalidate('ministries:', 'leadership:');
 
 /** "Men's Ministry (PEMEM)" becomes "mens-ministry-pemem". */
 function slugify(text) {
@@ -58,7 +63,7 @@ async function prepareMinistry(req, res, exceptId = 0) {
 /** GET /api/ministries — public */
 async function getMinistries(req, res, next) {
   try {
-    const data = await Ministry.findAll();
+    const data = await cache.wrap('ministries:list', CACHE_TTL, () => Ministry.findAll());
     return res.json({ success: true, message: 'Ministries fetched successfully.', data });
   } catch (err) {
     return next(err);
@@ -82,6 +87,7 @@ async function createMinistry(req, res, next) {
     const values = await prepareMinistry(req, res);
     if (!values) return undefined;
     const ministry = await Ministry.create(values);
+    await clearCache();
     return res.status(201).json({ success: true, message: 'Ministry created successfully.', data: ministry });
   } catch (err) {
     return next(err);
@@ -96,6 +102,7 @@ async function updateMinistry(req, res, next) {
     const values = await prepareMinistry(req, res, Number(req.params.id));
     if (!values) return undefined;
     const ministry = await Ministry.update(req.params.id, values);
+    await clearCache();
     return res.json({ success: true, message: 'Ministry updated successfully.', data: ministry });
   } catch (err) {
     return next(err);
@@ -119,6 +126,7 @@ async function deleteMinistry(req, res, next) {
     }
 
     await Ministry.remove(req.params.id);
+    await clearCache();
     return res.json({ success: true, message: 'Ministry deleted successfully.', data: null });
   } catch (err) {
     return next(err);

@@ -10,6 +10,10 @@
  */
 const SiteSetting = require('../models/siteSettingModel');
 const { ValidationError } = require('../utils/errors');
+const cache = require('../utils/cache');
+
+const CACHE_KEY = 'settings:public';
+const CACHE_TTL = 60; // seconds; cleared at once when an admin saves settings
 
 const ALLOWED_KEYS = [
   'welcome_message',
@@ -42,7 +46,7 @@ async function getSettingsObject() {
 /** GET /api/settings — public */
 async function getSettings(req, res, next) {
   try {
-    const data = await getSettingsObject();
+    const data = await cache.wrap(CACHE_KEY, CACHE_TTL, getSettingsObject);
     return res.json({ success: true, message: 'Settings fetched successfully.', data });
   } catch (err) {
     return next(err);
@@ -75,6 +79,7 @@ async function updateSettings(req, res, next) {
     }
 
     await SiteSetting.upsertMany(pairs);
+    await cache.invalidate('settings:');
 
     const data = await getSettingsObject();
     return res.json({ success: true, message: 'Settings updated successfully.', data });

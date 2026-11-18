@@ -39,14 +39,23 @@ if (missingSettings.length > 0) {
 // Required after the check above, so a missing setting is reported before the
 // database is configured.
 const pool = require('./config/db');
+const redis = require('./config/redis');
 
 const app = express();
 
-// Number of reverse proxies in front of the API. The client IP used for rate
-// limiting is read from the proxy header, so this must match the hosting:
-// 1 behind one proxy (for example nginx), 0 when browsers reach the API directly.
-const trustProxy = Number(process.env.TRUST_PROXY);
-app.set('trust proxy', Number.isInteger(trustProxy) && trustProxy >= 0 ? trustProxy : 1);
+// TRUST_PROXY_HOPS: how many reverse proxies stand between visitors and this
+// server (Nginx, a hosting provider's proxy, Cloudflare). Express then takes the
+// visitor's address (req.ip) from that many entries from the right of the
+// X-Forwarded-For header. The rate limits count per req.ip, so this must match
+// the hosting exactly:
+// - too low (0 behind Nginx): every visitor gets the proxy's address and they
+//   all share one rate-limit bucket, so one visitor can lock out everyone;
+// - too high (2 behind one proxy): a visitor can send a made-up X-Forwarded-For
+//   header, pick any address, and escape the limits.
+// 1 behind one proxy such as Nginx (the default), 0 when browsers reach this
+// server directly. TRUST_PROXY is the older name and is still read.
+const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS || process.env.TRUST_PROXY);
+app.set('trust proxy', Number.isInteger(trustProxyHops) && trustProxyHops >= 0 ? trustProxyHops : 1);
 
 // The website itself: the public pages, their css, js and images, and /admin.
 // Serving them here puts the pages and /api on one address, which the admin
@@ -127,20 +136,28 @@ app.use((req, res, next) => {
   next();
 });
 
-// Reports whether the API is up and whether it can reach the database.
-app.get('/api/health', async (req, res) => {
-  let database = 'connected';
+// Liveness: answers as long as the process is running. It checks nothing else,
+// so a database or Redis problem never gets a healthy server restarted.
+app.get('/api/health', (req, res) => {
+  res.json({ success: true, message: 'Royal Temple API is running.', data: { uptime: process.uptime() } });
+});
+
+// Readiness: can this server answer visitors? The database is required; Redis is
+// only reported, because without it the site falls back to memory and still works.
+app.get('/api/ready', async (req, res) => {
+  let database = 'ok';
   try {
     await pool.query('SELECT 1');
   } catch (err) {
     database = 'unreachable';
-    logger.error('Health check: the database could not be reached', { message: err.message, code: err.code });
+    logger.error('Readiness check: the database could not be reached', { message: err.message, code: err.code });
   }
-  const healthy = database === 'connected';
-  res.status(healthy ? 200 : 503).json({
-    success: healthy,
-    message: healthy ? 'Royal Temple API is running.' : 'The API is running but cannot reach the database.',
-    data: { uptime: process.uptime(), database },
+  const redisState = redis.getState();
+  const ready = database === 'ok';
+  res.status(ready ? 200 : 503).json({
+    success: ready,
+    message: ready ? 'Royal Temple API is ready.' : 'The API is running but cannot reach the database.',
+    data: { database, redis: redisState === 'connected' ? 'ok' : redisState },
   });
 });
 

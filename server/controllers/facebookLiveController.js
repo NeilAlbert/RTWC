@@ -12,8 +12,15 @@ const cache = require('../utils/cache');
 const logger = require('../utils/logger');
 
 const GRAPH_BASE = 'https://graph.facebook.com/v20.0';
-const STATUS_TTL = 60 * 1000;        // 60 seconds
-const LATEST_TTL = 15 * 60 * 1000;   // 15 minutes
+const STATUS_TTL = 60;          // seconds
+const LATEST_TTL = 15 * 60;     // 15 minutes
+// If Facebook cannot be reached, the last answer is served instead of an error:
+// the latest video for up to 24 hours, but the live status for only 10 minutes,
+// so the site never shows "live now" for long after a broadcast has ended.
+const STATUS_STALE = 10 * 60;
+// Facebook data cannot go out of date because of an admin edit, so it keeps its
+// full lifetime when there is no Redis (fewer Graph API calls).
+const OUTSIDE_SERVICE = { localTtlCap: false };
 
 function graphUrl(path, params = {}) {
   const url = new URL(`${GRAPH_BASE}/${path}`);
@@ -82,7 +89,7 @@ async function fetchLatestLive() {
 /** GET /api/facebook/live-status — cached ~60 seconds */
 async function getLiveStatus(req, res, next) {
   try {
-    const data = await cache.remember('fb:live-status', STATUS_TTL, fetchLiveStatus);
+    const data = await cache.wrap('fb:live-status', STATUS_TTL, fetchLiveStatus, { ...OUTSIDE_SERVICE, staleSeconds: STATUS_STALE });
     return res.json({ success: true, message: 'Live status fetched.', data });
   } catch (err) {
     logger.warn('Facebook live-status fetch failed', { message: err.message });
@@ -97,7 +104,7 @@ async function getLiveStatus(req, res, next) {
 /** GET /api/facebook/latest-live — cached ~15 minutes */
 async function getLatestLive(req, res, next) {
   try {
-    const data = await cache.remember('fb:latest-live', LATEST_TTL, fetchLatestLive);
+    const data = await cache.wrap('fb:latest-live', LATEST_TTL, fetchLatestLive, OUTSIDE_SERVICE);
     return res.json({ success: true, message: 'Latest live fetched.', data });
   } catch (err) {
     logger.warn('Facebook latest-live fetch failed', { message: err.message });

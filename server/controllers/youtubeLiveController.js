@@ -14,7 +14,17 @@ const cache = require('../utils/cache');
 const logger = require('../utils/logger');
 
 const YT_BASE = 'https://www.googleapis.com/youtube/v3';
-const STATUS_TTL = 60 * 1000;        // 60 seconds
+const STATUS_TTL = 60;          // seconds
+const STATUS_STALE = 10 * 60;   // an old answer is served for at most 10 minutes if YouTube fails
+const CACHE_OPTIONS = { localTtlCap: false, staleSeconds: STATUS_STALE };
+// Only real YouTube video IDs are cached, so visitors cannot fill the cache with made-up ones.
+const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
+
+/** Cached when the ID looks like a YouTube video ID, fetched directly otherwise (same answer). */
+function cachedStatus(kind, videoId) {
+  if (!VIDEO_ID.test(videoId)) return fetchYouTubeVideoStatus(videoId);
+  return cache.wrap(`yt:${kind}:${videoId}`, STATUS_TTL, () => fetchYouTubeVideoStatus(videoId), CACHE_OPTIONS);
+}
 
 function ytUrl(path, params = {}) {
   const url = new URL(`${YT_BASE}/${path}`);
@@ -75,9 +85,7 @@ async function getYouTubeLiveStatus(req, res, next) {
       });
     }
 
-    const data = await cache.remember('yt:live-status:' + videoId, STATUS_TTL, () =>
-      fetchYouTubeVideoStatus(videoId)
-    );
+    const data = await cachedStatus('live-status', videoId);
 
     return res.json({
       success: true,
@@ -108,9 +116,7 @@ async function getYouTubeLatestLive(req, res, next) {
       });
     }
 
-    const data = await cache.remember('yt:latest-live:' + videoId, STATUS_TTL, () =>
-      fetchYouTubeVideoStatus(videoId)
-    );
+    const data = await cachedStatus('latest-live', videoId);
 
     return res.json({
       success: true,
