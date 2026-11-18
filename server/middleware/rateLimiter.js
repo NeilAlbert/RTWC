@@ -119,8 +119,8 @@ const contactLimiter = limiter('contact', 5, TRY_LATER);
 /** Prayer requests: max 5 requests per 15 minutes per IP. */
 const prayerRequestsLimiter = limiter('prayer', 5, TRY_LATER);
 
-/** Newsletter subscribe: max 10 requests per 15 minutes per IP. */
-const newsletterLimiter = limiter('newsletter', 10, TRY_LATER);
+/** Newsletter subscribe: max 5 requests per 15 minutes per IP, like the other public forms. */
+const newsletterLimiter = limiter('newsletter', 5, TOO_MANY_ATTEMPTS);
 
 /** Sign-in: 10 attempts per 15 minutes per IP. The login page shows this message. */
 const authLimiter = limiter('login', 10, TOO_MANY_ATTEMPTS);

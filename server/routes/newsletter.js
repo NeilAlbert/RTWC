@@ -1,37 +1,43 @@
 /**
  * =============================================================================
- * routes/newsletter.js — newsletter subscription endpoints.
+ * routes/newsletter.js — newsletter sign-up from the public site.
+ * The subscriber list is under /api/admin/newsletter.
  * =============================================================================
  */
 const express = require('express');
-const { body, query } = require('express-validator');
+const { body } = require('express-validator');
 
-const authMiddleware = require('../middleware/authMiddleware');
 const validateRequest = require('../middleware/validateRequest');
+const { sanitizeBody } = require('../middleware/sanitizeInput');
 const { newsletterLimiter } = require('../middleware/rateLimiter');
-const { subscribe, getSubscribers } = require('../controllers/newsletterController');
+const { subscribe, honeypot } = require('../controllers/newsletterController');
 
 const router = express.Router();
 
-/** POST /api/newsletter/subscribe — public, rate-limited, validated */
+/**
+ * POST /api/newsletter/subscribe — public. Body: { email, website }.
+ * "website" is the hidden honeypot field and must be empty.
+ *
+ * The address is checked as typed, before tags are stripped, so an address with
+ * markup in it is refused rather than cleaned into something valid. It is only
+ * trimmed and lowercased; dots and +tags are kept as the visitor typed them.
+ */
 router.post(
   '/subscribe',
   newsletterLimiter,
-  [body('email').trim().isEmail().withMessage('A valid email address is required.').normalizeEmail()],
-  validateRequest,
-  subscribe
-);
-
-/** GET /api/newsletter/subscribers — admin only, paginated */
-router.get(
-  '/subscribers',
-  authMiddleware,
+  honeypot,
   [
-    query('page').optional().isInt({ min: 1 }),
-    query('limit').optional().isInt({ min: 1, max: 100 }),
+    body('email')
+      .isString().withMessage('Enter your email address.').bail()
+      .trim()
+      .notEmpty().withMessage('Enter your email address.').bail()
+      .isLength({ max: 254 }).withMessage('Use an email address of 254 characters or fewer.').bail()
+      .isEmail().withMessage('Enter an email address such as name@example.com.').bail()
+      .toLowerCase(),
   ],
   validateRequest,
-  getSubscribers
+  sanitizeBody(['email'], { maxLength: 254 }),
+  subscribe
 );
 
 module.exports = router;

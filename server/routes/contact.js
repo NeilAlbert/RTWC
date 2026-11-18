@@ -4,17 +4,13 @@
  * =============================================================================
  */
 const express = require('express');
-const { body, param, query } = require('express-validator');
+const { body } = require('express-validator');
 
-const authMiddleware = require('../middleware/authMiddleware');
 const validateRequest = require('../middleware/validateRequest');
 const { sanitizeBody } = require('../middleware/sanitizeInput');
 const { contactLimiter } = require('../middleware/rateLimiter');
-const {
-  submitContact,
-  getMessages,
-  updateMessageStatus,
-} = require('../controllers/contactController');
+// Reading, updating and deleting messages is under /api/admin/contact.
+const { submitContact } = require('../controllers/contactController');
 
 const router = express.Router();
 
@@ -30,28 +26,6 @@ router.post(
   ],
   validateRequest,
   submitContact
-);
-
-/** GET /api/contact — admin only, paginated, filterable by status */
-router.get(
-  '/',
-  authMiddleware,
-  [
-    query('status').optional().isIn(['new', 'read', 'responded']),
-    query('page').optional().isInt({ min: 1 }),
-    query('limit').optional().isInt({ min: 1, max: 50 }),
-  ],
-  validateRequest,
-  getMessages
-);
-
-/** PATCH /api/contact/:id/status — admin only */
-router.patch(
-  '/:id/status',
-  authMiddleware,
-  [param('id').isInt({ min: 1 }).withMessage('Invalid message id.')],
-  validateRequest,
-  updateMessageStatus
 );
 
 module.exports = router;

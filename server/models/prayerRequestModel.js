@@ -8,6 +8,7 @@
  * =============================================================================
  */
 const pool = require('../config/db');
+const { likePattern } = require('../utils/search');
 
 async function create({ name, request_text, is_private }) {
   const [result] = await pool.query(
@@ -17,31 +18,40 @@ async function create({ name, request_text, is_private }) {
   return findById(result.insertId);
 }
 
-async function countAll({ status } = {}) {
+/**
+ * ?status= picks one status. ?q= searches the name and the text of requests that
+ * may be shared. A private request is never matched by a search, so a search
+ * cannot be used to learn what one says or who sent it.
+ */
+function listFilter({ status, q } = {}) {
+  const conditions = [];
   const params = [];
-  let whereSql = '';
   if (status) {
-    whereSql = 'WHERE status = ?';
+    conditions.push('status = ?');
     params.push(status);
   }
-  const [rows] = await pool.query(`SELECT COUNT(*) AS total FROM prayer_requests ${whereSql}`, params);
+  if (q) {
+    const pattern = likePattern(q);
+    conditions.push('is_private = 0 AND (name LIKE ? OR request_text LIKE ?)');
+    params.push(pattern, pattern);
+  }
+  return { where: conditions.length ? `WHERE ${conditions.join(' AND ')}` : '', params };
+}
+
+async function countAll(filter = {}) {
+  const { where, params } = listFilter(filter);
+  const [rows] = await pool.query(`SELECT COUNT(*) AS total FROM prayer_requests ${where}`, params);
   return rows[0].total;
 }
 
-async function findAll({ status, limit, offset } = {}) {
-  const params = [];
-  let whereSql = '';
-  if (status) {
-    whereSql = 'WHERE status = ?';
-    params.push(status);
-  }
-  params.push(limit, offset);
+async function findAll({ status, q, limit, offset } = {}) {
+  const { where, params } = listFilter({ status, q });
   const [rows] = await pool.query(
     `SELECT id, name, request_text, is_private, status, created_at
-     FROM prayer_requests ${whereSql}
+     FROM prayer_requests ${where}
      ORDER BY created_at DESC, id DESC
      LIMIT ? OFFSET ?`,
-    params
+    [...params, limit, offset]
   );
   return rows;
 }

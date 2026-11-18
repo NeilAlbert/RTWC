@@ -9,8 +9,6 @@
  */
 const ContactMessage = require('../models/contactMessageModel');
 const { sendMail } = require('../utils/mailer');
-const { getPagination, buildPaginationMeta } = require('../utils/pagination');
-const { NotFoundError, ValidationError } = require('../utils/errors');
 const logger = require('../utils/logger');
 
 /** POST /api/contact — public (rate-limited) */
@@ -40,44 +38,4 @@ async function submitContact(req, res, next) {
   }
 }
 
-/** GET /api/contact — admin only, paginated, filterable by status */
-async function getMessages(req, res, next) {
-  try {
-    const status = req.query.status || undefined;
-    const { page, limit, offset } = getPagination(req.query.page, req.query.limit, 10, 50);
-
-    const total = await ContactMessage.countAll({ status });
-    const items = await ContactMessage.findAll({ status, limit, offset });
-
-    return res.json({
-      success: true,
-      message: 'Contact messages fetched successfully.',
-      data: { items, pagination: buildPaginationMeta(total, page, limit) },
-    });
-  } catch (err) {
-    return next(err);
-  }
-}
-
-/** PATCH /api/contact/:id/status — admin only */
-async function updateMessageStatus(req, res, next) {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    const allowed = ['new', 'read', 'responded'];
-    if (!allowed.includes(status)) {
-      return next(new ValidationError('Status must be one of: new, read, responded.'));
-    }
-
-    const existing = await ContactMessage.findById(id);
-    if (!existing) return next(new NotFoundError('Contact message not found.'));
-
-    const updated = await ContactMessage.updateStatus(id, status);
-    return res.json({ success: true, message: 'Message status updated.', data: updated });
-  } catch (err) {
-    return next(err);
-  }
-}
-
-module.exports = { submitContact, getMessages, updateMessageStatus };
+module.exports = { submitContact };

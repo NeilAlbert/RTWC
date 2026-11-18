@@ -1066,6 +1066,138 @@ textarea.input {
   color: var(--text-muted);
 }
 
+/* ---------- Inbox ---------- */
+
+/* Two lines at most. The whole text is in the dialog. */
+.cell-preview {
+  display: -webkit-box;
+  min-width: 12ch;
+  max-width: 26ch;
+  overflow: hidden;
+  color: var(--text-muted);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.cell-sub {
+  display: block;
+  padding-top: var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--text-14);
+  font-weight: var(--weight-regular);
+  overflow-wrap: break-word;
+}
+
+/* Wide enough for "17 November 2026," on one line and the time on the next. */
+.cell-date {
+  display: block;
+  min-width: 8.5em;
+}
+
+.inbox-detail {
+  display: grid;
+  gap: var(--space-24);
+}
+
+.inbox-detail .field {
+  max-width: 320px;
+}
+
+.inbox-text-heading {
+  margin-bottom: var(--space-8);
+  font-size: var(--text-16);
+}
+
+/* The text exactly as it was sent: its line breaks kept, long words broken. */
+.inbox-text {
+  max-width: var(--measure);
+  padding: var(--space-16);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Settings ---------- */
+
+.settings-form {
+  display: grid;
+  gap: var(--space-24);
+}
+
+.settings-form .panel + .panel {
+  margin-top: 0;
+}
+
+.settings-form .panel-body > .field,
+.settings-form .panel-intro {
+  max-width: 640px;
+}
+
+.settings-form .panel-intro {
+  margin-bottom: 0;
+}
+
+/* "Save changes" stays in view at the bottom of the window. */
+.save-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-12) var(--space-16);
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  padding: var(--space-12) var(--space-16);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface-0);
+}
+
+.save-bar-summary {
+  color: var(--text-muted);
+  font-size: var(--text-14);
+}
+
+/* Looks like the bar on the public site (css/style.css, .announcement). */
+.announcement-preview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8) var(--space-16);
+  padding: var(--space-8) var(--space-16);
+  border: 1px solid var(--navy-900);
+  border-radius: var(--radius);
+  background: var(--navy-900);
+  color: var(--text-on-navy);
+  font-size: var(--text-14);
+  font-weight: var(--weight-semibold);
+}
+
+.announcement-preview.is-off {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-weight: var(--weight-regular);
+}
+
+.announcement-preview-text {
+  flex: 1 1 16rem;
+  overflow-wrap: anywhere;
+}
+
+.announcement-preview-link {
+  text-decoration: underline;
+}
+
+.announcement-preview-dismiss {
+  padding: var(--space-8) var(--space-16);
+  border: 1px solid var(--navy-100);
+  border-radius: var(--radius);
+}
+
 /* ---------- Hidden ---------- */
 
 /* Last in the file, so the hidden attribute always wins over a component's own display. */

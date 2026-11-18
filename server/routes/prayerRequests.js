@@ -4,17 +4,13 @@
  * =============================================================================
  */
 const express = require('express');
-const { body, param, query } = require('express-validator');
+const { body } = require('express-validator');
 
-const authMiddleware = require('../middleware/authMiddleware');
 const validateRequest = require('../middleware/validateRequest');
 const { sanitizeBody } = require('../middleware/sanitizeInput');
 const { prayerRequestsLimiter } = require('../middleware/rateLimiter');
-const {
-  submitPrayerRequest,
-  getRequests,
-  updateRequestStatus,
-} = require('../controllers/prayerRequestsController');
+// Reading, updating and deleting requests is under /api/admin/prayer-requests.
+const { submitPrayerRequest } = require('../controllers/prayerRequestsController');
 
 const router = express.Router();
 
@@ -31,28 +27,6 @@ router.post(
   ],
   validateRequest,
   submitPrayerRequest
-);
-
-/** GET /api/prayer-requests — admin only, paginated */
-router.get(
-  '/',
-  authMiddleware,
-  [
-    query('status').optional().isIn(['new', 'prayed_for']),
-    query('page').optional().isInt({ min: 1 }),
-    query('limit').optional().isInt({ min: 1, max: 50 }),
-  ],
-  validateRequest,
-  getRequests
-);
-
-/** PATCH /api/prayer-requests/:id/status — admin only */
-router.patch(
-  '/:id/status',
-  authMiddleware,
-  [param('id').isInt({ min: 1 }).withMessage('Invalid request id.')],
-  validateRequest,
-  updateRequestStatus
 );
 
 module.exports = router;

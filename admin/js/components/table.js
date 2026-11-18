@@ -9,6 +9,7 @@
  *     numeric,          true to right-align
  *     wrap,             true for long text that may break onto more lines
  *     rowHeader,        true on the one column that names the row
+ *     sub(row),         optional, on the row header: a muted second line of text under the name
  *     render(row),      returns a node or a string. Strings are placed as text
  *   }],
  *   actions(row),       returns [{ label, name, onClick, danger, disabled, hint }] for the last column.
@@ -54,9 +55,16 @@ export function createTable({ caption, columns, actions, onRowClick, empty }) {
     const classes = [column.numeric ? 'is-numeric' : '', column.wrap ? 'cell-wrap' : ''].filter(Boolean).join(' ') || null;
 
     if (!column.rowHeader) return el('td', { class: classes }, value);
-    if (!onRowClick) return el('th', { scope: 'row', class: classes }, value);
+    // A second line under the row's name, outside its button, such as an email address.
+    const sub = column.sub ? column.sub(row) : '';
+    // An email address may break after its @, never in the middle of a word.
+    const subParts = String(sub).split('@');
+    const subLine = sub
+      ? el('span', { class: 'cell-sub' }, ...subParts.flatMap((part, i) => (i === 0 ? [part] : ['@', el('wbr'), part])))
+      : null;
+    if (!onRowClick) return el('th', { scope: 'row', class: classes }, value, subLine);
     return el('th', { scope: 'row', class: classes },
-      el('button', { class: 'link-button', type: 'button', onclick: () => onRowClick(row) }, value));
+      el('button', { class: 'link-button', type: 'button', onclick: () => onRowClick(row) }, value), subLine);
   }
 
   function buildActions(row) {

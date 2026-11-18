@@ -11,13 +11,21 @@
   <!-- ADD: og:url and og:image need the full web address of the live site. Add them once the domain is confirmed. -->
   <link rel="icon" href="assets/images/logo.jpg">
   <link rel="preload" as="image" href="assets/images/logo-loader.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;1,400&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,600;1,8..60,400&amp;display=swap">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/images.css">
+  <link rel="stylesheet" href="css/motif.css">
+  <link rel="stylesheet" href="css/newsletter.css">
+  <link rel="stylesheet" href="css/pages/home.css">
   <link rel="stylesheet" href="css/loader.css">
   <script src="js/loader-init.js"></script>
   <noscript><style>#page-loader { display: none; }</style></noscript>
   <script src="js/loader.js" defer></script>
   <script src="js/main.js" defer></script>
+  <script src="js/newsletter.js" defer></script>
   <script src="js/pages/index.js" defer></script>
 </head>
 <body>
@@ -27,6 +35,13 @@
   </div>
 
   <a class="skip-link" href="#main">Skip to main content</a>
+
+  <div class="utility-bar">
+    <div class="wrap utility-inner">
+      <p><span class="utility-label">Next service</span> <span data-next-service>Sunday worship service, 8:00 am to 11:30 am</span></p>
+      <a href="https://www.facebook.com/cop.rtwc">Facebook</a>
+    </div>
+  </div>
 
   <header class="site-header">
     <div class="wrap">
@@ -45,6 +60,7 @@
           <li><a href="gallery.html">Gallery</a></li>
           <li><a href="contact.html">Contact</a></li>
           <li><a href="live.html">Watch live</a></li>
+          <li class="nav-visit"><a class="button" href="contact.html">Plan a visit</a></li>
         </ul>
       </nav>
     </div>
@@ -52,68 +68,172 @@
 
   <main id="main">
     <div class="wrap">
-      <section class="page-title two-column">
-        <div>
-          <h1>The Church of Pentecost, Royal Temple Worship Centre</h1>
-          <p data-setting="welcome_message">Royal Temple Worship Centre is an assembly of The Church of Pentecost. You are welcome to worship with us on Sundays and to join us for Bible study and prayer during the week.</p>
+      <section class="band band-navy home-hero has-motif motif-rays" aria-labelledby="home-title">
+        <div class="home-hero-text">
+          <h1 id="home-title">The Church of Pentecost, Royal Temple Worship Centre</h1>
+          <p class="lead" data-setting="welcome_message">Royal Temple Worship Centre is an assembly of The Church of Pentecost. You are welcome to worship with us on Sundays and to join us for Bible study and prayer during the week.</p>
           <p>We are in the <span class="to-add">[ADD: district]</span> District, <span class="to-add">[ADD: area]</span> Area.</p>
           <div class="button-row">
-            <a class="button" href="#service-times">See service times</a>
+            <a class="button button-gold" href="#service-times">See service times</a>
             <a class="button-plain" href="live.html">Watch live</a>
           </div>
+          <dl class="hero-next">
+            <dt>Next service</dt>
+            <dd data-next-service>Sunday worship service, 8:00 am to 11:30 am</dd>
+          </dl>
         </div>
-        <!-- VERIFY: confirm this photo shows members of Royal Temple Worship Centre. Replace it if not. -->
-        <img src="assets/images/hero.jpg" alt="Members of the congregation seated in the church hall during a service." width="2048" height="1365">
+        <div class="home-hero-photo">
+          <!-- VERIFY: confirm this photo shows members of Royal Temple Worship Centre. Replace it if not. -->
+          <img class="ph-landscape" src="assets/images/hero.jpg" alt="Members of the congregation seated in the church hall during a service." width="2048" height="1365">
+        </div>
       </section>
 
-      <section class="section" id="service-times">
-        <h2>Service Times</h2>
-        <ul class="service-times" data-setting="service_times">
-            <li>Sunday worship service: 8:00 am to 11:30 am</li>
-            <li>Wednesday Bible study: 6:30 pm to 8:30 pm</li>
-            <li>Friday prayer meeting: 6:30 pm to 9:00 pm</li>
+      <section class="band band-light" id="service-times" aria-labelledby="times-title">
+        <div class="section-head">
+          <h2 id="times-title">Service Times</h2>
+        </div>
+        <div class="home-times">
+          <div class="info-panel">
+            <ul class="service-times info-table" data-setting="service_times">
+              <li><span class="info-label">Sunday worship service</span> <span class="info-value">8:00 am to 11:30 am</span></li>
+              <li><span class="info-label">Wednesday Bible study</span> <span class="info-value">6:30 pm to 8:30 pm</span></li>
+              <li><span class="info-label">Friday prayer meeting</span> <span class="info-value">6:30 pm to 9:00 pm</span></li>
+            </ul>
+            <p class="note">All times are GMT.</p>
+          </div>
+          <div class="home-where">
+            <p class="label">Address</p>
+            <p class="home-address"><span class="to-add" data-setting="church_address">[ADD: church address]</span></p>
+            <p><a class="link-arrow" href="https://www.google.com/maps/search/?api=1&amp;query=The%20Church%20of%20Pentecost%20(Royal%20Temple%20Worship%20Center)">Get directions</a></p>
+            <iframe class="map-frame" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.0785582706308!2d-0.023770721326286003!3d5.701790379531448!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf81a63586dffd%3A0xfcf2e597e3ca059b!2sThe%20Church%20of%20Pentecost%20(Royal%20Temple%20Worship%20Center)!5e0!3m2!1sen!2sgh!4v1793331102578!5m2!1sen!2sgh" title="Map showing where Royal Temple Worship Centre is" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="band band-paper" aria-labelledby="mission-title">
+        <div class="home-mission">
+          <div class="ph-slot ph-portrait" role="img" aria-label="Space for a photo of the congregation at worship." data-photo-label="Photo: the congregation at worship, 1200 x 1500"></div>
+          <div class="home-mission-text">
+            <h2 id="mission-title">Mission and Vision</h2>
+            <p class="label">Mission</p>
+            <p class="statement"><span class="to-add" data-setting="mission_statement">[ADD: mission statement]</span></p>
+            <p class="label">Vision</p>
+            <p><span class="to-add" data-setting="vision_statement">[ADD: vision statement]</span></p>
+            <p><a class="link-arrow" href="about.html">About us</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="band band-light" aria-labelledby="ministries-title">
+        <div class="section-head">
+          <h2 id="ministries-title">Our Ministries</h2>
+          <p class="lead">These are the ministries of the assembly. To join one, speak to its leader after a service or <a href="contact.html">contact the church office</a>.</p>
+        </div>
+        <ol class="ministry-index">
+          <li><a href="ministries.html#pemem"><span class="ministry-index-name">Men's Ministry (PEMEM)</span> <span class="ministry-index-text">The fellowship for the men of the assembly.</span></a></li>
+          <li><a href="ministries.html#womens"><span class="ministry-index-name">Women's Ministry</span> <span class="ministry-index-text">The fellowship for the women of the assembly.</span></a></li>
+          <li><a href="ministries.html#pyfm"><span class="ministry-index-name">Youth Ministry</span> <span class="ministry-index-text">For the teenagers and young adults of the assembly.</span></a></li>
+          <li><a href="ministries.html#pensa"><span class="ministry-index-name">PENSA (Pentecost Students and Associates)</span> <span class="ministry-index-text">For students in secondary and tertiary schools.</span></a></li>
+          <li><a href="ministries.html#children"><span class="ministry-index-name">Children's Ministry</span> <span class="ministry-index-text">Sunday school and Bible teaching for the children of the assembly.</span></a></li>
+          <li><a href="ministries.html#choir"><span class="ministry-index-name">Choir and Praise Team</span> <span class="ministry-index-text">Leads the singing at our services.</span></a></li>
+          <li><a href="ministries.html#evangelism"><span class="ministry-index-name">Evangelism Ministry</span> <span class="ministry-index-text">Leads the assembly's outreach and follows up with new converts.</span></a></li>
+          <li><a href="ministries.html#ushering"><span class="ministry-index-name">Ushers</span> <span class="ministry-index-text">Welcome people to our services and help them find a seat.</span></a></li>
+          <li><a href="ministries.html#prayer"><span class="ministry-index-name">Prayer Force</span> <span class="ministry-index-text">Meets to pray for the assembly and for prayer requests sent to the church.</span></a></li>
+        </ol>
+        <p class="section-more"><a class="link-arrow" href="ministries.html">All ministries</a></p>
+      </section>
+
+      <section class="band band-paper" aria-labelledby="events-title">
+        <div class="section-head section-head-split">
+          <h2 id="events-title">Upcoming Events</h2>
+          <a class="link-arrow" href="events.html">See all events</a>
+        </div>
+        <ul class="event-rows" id="home-events"></ul>
+        <p class="empty-state" id="home-events-status" role="status">Upcoming events are listed on the Events page.</p>
+      </section>
+
+      <!-- Shown only when Admin > Settings > Featured verse has both the text and the reference. -->
+      <div class="home-verse" id="featured-verse" hidden>
+        <section class="band band-navy has-motif motif-rings verse-band" aria-label="Featured verse">
+          <figure class="verse">
+            <blockquote><p id="featured-verse-text"></p></blockquote>
+            <figcaption id="featured-verse-ref"></figcaption>
+          </figure>
+        </section>
+        <div class="band-gold-accent"></div>
+      </div>
+
+      <section class="band band-light" aria-labelledby="sermons-title">
+        <div class="home-sermon">
+          <div class="ph-slot ph-wide" role="img" aria-label="Space for a sermon thumbnail." data-photo-label="Photo: sermon thumbnail, 1600 x 900"></div>
+          <div class="home-sermon-text">
+            <h2 id="sermons-title">Sermons</h2>
+            <p class="lead">Messages preached at Royal Temple Worship Centre.</p>
+            <p class="empty-state">No sermons have been posted here yet.</p>
+            <ul class="link-list">
+              <li><a href="https://www.facebook.com/cop.rtwc/videos">Watch recent services on Facebook</a></li>
+              <li><a href="sermons.html">All sermons</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="band band-paper" aria-labelledby="cop-title">
+        <div class="home-cop">
+          <div class="section-head">
+            <h2 id="cop-title">The Church of Pentecost</h2>
+            <p class="lead">Royal Temple Worship Centre is part of The Church of Pentecost, which has its headquarters in Accra, Ghana.</p>
+          </div>
+          <ul class="link-list">
+            <li><a href="https://thecophq.org">Visit the Church of Pentecost website</a></li>
+            <li><a href="https://www.facebook.com/cop.rtwc">Royal Temple Worship Centre on Facebook</a></li>
           </ul>
-        <p class="note">All times are GMT.</p>
+        </div>
       </section>
 
-      <section class="section">
-        <h2>Upcoming Events</h2>
-        <ul class="event-list" id="home-events"></ul>
-        <p id="home-events-status" role="status">Upcoming events are listed on the Events page.</p>
-        <p><a href="events.html">See all events</a></p>
-      </section>
-
-      <section class="section" id="visit">
-        <h2>Visit Us</h2>
-        <div class="two-column">
-          <div>
-            <p>Visitors are welcome at every service.</p>
-            <dl class="contact-details">
+      <section class="band band-navy" id="visit" aria-labelledby="visit-title">
+        <div class="home-visit">
+          <div class="section-head">
+            <h2 id="visit-title">Visit Us</h2>
+            <p><a class="button button-gold" href="contact.html">Contact us</a></p>
+          </div>
+          <dl class="contact-details info-table">
             <dt>Address</dt>
             <dd><span class="to-add" data-setting="church_address">[ADD: church address]</span></dd>
             <dt>Phone</dt>
             <dd><a class="to-add" data-setting="phone_number" data-link="tel:">[ADD: church phone number]</a></dd>
             <dt>Email</dt>
             <dd><a class="to-add" data-setting="email" data-link="mailto:">[ADD: church email address]</a></dd>
-            </dl>
-            <p><a class="button" href="contact.html">Contact us</a></p>
+          </dl>
           </div>
-          <iframe class="map-frame" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.0785582706308!2d-0.023770721326286003!3d5.701790379531448!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf81a63586dffd%3A0xfcf2e597e3ca059b!2sThe%20Church%20of%20Pentecost%20(Royal%20Temple%20Worship%20Center)!5e0!3m2!1sen!2sgh!4v1793331102578!5m2!1sen!2sgh" title="Map showing where Royal Temple Worship Centre is" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          <div class="home-newsletter" data-newsletter data-newsletter-theme="navy"></div>
         </div>
       </section>
     </div>
   </main>
 
   <footer class="site-footer">
-    <div class="wrap">
-      <div class="footer-columns">
+    <div class="band-gold-accent"></div>
+    <section class="footer-cta has-motif motif-rays" aria-labelledby="footer-cta-heading">
+      <div class="wrap footer-cta-inner">
         <div>
-          <h2>Service Times</h2>
-          <ul class="service-times" data-setting="service_times">
-            <li>Sunday worship service: 8:00 am to 11:30 am</li>
-            <li>Wednesday Bible study: 6:30 pm to 8:30 pm</li>
-            <li>Friday prayer meeting: 6:30 pm to 9:00 pm</li>
+          <h2 id="footer-cta-heading">Visitors are welcome at every service.</h2>
+          <ul class="service-times footer-times" data-setting="service_times">
+            <li><span class="info-label">Sunday worship service</span> <span class="info-value">8:00 am to 11:30 am</span></li>
+            <li><span class="info-label">Wednesday Bible study</span> <span class="info-value">6:30 pm to 8:30 pm</span></li>
+            <li><span class="info-label">Friday prayer meeting</span> <span class="info-value">6:30 pm to 9:00 pm</span></li>
           </ul>
+        </div>
+        <a class="button button-gold" href="contact.html">Plan a visit</a>
+      </div>
+    </section>
+
+    <div class="wrap footer-main">
+      <div class="footer-columns">
+        <div class="footer-brand">
+          <p class="footer-name">Royal Temple Worship Centre</p>
+          <p class="footer-affiliation">The Church of Pentecost</p>
+          <p><a href="https://www.facebook.com/cop.rtwc">Royal Temple Worship Centre on Facebook</a></p>
         </div>
         <div>
           <h2>Contact</h2>
@@ -125,11 +245,10 @@
             <dt>Email</dt>
             <dd><a class="to-add" data-setting="email" data-link="mailto:">[ADD: church email address]</a></dd>
           </dl>
-          <p><a href="https://www.facebook.com/cop.rtwc">Royal Temple Worship Centre on Facebook</a></p>
         </div>
         <div>
           <h2>Pages</h2>
-          <ul>
+          <ul class="footer-pages">
             <li><a href="index.html">Home</a></li>
             <li><a href="about.html">About</a></li>
             <li><a href="ministries.html">Ministries</a></li>
@@ -140,6 +259,7 @@
             <li><a href="live.html">Watch live</a></li>
           </ul>
         </div>
+        <div class="footer-newsletter" data-newsletter data-newsletter-theme="navy"></div>
       </div>
       <!-- Icons8 attribution: no Icons8 link or Icons8 icon was found anywhere in the site.
            If Icons8 icons are added, their attribution link belongs here. -->

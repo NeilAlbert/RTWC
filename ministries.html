@@ -11,13 +11,20 @@
   <!-- ADD: og:url and og:image need the full web address of the live site. Add them once the domain is confirmed. -->
   <link rel="icon" href="assets/images/logo.jpg">
   <link rel="preload" as="image" href="assets/images/logo-loader.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;1,400&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,600;1,8..60,400&amp;display=swap">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/images.css">
+  <link rel="stylesheet" href="css/motif.css">
+  <link rel="stylesheet" href="css/newsletter.css">
   <link rel="stylesheet" href="css/loader.css">
   <script src="js/loader-init.js"></script>
   <noscript><style>#page-loader { display: none; }</style></noscript>
   <script src="js/loader.js" defer></script>
   <script src="js/main.js" defer></script>
+  <script src="js/newsletter.js" defer></script>
 </head>
 <body>
   <div id="page-loader" role="status" aria-live="polite">
@@ -26,6 +33,13 @@
   </div>
 
   <a class="skip-link" href="#main">Skip to main content</a>
+
+  <div class="utility-bar">
+    <div class="wrap utility-inner">
+      <p><span class="utility-label">Next service</span> <span data-next-service>Sunday worship service, 8:00 am to 11:30 am</span></p>
+      <a href="https://www.facebook.com/cop.rtwc">Facebook</a>
+    </div>
+  </div>
 
   <header class="site-header">
     <div class="wrap">
@@ -44,6 +58,7 @@
           <li><a href="gallery.html">Gallery</a></li>
           <li><a href="contact.html">Contact</a></li>
           <li><a href="live.html">Watch live</a></li>
+          <li class="nav-visit"><a class="button" href="contact.html">Plan a visit</a></li>
         </ul>
       </nav>
     </div>
@@ -109,15 +124,27 @@
   </main>
 
   <footer class="site-footer">
-    <div class="wrap">
-      <div class="footer-columns">
+    <div class="band-gold-accent"></div>
+    <section class="footer-cta has-motif motif-rays" aria-labelledby="footer-cta-heading">
+      <div class="wrap footer-cta-inner">
         <div>
-          <h2>Service Times</h2>
-          <ul class="service-times" data-setting="service_times">
-            <li>Sunday worship service: 8:00 am to 11:30 am</li>
-            <li>Wednesday Bible study: 6:30 pm to 8:30 pm</li>
-            <li>Friday prayer meeting: 6:30 pm to 9:00 pm</li>
+          <h2 id="footer-cta-heading">Visitors are welcome at every service.</h2>
+          <ul class="service-times footer-times" data-setting="service_times">
+            <li><span class="info-label">Sunday worship service</span> <span class="info-value">8:00 am to 11:30 am</span></li>
+            <li><span class="info-label">Wednesday Bible study</span> <span class="info-value">6:30 pm to 8:30 pm</span></li>
+            <li><span class="info-label">Friday prayer meeting</span> <span class="info-value">6:30 pm to 9:00 pm</span></li>
           </ul>
+        </div>
+        <a class="button button-gold" href="contact.html">Plan a visit</a>
+      </div>
+    </section>
+
+    <div class="wrap footer-main">
+      <div class="footer-columns">
+        <div class="footer-brand">
+          <p class="footer-name">Royal Temple Worship Centre</p>
+          <p class="footer-affiliation">The Church of Pentecost</p>
+          <p><a href="https://www.facebook.com/cop.rtwc">Royal Temple Worship Centre on Facebook</a></p>
         </div>
         <div>
           <h2>Contact</h2>
@@ -129,11 +156,10 @@
             <dt>Email</dt>
             <dd><a class="to-add" data-setting="email" data-link="mailto:">[ADD: church email address]</a></dd>
           </dl>
-          <p><a href="https://www.facebook.com/cop.rtwc">Royal Temple Worship Centre on Facebook</a></p>
         </div>
         <div>
           <h2>Pages</h2>
-          <ul>
+          <ul class="footer-pages">
             <li><a href="index.html">Home</a></li>
             <li><a href="about.html">About</a></li>
             <li><a href="ministries.html">Ministries</a></li>
@@ -144,6 +170,7 @@
             <li><a href="live.html">Watch live</a></li>
           </ul>
         </div>
+        <div class="footer-newsletter" data-newsletter data-newsletter-theme="navy"></div>
       </div>
       <!-- Icons8 attribution: no Icons8 link or Icons8 icon was found anywhere in the site.
            If Icons8 icons are added, their attribution link belongs here. -->

@@ -87,6 +87,55 @@
 
   /* Motion: colour, background, border and underline changes only */
   --transition: 150ms;
+
+  /* ---------- Public site additions (18 Nov 2026) ----------
+     The admin dashboard does not use these, so it is unchanged. */
+
+  /* Type: Source Serif 4 and Source Sans 3 from Google Fonts, loaded by the public
+     pages only. The existing stacks are the fallback while they load. */
+  --font-heading: "Source Serif 4", var(--font-serif);
+  --font-body: "Source Sans 3", var(--font-sans);
+
+  /* Fluid sizes: the first value is the 375px phone size, the last the desktop size. */
+  --text-h1: clamp(2.25rem, 1.55rem + 2.95vw, 3.75rem);     /* 36px to 60px */
+  --text-h2: clamp(1.75rem, 1.4rem + 1.5vw, 2.5rem);        /* 28px to 40px */
+  --text-h3: clamp(1.375rem, 1.3rem + 0.35vw, 1.625rem);    /* 22px to 26px */
+  --text-body: clamp(1.0625rem, 1.03rem + 0.15vw, 1.125rem); /* 17px to 18px */
+  --text-lead: clamp(1.1875rem, 1.1rem + 0.4vw, 1.375rem);  /* 19px to 22px */
+  --text-quote: clamp(1.625rem, 1.2rem + 1.8vw, 2.5rem);    /* 26px to 40px */
+  --text-label: 0.8125rem;                                  /* 13px small caps labels */
+  --text-nav: 0.9375rem;                                    /* 15px */
+
+  --leading-display: 1.1;  /* h1 */
+  --leading-title: 1.2;    /* h2, h3 */
+  --leading-copy: 1.65;    /* running text */
+  --tracking-tight: -0.015em; /* large headings only */
+  --tracking-label: 0.08em;   /* small caps labels */
+  --measure-copy: 65ch;
+
+  /* Section rhythm: 56px on a phone up to 112px on a wide screen */
+  --space-56: 56px;
+  --space-80: 80px;
+  --space-112: 112px;
+  --band-pad: clamp(3.5rem, 2rem + 5vw, 7rem);
+
+  /* Bands */
+  --band-navy-text: var(--navy-100);  /* secondary text on navy-900: 12:1 */
+  --band-navy-rule: var(--navy-700);  /* hairlines on navy-900 */
+  --gold-strip: 6px;
+  --rule-width: 40px;  /* gold rule under section headings */
+  --rule-height: 3px;
+
+  /* The brand motif: colour of the line art. Navy bands get white at 8%, light bands navy at 6%. */
+  --motif-on-navy: rgb(255 255 255 / 0.08);
+  --motif-on-light: rgb(31 56 100 / 0.06);
+
+  /* The one overlay allowed on a photo, only behind text that sits on it */
+  --photo-overlay: rgb(19 36 68 / 0.55);
+
+  --date-block: 64px;
+  --button-height: 48px;
+  --arrow-nudge: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {

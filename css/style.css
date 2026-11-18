@@ -8,6 +8,9 @@
 :root {
   /* Space at the left and right edge of the page. */
   --gutter: var(--space-16);
+
+  /* A right-pointing arrow, drawn as a mask so it takes the colour of its text. */
+  --icon-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 8h10.5M9 4l4 4-4 4'/%3E%3C/svg%3E");
 }
 
 *,
@@ -17,35 +20,43 @@
 }
 
 html {
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   font-size: 100%;
   font-weight: var(--weight-regular);
-  line-height: var(--leading-body);
+  line-height: var(--leading-copy);
   color: var(--text);
   background-color: var(--surface-1);
 }
 
 body {
   margin: 0;
+  font-size: var(--text-body);
+  background-color: var(--surface-1);
 }
 
 h1,
 h2,
 h3 {
   margin: 0 0 var(--space-16);
-  font-family: var(--font-serif);
-  font-weight: var(--weight-bold);
-  line-height: var(--leading-heading);
+  font-family: var(--font-heading);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-title);
   color: var(--navy);
+  text-wrap: balance;
 }
 
-h1 { font-size: var(--text-36); }
-h2 { font-size: var(--text-28); }
-
-h3 {
-  font-size: var(--text-22);
-  line-height: var(--leading-snug);
+h1 {
+  font-size: var(--text-h1);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-tight);
 }
+
+h2 {
+  font-size: var(--text-h2);
+  letter-spacing: var(--tracking-tight);
+}
+
+h3 { font-size: var(--text-h3); }
 
 p,
 ul,
@@ -57,7 +68,30 @@ dl {
 p,
 li,
 dd {
-  max-width: var(--measure);
+  max-width: var(--measure-copy);
+}
+
+/* The first paragraph under a heading: one size up, in the muted colour. */
+.lead {
+  font-size: var(--text-lead);
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* Small caps label: only where it names something, such as a table row or a category. */
+.label,
+.info-label,
+.contact-details dt {
+  font-size: var(--text-label);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.label {
+  margin-bottom: var(--space-8);
 }
 
 img {
@@ -139,16 +173,107 @@ main > .wrap {
   padding-inline: 0;
 }
 
+.band,
 .page-title,
 .section {
   padding-inline: max(var(--gutter), calc((100% - var(--container)) / 2 + var(--gutter)));
 }
 
+/* Bands: the page is built from full-width bands that alternate, so no two
+   neighbours look the same. */
+.band {
+  padding-block: var(--band-pad);
+}
+
+.band > :last-child {
+  margin-bottom: 0;
+}
+
+.band-light { background-color: var(--surface-1); }
+.band-paper { background-color: var(--surface-2); }
+
+.band-navy {
+  background-color: var(--navy-900);
+  color: var(--text-on-navy);
+}
+
+.band-navy h1,
+.band-navy h2,
+.band-navy h3,
+.band-navy a:not(.button):not(.button-gold) {
+  color: var(--text-on-navy);
+}
+
+.band-navy .lead,
+.band-navy .label,
+.band-navy .info-label,
+.band-navy .contact-details dt,
+.band-navy .note {
+  color: var(--band-navy-text);
+}
+
+.band-navy :focus-visible {
+  outline-color: var(--text-on-navy);
+}
+
+/* A narrow solid gold strip: above the footer, and under the featured verse. */
+.band-gold-accent {
+  height: var(--gold-strip);
+  background-color: var(--gold);
+}
+
+/* Section header: optional label, the heading with its gold rule, an optional lead. */
+.section-head {
+  max-width: var(--measure-copy);
+  margin-bottom: var(--space-48);
+}
+
+.section-head > :last-child {
+  margin-bottom: 0;
+}
+
+.section-head h2::after,
+.section h2::after {
+  content: "";
+  display: block;
+  width: var(--rule-width);
+  height: var(--rule-height);
+  margin-top: var(--space-16);
+  background-color: var(--gold);
+}
+
+.section-head h2 {
+  margin-bottom: var(--space-24);
+}
+
+/* Heading on the left, its "see all" link on the right. */
+.section-head-split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-16) var(--space-32);
+  max-width: none;
+}
+
+.section-head-split h2 {
+  margin-bottom: 0;
+}
+
+.section-more {
+  margin-top: var(--space-32);
+}
+
 /* Top band of every page: solid navy with white text. */
 .page-title {
-  padding-block: var(--space-48);
-  background-color: var(--navy);
+  padding-block: var(--space-56);
+  background-color: var(--navy-900);
   color: var(--text-on-navy);
+}
+
+.page-title > p,
+.page-title > div > p {
+  color: var(--band-navy-text);
 }
 
 .page-title h1,
@@ -158,7 +283,7 @@ main > .wrap {
 
 .page-title > p,
 .page-title > div > p {
-  font-size: var(--text-18);
+  font-size: var(--text-lead);
 }
 
 .page-title > :last-child,
@@ -170,9 +295,9 @@ main > .wrap {
   border-radius: var(--radius);
 }
 
-/* Bands alternate between the page background and the darker neutral. */
+/* Inner pages: bands alternate between the page background and the darker neutral. */
 .section {
-  padding-block: var(--space-48);
+  padding-block: var(--band-pad);
 }
 
 .section:nth-child(odd) {
@@ -183,16 +308,6 @@ main > .wrap {
   margin-bottom: 0;
 }
 
-/* Section headings carry a short gold rule. */
-.section h2::after {
-  content: "";
-  display: block;
-  width: var(--space-48);
-  height: 3px;
-  margin-top: var(--space-12);
-  background-color: var(--gold);
-}
-
 .two-column {
   display: grid;
   gap: var(--space-32);
@@ -200,33 +315,6 @@ main > .wrap {
 
 .two-column > * {
   min-width: 0;
-}
-
-/* Home page: the photo fills the top band, under a solid navy tint that keeps
-   the white text readable. The navy background shows while the photo loads. */
-.page-title.two-column {
-  position: relative;
-  isolation: isolate;
-  grid-template-columns: 1fr;
-  padding-block: var(--space-64);
-}
-
-.page-title.two-column img {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
-  object-fit: cover;
-}
-
-.page-title.two-column::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-color: var(--photo-tint);
 }
 
 /* ---------- Components ---------- */
@@ -270,14 +358,18 @@ main > .wrap {
 .photo-slot-portrait { aspect-ratio: 4 / 5; }
 .photo-slot-wide { aspect-ratio: 3 / 2; }
 
-/* Buttons: .button is the primary action, .button-plain the secondary one. */
+/* Buttons: .button is the primary action, .button-plain the secondary one, and
+   .button-gold the single most important action on a navy band. A button that
+   goes to another page or place carries an arrow, which nudges 4px on hover. */
 .button,
 .button-plain,
+.button-gold,
 .menu-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: var(--control-height);
+  gap: var(--space-8);
+  min-height: var(--button-height);
   padding: var(--space-8) var(--space-24);
   border: 1px solid var(--navy);
   border-radius: var(--radius);
@@ -311,6 +403,265 @@ main > .wrap {
   background-color: var(--navy-50);
 }
 
+/* navy-900 on gold is 4.7:1. */
+.button-gold {
+  background-color: var(--gold);
+  border-color: var(--gold);
+  color: var(--navy-900);
+}
+
+.button-gold:hover {
+  background-color: var(--surface-0);
+  border-color: var(--surface-0);
+}
+
+/* On a navy band the secondary button is outlined in white. */
+.band-navy .button-plain {
+  background-color: transparent;
+  border-color: var(--text-on-navy);
+  color: var(--text-on-navy);
+}
+
+.band-navy .button-plain:hover {
+  background-color: var(--navy-700);
+}
+
+/* The arrow: on link buttons, "see all" text links and rows that lead somewhere. */
+a.button::after,
+a.button-gold::after,
+.link-arrow::after,
+.link-list a::after,
+.row-arrow {
+  content: "";
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  background-color: currentColor;
+  -webkit-mask: var(--icon-arrow) center / contain no-repeat;
+  mask: var(--icon-arrow) center / contain no-repeat;
+  transition: transform var(--transition);
+}
+
+a.button:hover::after,
+a.button-gold:hover::after,
+.link-arrow:hover::after,
+.link-list a:hover::after,
+.event-row:hover .row-arrow,
+.ministry-index a:hover::after {
+  transform: translateX(var(--arrow-nudge));
+}
+
+/* Text link with an arrow: the standard way to point to more content. */
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-height: var(--control-height);
+  font-weight: var(--weight-semibold);
+  text-decoration-color: transparent;
+}
+
+.link-arrow:hover {
+  text-decoration-color: var(--gold);
+}
+
+/* A ruled list of links, each on its own row with an arrow at the end. */
+.link-list {
+  max-width: none;
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.link-list li {
+  max-width: none;
+  border-top: 1px solid var(--border-strong);
+}
+
+.link-list a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+  min-height: var(--space-56);
+  padding-block: var(--space-12);
+  font-weight: var(--weight-semibold);
+  text-decoration-color: transparent;
+}
+
+.link-list a:hover {
+  text-decoration-color: var(--gold);
+}
+
+.band-navy .link-list,
+.band-navy .link-list li {
+  border-color: var(--band-navy-rule);
+}
+
+/* Information table: label on the left in small caps, value on the right,
+   hairlines between rows. Service times and contact details. */
+.info-panel {
+  padding: var(--space-8) var(--space-24) var(--space-16);
+  background-color: var(--surface-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.info-panel > :last-child {
+  margin-bottom: 0;
+}
+
+.info-panel .note {
+  margin-top: var(--space-16);
+}
+
+ul.info-table {
+  padding: 0;
+  list-style: none;
+}
+
+ul.info-table li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4) var(--space-24);
+  max-width: none;
+  padding-block: var(--space-16);
+  border-bottom: 1px solid var(--border);
+}
+
+ul.info-table .info-value,
+.service-times .info-value {
+  font-weight: var(--weight-semibold);
+}
+
+/* Inner pages: a service time row with a label also splits label and value. */
+main .service-times li:has(.info-label) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4) var(--space-24);
+}
+
+/* Date block for events: day large in the serif, month in small caps beneath. */
+.date-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--date-block);
+  height: var(--date-block);
+  background-color: var(--navy);
+  border-radius: var(--radius);
+  color: var(--text-on-navy);
+  line-height: 1;
+}
+
+.date-day {
+  font-family: var(--font-heading);
+  font-size: var(--text-28);
+  font-weight: var(--weight-semibold);
+}
+
+.date-month {
+  margin-top: var(--space-4);
+  font-size: var(--text-12);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--navy-100);
+}
+
+/* A ruled row for one event: date block, title and details, arrow. The title link
+   covers the whole row, so the row is one large target. */
+.event-rows {
+  max-width: none;
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.event-rows:empty {
+  display: none;
+}
+
+.event-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--date-block) minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-16);
+  max-width: none;
+  padding-block: var(--space-24);
+  border-top: 1px solid var(--border-strong);
+}
+
+.event-row .row-arrow {
+  align-self: center;
+}
+
+.event-row-title {
+  margin-bottom: var(--space-4);
+  font-size: var(--text-h3);
+  text-wrap: pretty;
+}
+
+@media (min-width: 768px) {
+  .event-row {
+    align-items: center;
+    gap: var(--space-24);
+  }
+}
+
+.event-row-link {
+  text-decoration-color: transparent;
+}
+
+.event-row-link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.event-row:hover .event-row-link {
+  text-decoration-color: var(--gold);
+}
+
+.event-row-link:focus-visible {
+  outline: 0;
+}
+
+.event-row:has(.event-row-link:focus-visible) {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+.event-row .event-meta {
+  margin: 0;
+}
+
+.row-arrow {
+  width: var(--space-24);
+  height: var(--space-24);
+  color: var(--navy);
+}
+
+/* A message that stands in for a list while it loads, or when it is empty. */
+.empty-state {
+  max-width: none;
+  padding-block: var(--space-24);
+  border-block: 1px solid var(--border-strong);
+  color: var(--text-muted);
+}
+
+.empty-state:empty {
+  display: none;
+}
+
 .button:disabled,
 .button-plain:disabled,
 .button[aria-disabled="true"],
@@ -330,6 +681,7 @@ a[aria-disabled="true"] {
   flex-wrap: wrap;
   gap: var(--space-16);
   margin-bottom: var(--space-16);
+  max-width: none;
 }
 
 /* On the navy band the primary button is gold and the secondary one is outlined in white. */
@@ -352,6 +704,107 @@ a[aria-disabled="true"] {
 
 .page-title .button-plain:hover {
   background-color: var(--navy-700);
+}
+
+/* Site announcement (Admin > Settings). White on navy-900 is 15:1. */
+.announcement {
+  background-color: var(--navy-900);
+  color: var(--text-on-navy);
+}
+
+.announcement-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4) var(--space-16);
+  padding-block: var(--space-4);
+}
+
+.announcement-text {
+  flex: 1 1 16rem;
+  margin: 0;
+  padding-block: var(--space-8);
+  font-size: var(--text-14);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+  overflow-wrap: anywhere;
+}
+
+.announcement a {
+  color: var(--text-on-navy);
+  text-decoration: underline;
+}
+
+.announcement-dismiss {
+  min-width: var(--control-height);
+  min-height: var(--control-height);
+  padding: var(--space-8) var(--space-16);
+  border: 1px solid var(--navy-100);
+  border-radius: var(--radius);
+  background-color: transparent;
+  color: var(--text-on-navy);
+  font-size: var(--text-14);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: background-color var(--transition);
+}
+
+.announcement-dismiss:hover {
+  background-color: var(--navy-700);
+}
+
+.announcement :focus-visible {
+  outline-color: var(--text-on-navy);
+}
+
+/* Utility bar above the header: the next service and the Facebook page.
+   Hidden on narrow phones, where the header carries everything needed. */
+.utility-bar {
+  display: none;
+  background-color: var(--navy-900);
+  color: var(--band-navy-text);
+  font-size: var(--text-14);
+  line-height: var(--leading-snug);
+}
+
+.utility-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-24);
+  min-height: var(--control-height);
+}
+
+.utility-inner p {
+  max-width: none;
+  margin: 0;
+}
+
+.utility-label {
+  margin-right: var(--space-8);
+  font-size: var(--text-12);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.utility-inner a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+  color: var(--text-on-navy);
+  text-decoration-color: transparent;
+}
+
+.utility-inner a:hover {
+  text-decoration-color: var(--gold);
+}
+
+.utility-bar :focus-visible {
+  outline-color: var(--text-on-navy);
+  outline-offset: -2px;
 }
 
 /* Header and navigation */
@@ -379,14 +832,24 @@ a[aria-disabled="true"] {
   line-height: var(--leading-snug);
 }
 
+.site-name img {
+  flex-shrink: 0;
+}
+
 .site-name strong {
   display: block;
-  font-family: var(--font-serif);
+  font-family: var(--font-heading);
   font-size: var(--text-18);
+  font-weight: var(--weight-semibold);
 }
 
 .site-name span span {
-  font-size: var(--text-14);
+  display: block;
+  margin-top: 2px;
+  font-size: var(--text-12);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
   color: var(--text-muted);
 }
 
@@ -418,6 +881,7 @@ a[aria-disabled="true"] {
   display: flex;
   align-items: center;
   min-height: var(--control-height);
+  font-size: var(--text-nav);
   font-weight: var(--weight-medium);
   text-decoration: underline 2px transparent;
   text-underline-offset: var(--space-8);
@@ -426,6 +890,16 @@ a[aria-disabled="true"] {
 .site-nav a:hover,
 .site-nav a[aria-current="page"] {
   text-decoration-color: var(--gold);
+}
+
+/* "Plan a visit": the header's one button. In the phone menu it is the last row. */
+.site-nav .nav-visit {
+  padding-block: var(--space-12);
+}
+
+.site-nav .nav-visit .button {
+  width: 100%;
+  text-decoration: none;
 }
 
 /* Tabs: the events filter and the live platform switch. */
@@ -665,21 +1139,19 @@ textarea[aria-invalid="true"] {
   line-height: var(--leading-body);
 }
 
-/* Footer */
+/* Footer: gold strip, a call to action band, the main footer, the bottom bar. */
 .site-footer {
-  padding-block: var(--space-48) var(--space-24);
   background-color: var(--navy-900);
-  color: var(--navy-100);
+  color: var(--band-navy-text);
 }
 
-.site-footer h2 {
-  font-size: var(--text-18);
-  line-height: var(--leading-snug);
-  color: var(--gold);
-}
-
-.site-footer a {
+.site-footer a:not(.button-gold) {
   color: var(--text-on-navy);
+  text-decoration-color: var(--band-navy-rule);
+}
+
+.site-footer a:hover {
+  text-decoration-color: var(--gold);
 }
 
 .site-footer ul {
@@ -687,27 +1159,126 @@ textarea[aria-invalid="true"] {
   list-style: none;
 }
 
-.site-footer .service-times li,
+/* Call to action: navy-700, one line, the service times and a gold button. */
+.footer-cta {
+  padding-block: var(--space-48);
+  background-color: var(--navy-700);
+  color: var(--text-on-navy);
+}
+
+.footer-cta-inner {
+  display: grid;
+  gap: var(--space-24);
+  align-items: center;
+}
+
+.footer-cta h2 {
+  margin-bottom: var(--space-16);
+  font-size: var(--text-h3);
+  color: var(--text-on-navy);
+}
+
+.footer-times {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8) var(--space-32);
+  max-width: none;
+  margin: 0;
+}
+
+.footer-times li {
+  max-width: none;
+  padding-block: var(--space-4);
+  border-bottom: 0;
+}
+
+.footer-times .info-label {
+  display: block;
+  color: var(--navy-100);
+}
+
+.footer-times .info-value {
+  font-weight: var(--weight-semibold);
+  color: var(--text-on-navy);
+}
+
+.footer-cta-inner > .button-gold {
+  justify-self: start;
+}
+
+/* Main footer */
+.footer-main {
+  padding-block: var(--space-56) var(--space-24);
+}
+
+.site-footer h2:not(#footer-cta-heading) {
+  margin-bottom: var(--space-12);
+  font-family: var(--font-body);
+  font-size: var(--text-label);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--gold); /* gold on navy-900 is 4.7:1 */
+}
+
+.footer-name {
+  margin-bottom: var(--space-4);
+  font-family: var(--font-heading);
+  font-size: var(--text-22);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-title);
+  color: var(--text-on-navy);
+}
+
+.footer-affiliation {
+  font-size: var(--text-label);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
 .site-footer .contact-details dt,
 .site-footer .contact-details dd {
-  border-bottom-color: var(--navy-700);
+  border-bottom-color: var(--band-navy-rule);
+}
+
+.site-footer .contact-details dt {
+  color: var(--band-navy-text);
 }
 
 .site-footer .contact-details {
-  margin-bottom: var(--space-16);
+  margin-bottom: 0;
+}
+
+.footer-pages {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 var(--space-24);
+}
+
+.footer-brand a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-height);
+}
+
+.footer-pages a {
+  display: flex;
+  align-items: center;
+  min-height: var(--control-height);
 }
 
 .footer-columns {
   display: grid;
-  gap: var(--space-32);
-  margin-bottom: var(--space-32);
+  gap: var(--space-48);
+  margin-bottom: var(--space-48);
 }
 
 .footer-small {
   max-width: none;
   margin: 0;
-  padding-top: var(--space-16);
-  border-top: 1px solid var(--navy-700);
+  padding-top: var(--space-24);
+  border-top: 1px solid var(--band-navy-rule);
   font-size: var(--text-14);
 }
 
@@ -1006,6 +1577,12 @@ textarea[aria-invalid="true"] {
 
 /* ---------- Wider screens ---------- */
 
+@media (min-width: 640px) {
+  .utility-bar {
+    display: block;
+  }
+}
+
 @media (min-width: 768px) {
   :root {
     --gutter: var(--space-24);
@@ -1023,9 +1600,8 @@ textarea[aria-invalid="true"] {
     z-index: 20;
   }
 
-  .page-title,
-  .section {
-    padding-block: var(--space-64);
+  .page-title {
+    padding-block: var(--space-80);
   }
 
   .two-column {
@@ -1033,18 +1609,22 @@ textarea[aria-invalid="true"] {
     gap: var(--space-48);
   }
 
-  .page-title.two-column {
-    grid-template-columns: 1fr;
-    padding-block: var(--space-96);
-  }
-
   .event-list,
   .ministry-list {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .footer-cta {
+    padding-block: var(--space-56);
+  }
+
+  .footer-cta-inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-48);
+  }
+
   .footer-columns {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 4fr 5fr 3fr;
   }
 
   .leader-profile {
@@ -1056,19 +1636,20 @@ textarea[aria-invalid="true"] {
   }
 }
 
+/* From 1024px the menu is always shown. Up to 1279px it sits on its own row under
+   the church name; from 1280px everything fits on one row. */
 @media (min-width: 1024px) {
-  h1 { font-size: var(--text-48); }
+  /* The header is two rows deep here, so anchored sections stop below it. */
+  html {
+    scroll-padding-top: 160px;
+  }
 
   .site-header .wrap {
-    padding-block: var(--space-16);
+    padding-block: var(--space-16) 0;
   }
 
   .menu-button {
     display: none;
-  }
-
-  .site-nav {
-    flex-basis: auto;
   }
 
   .site-name {
@@ -1078,15 +1659,21 @@ textarea[aria-invalid="true"] {
   .site-nav ul,
   .site-nav ul.is-open {
     display: flex;
-    gap: var(--space-16);
+    align-items: center;
+    gap: var(--space-24);
   }
 
   .site-nav li {
     border-top: 0;
   }
 
-  .site-nav a {
-    font-size: var(--text-14);
+  .site-nav .nav-visit {
+    margin-left: auto;
+    padding-block: var(--space-8);
+  }
+
+  .site-nav .nav-visit .button {
+    width: auto;
   }
 
   .ministry-list {
@@ -1094,14 +1681,27 @@ textarea[aria-invalid="true"] {
   }
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 1280px) {
+  html {
+    scroll-padding-top: var(--space-96);
+  }
+
+  .site-header .wrap {
+    flex-wrap: nowrap;
+    padding-block: var(--space-12);
+  }
+
+  .site-nav {
+    flex-basis: auto;
+  }
+
   .site-nav ul,
   .site-nav ul.is-open {
     gap: var(--space-24);
   }
 
-  .site-nav a {
-    font-size: var(--text-16);
+  .site-nav .nav-visit {
+    margin-left: var(--space-8);
   }
 }
 

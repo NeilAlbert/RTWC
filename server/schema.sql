@@ -172,7 +172,10 @@ INSERT INTO site_settings (setting_key, setting_value) VALUES
   ('previous_broadcast_url', ''),
   ('announcement_enabled', '0'),
   ('announcement_text', ''),
-  ('announcement_link', '')
+  ('announcement_link', ''),
+  -- Placeholders: the home page hides the featured verse until both are replaced.
+  ('featured_verse_text', '[ADD: verse text]'),
+  ('featured_verse_ref', '[ADD: reference]')
 ON DUPLICATE KEY UPDATE setting_key = setting_key;
 
 SET FOREIGN_KEY_CHECKS = 1;

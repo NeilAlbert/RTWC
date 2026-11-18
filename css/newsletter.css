@@ -1,0 +1,136 @@
+/* Newsletter sign-up (js/newsletter.js). Works on light surfaces and, with
+   .newsletter-navy, on the navy bands and the footer. */
+
+.newsletter {
+  max-width: 36rem;
+}
+
+.newsletter-heading {
+  margin-bottom: var(--space-16);
+}
+
+.newsletter-form {
+  margin: 0;
+}
+
+.newsletter-form label {
+  margin-bottom: var(--space-8);
+}
+
+/* The input flexes, the button keeps its width. Below 480px they stack. */
+.newsletter-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.newsletter-row input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--button-height);
+  border-color: var(--border-strong);
+}
+
+.newsletter-row input:hover {
+  border-color: var(--navy);
+}
+
+.newsletter-row input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.newsletter-row button {
+  flex: 0 0 auto;
+  min-width: 9.5rem;
+}
+
+.newsletter-error,
+.newsletter-status {
+  max-width: none;
+  margin: 0;
+  font-size: var(--text-16);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.newsletter-error {
+  color: var(--danger);
+}
+
+.newsletter-error:not(:empty) {
+  margin-top: var(--space-8);
+}
+
+.newsletter-status:not(:empty) {
+  margin-top: var(--space-12);
+}
+
+.newsletter-status[data-kind="success"] { color: var(--success); }
+.newsletter-status[data-kind="error"] { color: var(--danger); }
+
+.newsletter-help {
+  max-width: none;
+  margin: var(--space-12) 0 0;
+  font-size: var(--text-14);
+  color: var(--text-muted);
+}
+
+/* The honeypot: off screen and never seen. */
+.newsletter-trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+@media (min-width: 480px) {
+  .newsletter-row {
+    flex-direction: row;
+  }
+}
+
+/* ---------- On navy ---------- */
+
+.newsletter-navy .newsletter-heading,
+.newsletter-navy label {
+  color: var(--text-on-navy);
+}
+
+.newsletter-navy .newsletter-row input {
+  background-color: var(--surface-0);
+  border-color: var(--surface-0);
+  color: var(--text);
+}
+
+.newsletter-navy .newsletter-row input[aria-invalid="true"] {
+  border-color: var(--danger-tint);
+  outline: 2px solid var(--danger-tint);
+  outline-offset: 0;
+}
+
+/* The focus outline stays white on navy, and clear of the white input. */
+.newsletter-navy :focus-visible,
+.newsletter-navy .newsletter-row input[aria-invalid="true"]:focus-visible {
+  outline: 2px solid var(--text-on-navy);
+  outline-offset: 2px;
+}
+
+/* Light tints of the status colours: each passes 4.5:1 on navy-900. */
+.newsletter-navy .newsletter-error,
+.newsletter-navy .newsletter-status[data-kind="error"] {
+  color: var(--danger-tint);
+}
+
+.newsletter-navy .newsletter-status[data-kind="success"] {
+  color: var(--success-tint);
+}
+
+.newsletter-navy .newsletter-help {
+  color: var(--band-navy-text);
+}
+
+/* The footer's column headings are small caps labels; the sign-up matches them. */
+.site-footer .newsletter-heading {
+  margin-bottom: var(--space-12);
+}

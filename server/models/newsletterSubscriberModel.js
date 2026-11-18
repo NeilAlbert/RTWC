@@ -5,6 +5,7 @@
  * =============================================================================
  */
 const pool = require('../config/db');
+const { likePattern } = require('../utils/search');
 
 async function findByEmail(email) {
   const [rows] = await pool.query(
@@ -14,18 +15,20 @@ async function findByEmail(email) {
   return rows[0] || null;
 }
 
-async function create(email) {
+/**
+ * Adds an address. The unique index on email decides whether it is new, so two
+ * sign-ups at the same moment cannot both insert. Returns true when a row was
+ * added, false when the address was already on the list.
+ */
+async function subscribe(email) {
   const [result] = await pool.query(
-    'INSERT INTO newsletter_subscribers (email) VALUES (?)',
+    'INSERT IGNORE INTO newsletter_subscribers (email) VALUES (?)',
     [email]
   );
-  return findByEmail(email);
+  return result.affectedRows === 1;
 }
 
-/** Turns a search phrase into a LIKE pattern. % and _ in the phrase match themselves. */
-function emailPattern(q) {
-  return `%${String(q).replace(/[\\%_]/g, (char) => `\\${char}`)}%`;
-}
+const emailPattern = likePattern;
 
 async function countAll({ q } = {}) {
   const [rows] = q
@@ -56,4 +59,4 @@ async function removeByEmail(email) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findByEmail, create, countAll, findAll, remove, removeByEmail };
+module.exports = { findByEmail, subscribe, countAll, findAll, remove, removeByEmail };

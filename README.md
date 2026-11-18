@@ -27,7 +27,7 @@ Website of The Church of Pentecost, Royal Temple Worship Centre.
 
 ### Admin pages
 
-The admin is being rebuilt in four phases. After Phase 2 these pages work:
+The admin is being rebuilt in four phases. After Phase 3 these pages work:
 
 | Page | What it does |
 | --- | --- |
@@ -38,10 +38,16 @@ The admin is being rebuilt in four phases. After Phase 2 these pages work:
 | Ministries | Add, edit and delete ministries. One that still has leaders cannot be deleted |
 | Leadership | Add, edit and delete leaders, their roles, photos and order |
 | Media | Every uploaded image, where it is used, and Delete for one that is not used |
+| Messages | Messages from the Contact page. Opening a new one marks it read. Status, search, delete |
+| Prayer Requests | The same for prayer requests. A private one shows only "Private" until it is opened, and is not searched |
+| Newsletter | Subscribers, search, remove, and "Export as CSV" of the whole list |
+| Settings | Church details, service times, page text, live stream links and the site announcement |
 | Account | The admin name and email, and "Change password" |
 
-Messages, Prayer Requests, Newsletter and Settings open a placeholder until Phase 3,
-and Site status and Help until Phase 4.
+Site status and Help open a placeholder until Phase 4.
+
+The CSV export puts a `'` in front of any cell that starts with `=`, `+`, `-` or `@`, so
+a spreadsheet shows it as text instead of running it as a formula.
 
 The public Events page and home page show events from the admin at once. The public
 Sermons, Ministries and About pages do not read from the admin yet: they still show
@@ -109,6 +115,7 @@ several copies of the server. See `server/REDIS.md`.
 | Ministries, their meeting times and leaders | `ministries.html` |
 | Sermons | the `sermons` list at the top of `js/pages/sermons.js` |
 | Events | Admin > Events |
+| The announcement bar above the header | Admin > Settings > Site announcement |
 | Gallery photos | the church Facebook page, through the API |
 
 Anything shown on the site as `[ADD: ...]` in a dashed box is a fact that still has to be

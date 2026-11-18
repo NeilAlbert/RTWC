@@ -1,0 +1,73 @@
+/* Royal Temple Worship Centre: how photos are framed.
+   Four fixed shapes. Every photo is cropped to fill its shape, with the 4px corner
+   and nothing else: no filters, tints, frames or tilt. */
+
+.ph-wide { aspect-ratio: 16 / 9; }
+.ph-landscape { aspect-ratio: 3 / 2; }
+.ph-portrait { aspect-ratio: 4 / 5; }
+.ph-square { aspect-ratio: 1 / 1; }
+
+img.ph-wide,
+img.ph-landscape,
+img.ph-portrait,
+img.ph-square {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: var(--radius);
+  background-color: var(--surface-2); /* shows while the photo loads */
+}
+
+/* Text that sits on a photo gets a solid navy at 55% behind it, and only when the
+   photo is too light for it. Nothing else is ever laid over a photo. */
+.ph-overlay {
+  background-color: var(--photo-overlay);
+}
+
+/* A space kept for a photo the church has not supplied yet. The label says what
+   photo goes here and its size, from data-photo-label. The faint rings mark it as
+   designed, so it never looks like a broken image. */
+.ph-slot {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: 100%;
+  background-color: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+}
+
+/* On the darker band the slot is one step lighter, so it still reads as a space. */
+.band-paper .ph-slot,
+.section:nth-child(odd) .ph-slot {
+  background-color: var(--surface-1);
+}
+
+.ph-slot::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  right: -18%;
+  bottom: -22%;
+  width: 72%;
+  aspect-ratio: 1;
+  background-color: var(--motif-on-light);
+  -webkit-mask: url("../assets/images/motif-rings.svg") center / contain no-repeat;
+  mask: url("../assets/images/motif-rings.svg") center / contain no-repeat;
+}
+
+.ph-slot::after {
+  content: attr(data-photo-label);
+  position: absolute;
+  top: var(--space-12);
+  left: var(--space-12);
+  max-width: calc(100% - var(--space-24));
+  padding: var(--space-4) var(--space-8);
+  background-color: var(--surface-0);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-tag);
+  color: var(--text-muted);
+  font-size: var(--text-label);
+  line-height: var(--leading-snug);
+}

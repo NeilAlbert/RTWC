@@ -26,19 +26,17 @@ const { createEvent, updateEvent, deleteEvent } = require('../controllers/events
 const { createMinistry, updateMinistry, deleteMinistry } = require('../controllers/ministriesController');
 const { createMember, updateMember, deleteMember } = require('../controllers/leadershipController');
 const { listMedia, deleteMedia } = require('../controllers/mediaController');
-const { getMessages, updateMessageStatus } = require('../controllers/contactController');
-const { updateRequestStatus } = require('../controllers/prayerRequestsController');
+const {
+  listMessages, getMessage, setMessageStatus, deleteMessage,
+  listPrayerRequests, getPrayerRequest, setPrayerRequestStatus, deletePrayerRequest,
+  listSubscribers, deleteSubscriber,
+} = require('../controllers/inboxController');
+const { getAdminSettings } = require('../controllers/siteSettingsController');
 const {
   listSermons,
   listEvents,
   listMinistries,
   listLeadership,
-  deleteMessage,
-  listPrayerRequests,
-  getPrayerRequest,
-  deletePrayerRequest,
-  listSubscribers,
-  deleteSubscriber,
   getStats,
   getStatus,
 } = require('../controllers/adminController');
@@ -184,65 +182,59 @@ router.delete(
 );
 
 // ---------------------------------------------------------------------------
-// Inbox: contact messages, prayer requests, newsletter (reworked in Phase 3).
+// Inbox: contact messages, prayer requests and the newsletter list. Each list
+// takes ?page, ?limit and ?q; the messages and requests also take ?status.
+// Only the status of a message or request can be changed, so no text is saved.
 // ---------------------------------------------------------------------------
 const MESSAGE_STATUSES = ['new', 'read', 'responded'];
 const PRAYER_STATUSES = ['new', 'prayed_for'];
-const pageRules = [
-  query('page').optional().isInt({ min: 1 }).withMessage('Invalid page.'),
-  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Invalid limit.'),
-];
+const statusFilter = (statuses) => query('status').optional(optional).isIn(statuses).withMessage('Invalid status.');
 
-/** GET /api/admin/contact: newest first, ?status=new|read|responded, paginated */
-router.get(
-  '/contact',
-  [query('status').optional(optional).isIn(MESSAGE_STATUSES).withMessage('Invalid status.'), ...pageRules],
-  validateRequest,
-  getMessages
-);
+/** GET /api/admin/contact: newest first. ?q= searches the name, email and message. */
+router.get('/contact', [...listRules, statusFilter(MESSAGE_STATUSES)], validateRequest, listMessages);
 
-/** PATCH /api/admin/contact/:id/status: body { status } */
+/** GET /api/admin/contact/:id: the whole message. */
+router.get('/contact/:id', idRule, validateRequest, getMessage);
+
+/** PATCH /api/admin/contact/:id/status: body { status: new | read | responded } */
 router.patch(
   '/contact/:id/status',
-  [...idRule, body('status').isIn(MESSAGE_STATUSES).withMessage('Status must be new, read or responded.')],
+  [...idRule, body('status').isIn(MESSAGE_STATUSES).withMessage('Choose New, Read or Responded.')],
   validateRequest,
-  updateMessageStatus
+  setMessageStatus
 );
 
 /** DELETE /api/admin/contact/:id */
 router.delete('/contact/:id', idRule, validateRequest, deleteMessage);
 
-/** GET /api/admin/prayer-requests: newest first, ?status=new|prayed_for, paginated */
-router.get(
-  '/prayer-requests',
-  [query('status').optional(optional).isIn(PRAYER_STATUSES).withMessage('Invalid status.'), ...pageRules],
-  validateRequest,
-  listPrayerRequests
-);
+/** GET /api/admin/prayer-requests: newest first. A private request is listed without its name or text. */
+router.get('/prayer-requests', [...listRules, statusFilter(PRAYER_STATUSES)], validateRequest, listPrayerRequests);
 
-/** GET /api/admin/prayer-requests/:id: the whole request, including a private one */
+/** GET /api/admin/prayer-requests/:id: the whole request, including a private one. */
 router.get('/prayer-requests/:id', idRule, validateRequest, getPrayerRequest);
 
-/** PATCH /api/admin/prayer-requests/:id/status: body { status } */
+/** PATCH /api/admin/prayer-requests/:id/status: body { status: new | prayed_for } */
 router.patch(
   '/prayer-requests/:id/status',
-  [...idRule, body('status').isIn(PRAYER_STATUSES).withMessage('Status must be new or prayed_for.')],
+  [...idRule, body('status').isIn(PRAYER_STATUSES).withMessage('Choose New or Prayed for.')],
   validateRequest,
-  updateRequestStatus
+  setPrayerRequestStatus
 );
 
 /** DELETE /api/admin/prayer-requests/:id */
 router.delete('/prayer-requests/:id', idRule, validateRequest, deletePrayerRequest);
 
-/** GET /api/admin/newsletter: newest first, ?q= searches the email address, paginated */
-router.get(
-  '/newsletter',
-  [query('q').optional().trim().isLength({ max: 255 }).withMessage('Search for 255 characters or fewer.'), ...pageRules],
-  validateRequest,
-  listSubscribers
-);
+/** GET /api/admin/newsletter: newest first. ?q= searches the email address. */
+router.get('/newsletter', listRules, validateRequest, listSubscribers);
 
 /** DELETE /api/admin/newsletter/:id */
 router.delete('/newsletter/:id', idRule, validateRequest, deleteSubscriber);
+
+// ---------------------------------------------------------------------------
+// Settings. They are saved with PUT /api/settings (routes/siteSettings.js),
+// which also needs a signed-in admin.
+// ---------------------------------------------------------------------------
+/** GET /api/admin/settings: { values, limits } for every setting the admin may change. Takes no input. */
+router.get('/settings', validateRequest, getAdminSettings);
 
 module.exports = router;

@@ -1,0 +1,120 @@
+/* Royal Temple Worship Centre: the brand motif.
+   Flat line art taken from the geometry of the church logo: concentric rings, and
+   the rays around the dove. Drawn as a CSS mask on ::before, so a token sets its
+   colour, it is invisible to screen readers, and it never moves.
+
+   Allowed only on: the home hero, inner page headers, the featured verse band and
+   the footer call to action. One per band. */
+
+.has-motif {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.has-motif::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: var(--motif-size, 640px);
+  aspect-ratio: 1;
+  pointer-events: none;
+  background-color: var(--motif-on-light);
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.motif-rings::before {
+  -webkit-mask-image: url("../assets/images/motif-rings.svg");
+  mask-image: url("../assets/images/motif-rings.svg");
+}
+
+.motif-rays::before {
+  -webkit-mask-image: url("../assets/images/motif-rays.svg");
+  mask-image: url("../assets/images/motif-rays.svg");
+}
+
+.band-navy.has-motif::before,
+.page-title.has-motif::before,
+.footer-cta.has-motif::before {
+  background-color: var(--motif-on-navy);
+}
+
+/* Placement. Each sits partly off the edge of its band. */
+
+/* Home hero: rays behind the headline, cropped by the top left of the band. */
+.home-hero.has-motif {
+  --motif-size: 560px;
+}
+
+.home-hero.has-motif::before {
+  top: -240px;
+  left: -220px;
+}
+
+/* Featured verse: rings at the right edge, centred on the band's height. */
+.verse-band.has-motif {
+  --motif-size: 440px;
+}
+
+/* Up to 1023px the verse can run the full width, so the rings sit in the top
+   right corner, inside the band's top padding, clear of the text. */
+.verse-band.has-motif::before {
+  top: -390px;
+  right: -200px;
+}
+
+/* Footer call to action: rays cut by the top right corner. */
+.footer-cta.has-motif {
+  --motif-size: 420px;
+}
+
+.footer-cta.has-motif::before {
+  top: -210px;
+  right: -150px;
+}
+
+/* Inner page headers (Stage 2): rings cropped at the right edge. */
+.page-title.has-motif {
+  --motif-size: 480px;
+}
+
+.page-title.has-motif::before {
+  top: calc(50% - 240px);
+  right: -200px;
+}
+
+@media (min-width: 1024px) {
+  .home-hero.has-motif {
+    --motif-size: 880px;
+  }
+
+  .home-hero.has-motif::before {
+    top: -380px;
+    left: max(-300px, calc((100% - var(--container)) / 2 - 360px));
+  }
+
+  .verse-band.has-motif {
+    --motif-size: 640px;
+  }
+
+  /* The verse is at most 46rem (736px) wide and centred. The rings' left edge stays
+     32px beyond its right edge: right = 50% - (368 + 32 + 640)px. */
+  .verse-band.has-motif::before {
+    top: calc(50% - 320px);
+    right: calc(50% - 1040px);
+  }
+
+  .footer-cta.has-motif {
+    --motif-size: 560px;
+  }
+
+  .footer-cta.has-motif::before {
+    top: -300px;
+    right: max(-120px, calc((100% - var(--container)) / 2 - 220px));
+  }
+}

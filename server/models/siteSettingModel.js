@@ -24,19 +24,24 @@ async function findByKey(settingKey) {
 }
 
 /**
- * Insert or update a batch of settings (partial updates).
+ * Change the value of settings that already exist, all or none: if one update
+ * fails, none of them is kept. A key with no row is not created.
  * @param {Object<string,string>} pairs - e.g. { welcome_message: "...", email: "..." }
  */
-async function upsertMany(pairs) {
-  for (const [key, value] of Object.entries(pairs)) {
-    // Row-alias upsert syntax avoids VALUES(), which is deprecated in MySQL 8.0.20+.
-    await pool.query(
-      `INSERT INTO site_settings (setting_key, setting_value)
-       VALUES (?, ?) AS new
-       ON DUPLICATE KEY UPDATE setting_value = new.setting_value`,
-      [key, value]
-    );
+async function updateMany(pairs) {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    for (const [key, value] of Object.entries(pairs)) {
+      await connection.query('UPDATE site_settings SET setting_value = ? WHERE setting_key = ?', [value, key]);
+    }
+    await connection.commit();
+  } catch (err) {
+    await connection.rollback();
+    throw err;
+  } finally {
+    connection.release();
   }
 }
 
-module.exports = { findAll, findByKey, upsertMany };
+module.exports = { findAll, findByKey, updateMany };
