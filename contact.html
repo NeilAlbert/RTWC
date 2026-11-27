@@ -115,6 +115,11 @@
             <textarea id="contact-message" name="message" rows="6" aria-describedby="contact-message-error" required></textarea>
             <span class="field-error" id="contact-message-error"></span>
           </div>
+          <!-- Honeypot: hidden from people; a filled-in value marks the message as a bot's. -->
+          <div class="form-trap" aria-hidden="true">
+            <label for="contact-website">Website</label>
+            <input type="text" id="contact-website" name="website" tabindex="-1" autocomplete="off">
+          </div>
           <button type="submit" class="button">Send message</button>
           <p class="status-message" id="contact-status" role="status" tabindex="-1"></p>
         </form>
@@ -134,6 +139,11 @@
           <div class="checkbox-field">
             <input type="checkbox" id="prayer-private" name="is_private" checked>
             <label for="prayer-private">Keep this request private. Only the pastor and prayer leaders will see it.</label>
+          </div>
+          <!-- Honeypot: hidden from people; a filled-in value marks the request as a bot's. -->
+          <div class="form-trap" aria-hidden="true">
+            <label for="prayer-website">Website</label>
+            <input type="text" id="prayer-website" name="website" tabindex="-1" autocomplete="off">
           </div>
           <button type="submit" class="button">Send prayer request</button>
           <p class="status-message" id="prayer-status" role="status" tabindex="-1"></p>

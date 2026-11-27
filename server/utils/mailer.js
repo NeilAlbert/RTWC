@@ -32,10 +32,11 @@ function getTransporter() {
 
 /**
  * Send an email to the admin notification address.
- * @param {object} options - { to, subject, text, html }
+ * @param {object} options - { to, subject, text, html, replyTo }
+ *   replyTo must be an address the caller has already checked is valid.
  * @returns {Promise<object>} nodemailer info, or { skipped: true } when SMTP is unconfigured
  */
-async function sendMail({ to, subject, text, html }) {
+async function sendMail({ to, subject, text, html, replyTo }) {
   const t = getTransporter();
   const recipient = to || process.env.ADMIN_NOTIFICATION_EMAIL;
 
@@ -51,6 +52,7 @@ async function sendMail({ to, subject, text, html }) {
       subject,
       text,
       html,
+      ...(replyTo ? { replyTo } : {}),
     });
     logger.info('Email sent', { to: recipient, subject, messageId: info.messageId });
     return info;

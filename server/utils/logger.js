@@ -25,7 +25,11 @@ function formatEntry(level, message, meta) {
   return `[${timestamp}] [${level.toUpperCase()}] ${message}${metaStr}`;
 }
 
+// The tests (NODE_ENV=test) write no log file, and show only errors unless TEST_LOGS=1.
+const IS_TEST = process.env.NODE_ENV === 'test';
+
 function write(level, message, meta) {
+  if (IS_TEST && level !== 'error' && process.env.TEST_LOGS !== '1') return;
   const entry = formatEntry(level, message, meta);
 
   if (level === 'error') {
@@ -34,6 +38,7 @@ function write(level, message, meta) {
     console.log(entry);
   }
 
+  if (IS_TEST) return;
   try {
     fs.appendFileSync(LOG_FILE, `${entry}\n`);
   } catch (err) {

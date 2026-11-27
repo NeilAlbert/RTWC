@@ -5,6 +5,7 @@ node_modules/
 # Templates with no real values stay committable.
 !.env.example
 !.env.compose.example
+!.env.test.example
 
 # Server runtime artifacts
 server/logs/
@@ -12,11 +13,13 @@ backups/
 # Encrypted backups from Admin > Backups, wherever BACKUP_DIR points.
 *.rtwcbackup
 *.rtwcbackup.partial
+# Photos uploaded in the admin. In production they live on the server disk (UPLOAD_DIR).
+assets/uploads/*
+!assets/uploads/.gitkeep
 *.log
 .agents/
 .claude/
 .freebuff/
-.github/
 
 # The previous admin, kept until the new one is confirmed. Not served.
 admin-old/

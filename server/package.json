@@ -9,7 +9,10 @@
     "seed:admin": "node scripts/seedAdmin.js",
     "reset:admin": "node scripts/resetAdminPassword.js",
     "check:env": "node scripts/checkEnv.js",
-    "db:schema": "mysql --host=$DB_HOST --port=$DB_PORT --user=$DB_USER --password=$DB_PASSWORD $DB_NAME < schema.sql"
+    "db:schema": "mysql --host=$DB_HOST --port=$DB_PORT --user=$DB_USER --password=$DB_PASSWORD $DB_NAME < schema.sql",
+    "test": "node --test --test-concurrency=1 --test-force-exit \"test/**/*.test.js\"",
+    "check:syntax": "node scripts/checkSyntax.js",
+    "check": "npm run check:syntax && npm test"
   },
   "engines": {
     "node": ">=18.0.0"

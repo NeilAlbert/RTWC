@@ -1351,6 +1351,19 @@ textarea[aria-invalid="true"] {
   margin-bottom: var(--space-24);
 }
 
+.sermon-more {
+  margin-bottom: var(--space-24);
+}
+
+/* Contact and prayer forms: the honeypot field, off screen and never seen. */
+.form-trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 /* About: the Statement of Faith accordion */
 .tenets {
   overflow: hidden;
@@ -1730,7 +1743,7 @@ textarea[aria-invalid="true"] {
   }
 
   .sermon-filters {
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
   }
 }
 

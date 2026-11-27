@@ -9,15 +9,20 @@ const { body } = require('express-validator');
 const validateRequest = require('../middleware/validateRequest');
 const { sanitizeBody } = require('../middleware/sanitizeInput');
 const { prayerRequestsLimiter } = require('../middleware/rateLimiter');
+const { honeypot } = require('../middleware/honeypot');
 // Reading, updating and deleting requests is under /api/admin/prayer-requests.
-const { submitPrayerRequest } = require('../controllers/prayerRequestsController');
+const { submitPrayerRequest, THANK_YOU } = require('../controllers/prayerRequestsController');
 
 const router = express.Router();
 
-/** POST /api/prayer-requests — public, rate-limited, validated, sanitized */
+/**
+ * POST /api/prayer-requests — public, rate-limited, validated, sanitized.
+ * "website" is the hidden honeypot field and must be empty.
+ */
 router.post(
   '/',
   prayerRequestsLimiter,
+  honeypot(201, THANK_YOU, 'Prayer request caught by the honeypot'),
   sanitizeBody(['name', 'request_text'], { maxLength: 5000 }),
   [
     // The name is optional. The controller stores "Anonymous" when it is left blank.

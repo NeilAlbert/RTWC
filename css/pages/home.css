@@ -252,6 +252,10 @@ main .info-panel .service-times li {
   margin-bottom: 0;
 }
 
+.home-sermon-latest {
+  margin-bottom: var(--space-24);
+}
+
 /* ---------- The Church of Pentecost ---------- */
 
 .home-cop {

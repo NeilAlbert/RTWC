@@ -74,7 +74,8 @@
     buildBody: () => ({
       name: contactName.value.trim(),
       email: contactEmail.value.trim(),
-      message: contactMessage.value.trim()
+      message: contactMessage.value.trim(),
+      website: document.getElementById('contact-website').value
     }),
     fields: [
       {
@@ -106,7 +107,8 @@
     buildBody: () => ({
       name: prayerName.value.trim(),
       request_text: prayerRequest.value.trim(),
-      is_private: document.getElementById('prayer-private').checked
+      is_private: document.getElementById('prayer-private').checked,
+      website: document.getElementById('prayer-website').value
     }),
     fields: [
       {

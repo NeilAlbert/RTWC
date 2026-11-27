@@ -161,7 +161,9 @@
           <div class="home-sermon-text">
             <h2 id="sermons-title">Sermons</h2>
             <p class="lead">Messages preached at Royal Temple Worship Centre.</p>
-            <p class="empty-state">No sermons have been posted here yet.</p>
+            <!-- The newest sermon from Admin > Sermons (GET /api/sermons), filled in by js/pages/index.js. -->
+            <div class="home-sermon-latest" id="home-sermon-latest" hidden></div>
+            <p class="empty-state" id="home-sermon-status">No sermons have been posted here yet.</p>
             <ul class="link-list">
               <li><a href="https://www.facebook.com/cop.rtwc/videos">Watch recent services on Facebook</a></li>
               <li><a href="sermons.html">All sermons</a></li>

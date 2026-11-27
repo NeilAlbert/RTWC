@@ -11,6 +11,8 @@ const ContactMessage = require('../models/contactMessageModel');
 const { sendMail } = require('../utils/mailer');
 const logger = require('../utils/logger');
 
+const THANK_YOU = 'Thank you. We received your message.';
+
 /** POST /api/contact — public (rate-limited) */
 async function submitContact(req, res, next) {
   try {
@@ -19,10 +21,14 @@ async function submitContact(req, res, next) {
     const contact = await ContactMessage.create({ name, email, message });
 
     // Notification email — best-effort; a failure must not fail the request.
+    // The subject is fixed. The visitor's address goes only in Reply-To, after the
+    // route has checked it is a valid address (so it cannot hold a line break), and
+    // the name and message go only in the body.
     try {
       await sendMail({
         subject: 'New message from the church website',
         text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+        replyTo: email,
       });
     } catch (mailErr) {
       logger.error('Contact notification email failed', { message: mailErr.message });
@@ -30,7 +36,7 @@ async function submitContact(req, res, next) {
 
     return res.status(201).json({
       success: true,
-      message: 'Thank you. We received your message.',
+      message: THANK_YOU,
       data: { id: contact.id, createdAt: contact.created_at },
     });
   } catch (err) {
@@ -38,4 +44,4 @@ async function submitContact(req, res, next) {
   }
 }
 
-module.exports = { submitContact };
+module.exports = { submitContact, THANK_YOU };

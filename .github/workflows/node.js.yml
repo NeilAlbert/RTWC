@@ -1,5 +1,6 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+# Checks every push and pull request to main: the syntax of every JavaScript file
+# and the automated tests in server/test, against a throwaway MySQL database that
+# exists only for this run. No real database, email or secret is used.
 
 name: Node.js CI
 
@@ -10,22 +11,42 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  check:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+    defaults:
+      run:
+        working-directory: server
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          # A password for this throwaway container only. It is not a secret.
+          MYSQL_ROOT_PASSWORD: ci-throwaway-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci-throwaway-password"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    env:
+      TEST_DB_NAME: rtwc_ci_test
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ci-throwaway-password
+      DB_SSL: "false"
 
     steps:
     - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use Node.js 24
       uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+        node-version: 24.x
+        cache: npm
+        cache-dependency-path: server/package-lock.json
     - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+    - run: npm run check

@@ -1,5 +1,6 @@
 /* Home page: the ministries from Admin > Ministries, the next three events from
-   the events API, and the featured verse from Admin > Settings. */
+   the events API, the newest sermon from Admin > Sermons, and the featured verse
+   from Admin > Settings. */
 
 // The ministries index: number, name and description, each a link to its place
 // on the Ministries page (ministries.html#slug).
@@ -103,6 +104,47 @@
   } catch (error) {
     console.error('Could not load upcoming events.', error);
     status.textContent = 'Events could not be loaded. Please try again later.';
+  }
+})();
+
+// The newest sermon: title, speaker, date and a watch link. With no sermons, or
+// when the API cannot be reached, the band keeps its built-in text.
+(async () => {
+  const latest = document.getElementById('home-sermon-latest');
+  const status = document.getElementById('home-sermon-status');
+  if (!latest || !status) return;
+
+  try {
+    const data = await window.rtwc.getJSON('/api/sermons?page=1&limit=1');
+    const sermon = data && Array.isArray(data.items) ? data.items[0] : null;
+    if (!sermon) return;
+
+    const title = document.createElement('h3');
+    title.textContent = sermon.title;
+
+    const details = document.createElement('p');
+    details.className = 'event-meta';
+    details.textContent = [sermon.speaker, sermon.sermon_date && window.rtwc.formatDate(sermon.sermon_date)]
+      .filter(Boolean)
+      .join(', ');
+    latest.replaceChildren(title, details);
+
+    const url = typeof sermon.video_url === 'string' ? sermon.video_url.trim() : '';
+    if (/^https?:\/\/[^\s<>"'`]+$/i.test(url)) {
+      const watch = document.createElement('a');
+      watch.className = 'link-arrow';
+      watch.href = url;
+      watch.rel = 'noopener noreferrer';
+      watch.textContent = `Watch "${sermon.title}"`;
+      const line = document.createElement('p');
+      line.append(watch);
+      latest.append(line);
+    }
+
+    latest.hidden = false;
+    status.hidden = true;
+  } catch (error) {
+    console.error('Could not load the newest sermon.', error);
   }
 })();
 

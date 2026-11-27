@@ -7,6 +7,10 @@ const PrayerRequest = require('../models/prayerRequestModel');
 const { sendMail } = require('../utils/mailer');
 const logger = require('../utils/logger');
 
+const THANK_YOU = 'Thank you. We received your prayer request.';
+// A private request is read in the admin only: its notification holds no name or text.
+const PRIVATE_NOTICE = 'A private prayer request arrived. Open the admin to read it.';
+
 /** POST /api/prayer-requests — public (rate-limited) */
 async function submitPrayerRequest(req, res, next) {
   try {
@@ -19,11 +23,13 @@ async function submitPrayerRequest(req, res, next) {
       is_private: is_private === true || is_private === 'true' || is_private === 1 || is_private === '1',
     });
 
-    // Notification email — best-effort.
+    // Notification email — best-effort. The subject is fixed; visitor text goes only in the body.
     try {
       await sendMail({
         subject: 'New prayer request from the church website',
-        text: `Name: ${name}\nPrivacy: ${prayer.is_private ? 'Private' : 'May be shared'}\n\nRequest:\n${request_text}`,
+        text: prayer.is_private
+          ? PRIVATE_NOTICE
+          : `Name: ${name}\nPrivacy: May be shared\n\nRequest:\n${request_text}`,
       });
     } catch (mailErr) {
       logger.error('Prayer request notification email failed', { message: mailErr.message });
@@ -31,7 +37,7 @@ async function submitPrayerRequest(req, res, next) {
 
     return res.status(201).json({
       success: true,
-      message: 'Thank you. We received your prayer request.',
+      message: THANK_YOU,
       data: { id: prayer.id, createdAt: prayer.created_at },
     });
   } catch (err) {
@@ -39,4 +45,4 @@ async function submitPrayerRequest(req, res, next) {
   }
 }
 
-module.exports = { submitPrayerRequest };
+module.exports = { submitPrayerRequest, THANK_YOU, PRIVATE_NOTICE };

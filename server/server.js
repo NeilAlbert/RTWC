@@ -1,8 +1,10 @@
 /* Royal Temple Worship Centre API entry point. */
 const path = require('path');
 
-// Read server/.env whichever folder the server is started from.
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+// Read server/.env whichever folder the server is started from. The tests
+// (NODE_ENV=test) set every setting themselves and never read this file, so they
+// can never reach the normal database.
+if (process.env.NODE_ENV !== 'test') require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const fs = require('fs');
 const express = require('express');
@@ -190,27 +192,68 @@ app.use(errorHandler);
 const PORT = Number(process.env.PORT) || 5000;
 
 /**
- * The admin sign-in needs admins.token_valid_after. Without it every admin request
- * would fail with a server error, so the server stops and names the migration.
- * A database that cannot be reached at all is left to /api/health to report.
+ * Start-up check for the columns and tables the code needs, each named with the
+ * migration that adds it. A database that cannot be reached at all is left to
+ * /api/ready to report.
+ * - required: without it the admin sign-in or the public site fails with a server
+ *   error, so the server stops;
+ * - optional: only one feature is missing, so the server warns and starts.
  */
-async function checkAdminColumns() {
-  try {
-    await pool.query('SELECT token_valid_after FROM admins LIMIT 1');
-  } catch (err) {
-    if (err.code === 'ER_BAD_FIELD_ERROR') {
-      logger.error('The server cannot start. The admins table has no token_valid_after column. Back up the database, then run server/migrations/004_admin_additions.sql.');
-      process.exit(1);
+const SCHEMA_CHECKS = [
+  {
+    sql: 'SELECT token_valid_after FROM admins LIMIT 1',
+    required: true,
+    problem: 'The admins table has no token_valid_after column',
+    migration: '004_admin_additions.sql',
+  },
+  {
+    sql: 'SELECT meeting_time, display_order FROM ministries LIMIT 1',
+    required: true,
+    problem: 'The ministries table has no meeting_time or display_order column, so the public Ministries page would fail',
+    migration: '007_ministries.sql',
+  },
+  {
+    sql: 'SELECT id FROM backup_runs LIMIT 1',
+    required: false,
+    problem: 'The backup_runs table does not exist, so Admin > Backups is switched off',
+    migration: '006_backups.sql',
+  },
+];
+const MISSING_SCHEMA = new Set(['ER_BAD_FIELD_ERROR', 'ER_NO_SUCH_TABLE']);
+
+async function checkSchema() {
+  for (const check of SCHEMA_CHECKS) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      await pool.query(check.sql);
+    } catch (err) {
+      if (!MISSING_SCHEMA.has(err.code)) {
+        logger.error('Startup check: the database could not be read', { code: err.code });
+        return;
+      }
+      const action = `Back up the database, then run server/migrations/${check.migration}.`;
+      if (check.required) {
+        logger.error(`The server cannot start. ${check.problem}. ${action}`);
+        process.exit(1);
+      }
+      logger.warn(`${check.problem}. ${action}`);
     }
-    logger.error('Startup check: the admins table could not be read', { code: err.code });
   }
 }
 
-checkAdminColumns().then(() => {
-  // A backup cut off by a crash or restart is marked failed and its partial file removed.
-  // Then the clean-up finishes before the first check for this month's automatic backup.
-  recoverInterruptedRuns().then(() => backupScheduler.start());
-  app.listen(PORT, () => {
-    logger.info(`Royal Temple API listening on http://localhost:${PORT}`);
+function start() {
+  checkSchema().then(() => {
+    // A backup cut off by a crash or restart is marked failed and its partial file removed.
+    // Then the clean-up finishes before the first check for this month's automatic backup.
+    recoverInterruptedRuns().then(() => backupScheduler.start());
+    app.listen(PORT, () => {
+      logger.info(`Royal Temple API listening on http://localhost:${PORT}`);
+    });
   });
-});
+}
+
+// `node server.js` starts the server. The tests in server/test require this file
+// to get the app without listening or starting the backup scheduler.
+if (require.main === module) start();
+
+module.exports = app;

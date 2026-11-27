@@ -27,12 +27,15 @@ Website of The Church of Pentecost, Royal Temple Worship Centre.
    - Redis (optional): `REDIS_ENABLED`, `REDIS_URL`, `REDIS_PREFIX`.
    - Backups: `BACKUP_DIR`, `BACKUP_PASSPHRASE`, `BACKUP_MAX_BYTES`,
      `BACKUP_MAX_UPLOAD_MB`, `BACKUP_KEEP_AUTO`.
-2. In `server/`, run `npm install`, then `npm run check:env`. It checks `.env` and the
-   database connection, prints names only (never values), and exits with an error when
-   something required is wrong. Then run `npm start`.
-3. Open `http://localhost:5000/api/ready`. It must say `"database":"ok"`.
+2. In `server/`, run `npm install`.
+3. Set up the database before the first start: see "Database" below. A new database
+   needs `schema.sql` and the admin account; an older one needs its missing migrations.
+4. In `server/`, run `npm run check:env`. It checks `.env` and the database connection,
+   prints names only (never values), and exits with an error when something required is
+   wrong. Then run `npm start`.
+5. Open `http://localhost:5000/api/ready`. It must say `"database":"ok"`.
    (`/api/health` only says the server is running; it does not check the database.)
-4. Open `http://localhost:5000/admin` and log in. Do not open the admin pages from
+6. Open `http://localhost:5000/admin` and log in. Do not open the admin pages from
    another local server (for example Live Server on port 5500) or by double-clicking the
    file: the login cannot reach the API from there.
 
@@ -61,9 +64,9 @@ Site status and Help open a placeholder until Phase 4.
 The CSV export puts a `'` in front of any cell that starts with `=`, `+`, `-` or `@`, so
 a spreadsheet shows it as text instead of running it as a formula.
 
-The public Events page and home page show events from the admin at once. The public
-Sermons, Ministries and About pages do not read from the admin yet: they still show
-what is written in `js/pages/sermons.js`, `ministries.html` and `about.html`.
+The public Events, Sermons and Ministries pages, the leaders on the About page, and the
+home page show what is saved in the admin at once. The history, district and area, and
+Statement of Faith are still written in `index.html` and `about.html`.
 
 A login lasts 24 hours, or until the tab is closed, or until 30 minutes pass without a
 click or key press. Logging out, changing the password or resetting it ends every other
@@ -106,7 +109,7 @@ A password you still know can be changed in Admin > Account instead.
 | Cannot reach the server. Please try again. | The API is not running, or the page was not opened from the API address. |
 | The server has a problem and could not log you in. | Usually the database. Check `/api/ready` and `server/logs/server.log`. |
 
-If the API stops at start-up and names `token_valid_after`, run migration 004 (see Database).
+If the API stops at start-up and names a migration, run that migration (see Database).
 
 `TRUST_PROXY_HOPS` in `.env` is the number of proxies in front of the API: 1 behind nginx, 0
 when browsers reach the API directly. If it is too low on a live host, every visitor
@@ -131,9 +134,10 @@ passphrase cannot be recovered. See `server/BACKUPS.md`.
 | Address, phone, helpline, email, service times, welcome message, mission, vision | Admin > Settings |
 | YouTube and Facebook links, live status, next broadcast, recent service link | Admin > Settings |
 | District and area | `index.html` |
-| History, Resident Pastor, elders, deacons, statement of faith | `about.html` |
-| Ministries, their meeting times and leaders | `ministries.html` |
-| Sermons | the `sermons` list at the top of `js/pages/sermons.js` |
+| History, statement of faith | `about.html` |
+| Resident Pastor, Presiding Elder, secretary, elders, deacons, ministry leaders | Admin > Leadership |
+| Ministries and their meeting times | Admin > Ministries |
+| Sermons (Sermons page, and the newest one on the home page) | Admin > Sermons |
 | Events | Admin > Events |
 | The announcement bar above the header | Admin > Settings > Site announcement |
 | Gallery photos | the church Facebook page, through the API |
@@ -161,22 +165,41 @@ that has `src`, a plain `alt` sentence, `width`, `height` and `loading="lazy"`.
 
 ## Database
 
-On a new database run `server/schema.sql` (or `server/schema.mysql80.sql` for MySQL 8.0
-on this computer, which also creates the database). Nothing else is needed.
+### A new database
 
-On a database that already exists, back it up (see `server/BACKUPS.md`), then run the
-files in `server/migrations/` that it has not had yet, in this order:
+Run these from the `server/` folder, in this order:
 
-| File | What it does |
-| --- | --- |
-| `001_remove_giving_records.sql` | Removes giving records |
-| `002_remove_giving.sql` | Removes the rest of giving |
-| `003_remove_sample_settings.sql` | Clears sample contact details that older schemas inserted |
-| `004_admin_additions.sql` | Adds `admins.token_valid_after` and the three announcement settings. The API will not start without it |
-| `006_backups.sql` | Adds the `backup_runs` table and the three automatic backup settings for Admin > Backups |
+1. `server/schema.sql` (or `server/schema.mysql80.sql` for MySQL 8.0 on this computer,
+   which also creates the database). It already holds everything the migrations below
+   add, so no migration is needed.
+2. Create the admin: `node scripts/seedAdmin.js "Full Name" admin@example.org`.
+3. Optional: add the nine ministries the old site listed, so the Ministries page is not
+   empty. Run `node scripts/importMinistries.js --dry-run` first to see what it would
+   add, then `node scripts/importMinistries.js`. They can be edited in Admin > Ministries.
+4. `npm run check:env`, then `npm start`, then open `/api/ready`.
 
-Run one with, for example, `mysql -u root -p royal_temple < migrations/004_admin_additions.sql`
-from the `server/` folder.
+### A database that already exists
+
+Back it up first (see `server/BACKUPS.md`). Then run, in this order, the files in
+`server/migrations/` that it has not had yet. There is no record of which ones have
+run, so check the table below against the database. When unsure, the start-up check
+in `server.js` names the migration that is missing.
+
+| Order | File | What it does |
+| --- | --- | --- |
+| 1 | `001_remove_giving_records.sql` | Replaced by 002. Skip it; running it is harmless |
+| 2 | `002_remove_giving.sql` | Removes the giving table and settings |
+| 3 | `003_remove_sample_settings.sql` | Clears sample contact details that older schemas inserted |
+| 4 | `004_admin_additions.sql` | Adds `admins.token_valid_after` and the three announcement settings. The API will not start without it |
+| 5 | `005_featured_verse.sql` | Adds the two featured verse settings for the home page |
+| 6 | `006_backups.sql` | Adds the `backup_runs` table and the three automatic backup settings. Without it the API starts but Admin > Backups is off |
+| 7 | `007_ministries.sql` | Adds `ministries.meeting_time` and `display_order`. The API will not start without it |
+| 8 | `node scripts/importMinistries.js --dry-run`, then `node scripts/importMinistries.js` | One time, after 007: adds the nine ministries the old site listed. It never overwrites what was edited in the admin |
+
+Run a migration with, for example,
+`mysql -u root -p royal_temple < migrations/004_admin_additions.sql` from the `server/`
+folder. 004 and 007 stop with "Duplicate column name" if they have already run; that
+is harmless. 005 and 006 can be run again safely.
 
 ## Live streaming
 
