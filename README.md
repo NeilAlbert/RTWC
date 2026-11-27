@@ -18,6 +18,8 @@ Website of The Church of Pentecost, Royal Temple Worship Centre.
      least 32 characters (`openssl rand -hex 64`). The server will not start without them
      and says which one is missing.
    - Server: `PORT` (default 5000), `CORS_ORIGIN`, `TRUST_PROXY_HOPS` (default 1).
+   - Search engines: `SITE_URL`, the live address such as `https://www.example.org`
+     (see "Search engines and link previews" below).
    - Database: `DB_PORT` (default 3306). For a hosted database such as Aiven, set
      `DB_SSL_CA` to the path of its `ca.pem`. For MySQL on the same computer, set
      `DB_SSL=false`.
@@ -207,6 +209,21 @@ YouTube live detection uses the server-side `YOUTUBE_API_KEY`. Facebook live det
 and the gallery use `PAGE_ID` and `FB_PAGE_ACCESS_TOKEN`. Keep these on the server and
 never put them in browser code. The Watch Live page embeds a stream when the provider
 allows it and otherwise links to it.
+
+## Search engines and link previews
+
+Every public page has a unique title and description in its HTML. Set `SITE_URL` in
+`server/.env` to the live address and the server also sends:
+
+- a canonical link, `og:url` and a share image (`assets/images/hero.jpg`) on each page,
+  in place of the `<!-- seo:head -->` line in its `<head>`;
+- a Church description (JSON-LD) on the home page with the address, phone and email
+  from Admin > Settings. Empty settings are left out;
+- `/sitemap.xml` with the eight public pages, and a `Sitemap:` line in `robots.txt`.
+
+Without `SITE_URL` none of these are sent and `/sitemap.xml` is a 404. A new public
+page needs the `<!-- seo:head -->` line to be listed in the sitemap. After going live,
+submit `https://<site-domain>/sitemap.xml` in Google Search Console.
 
 ## Event calendar
 

@@ -27,6 +27,7 @@ const adminRoutes = require('./routes/admin');
 const adminBackupsRoutes = require('./routes/adminBackups');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
+const seo = require('./utils/seo');
 
 // Stop with a clear message when a required setting is missing. Without these the
 // server would start, and then every sign-in would fail with a server error.
@@ -45,6 +46,7 @@ const pool = require('./config/db');
 const redis = require('./config/redis');
 const { recoverInterruptedRuns } = require('./services/backupService');
 const backupScheduler = require('./jobs/backupScheduler');
+const { getPublicSettings } = require('./controllers/siteSettingsController');
 
 const app = express();
 
@@ -97,11 +99,27 @@ app.get('/admin', (req, res) => res.redirect('/admin/login.html'));
 ['css', 'js', 'assets', 'admin'].forEach((folder) => {
   app.use(`/${folder}`, express.static(path.join(SITE_ROOT, folder), staticOptions));
 });
-const sitePages = fs.readdirSync(SITE_ROOT).filter((name) => name.endsWith('.html') || name === 'robots.txt');
+// The pages go through utils/seo.js, which adds the canonical link, share image
+// and (on the home page) the Church details once SITE_URL is set.
+const sitePages = fs.readdirSync(SITE_ROOT).filter((name) => name.endsWith('.html'));
 sitePages.forEach((name) => {
-  app.get(`/${name}`, (req, res) => res.sendFile(path.join(SITE_ROOT, name)));
+  app.get(`/${name}`, seo.pageHandler(name, getPublicSettings));
 });
-app.get('/', (req, res) => res.sendFile(path.join(SITE_ROOT, 'index.html')));
+app.get('/', seo.pageHandler('index.html', getPublicSettings));
+app.get('/robots.txt', async (req, res, next) => {
+  try {
+    const text = await fs.promises.readFile(path.join(SITE_ROOT, 'robots.txt'), 'utf8');
+    res.type('text/plain').send(seo.robots(text));
+  } catch (err) {
+    next(err);
+  }
+});
+// A 404 until SITE_URL is set, because a sitemap must give full addresses.
+app.get('/sitemap.xml', (req, res, next) => {
+  const xml = seo.sitemap();
+  if (!xml) return next();
+  return res.type('application/xml').send(xml);
+});
 
 // CORS: only the site's own domains may call the API from a browser.
 const allowedOrigins = (process.env.CORS_ORIGIN || '')

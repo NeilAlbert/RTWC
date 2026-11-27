@@ -96,10 +96,15 @@ async function getPublicSettingsObject() {
   return settings;
 }
 
+/** The public settings through the cache. Also used for the home page's Church details (utils/seo.js). */
+function getPublicSettings() {
+  return cache.wrap(CACHE_KEY, CACHE_TTL, getPublicSettingsObject);
+}
+
 /** GET /api/settings: public */
 async function getSettings(req, res, next) {
   try {
-    const data = await cache.wrap(CACHE_KEY, CACHE_TTL, getPublicSettingsObject);
+    const data = await getPublicSettings();
     return res.json({ success: true, message: 'Settings fetched successfully.', data });
   } catch (err) {
     return next(err);
@@ -156,5 +161,5 @@ async function updateSettings(req, res, next) {
 }
 
 module.exports = {
-  SETTINGS, getSettings, getAdminSettings, updateSettings,
+  SETTINGS, getSettings, getPublicSettings, getAdminSettings, updateSettings,
 };

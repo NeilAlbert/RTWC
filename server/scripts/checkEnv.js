@@ -93,6 +93,22 @@ if (has('CORS_ORIGIN')) {
 }
 
 // ---------------------------------------------------------------------------
+section('Search engines');
+if (!has('SITE_URL')) {
+  warn('SITE_URL is empty: pages are sent without canonical links or a share image, and there is no /sitemap.xml');
+} else {
+  let url = null;
+  try { url = new URL(env.SITE_URL.trim()); } catch { url = null; }
+  if (!url || !['http:', 'https:'].includes(url.protocol) || url.pathname !== '/' || url.search || url.hash) {
+    fail('SITE_URL must be the plain web address of the site, such as https://www.example.org, with nothing after the host');
+  } else if (url.protocol !== 'https:') {
+    warn('SITE_URL starts with http://: use https:// once the certificate is set up');
+  } else {
+    ok('SITE_URL is a valid https address');
+  }
+}
+
+// ---------------------------------------------------------------------------
 section('Email');
 const emailNames = ['EMAIL_HOST', 'EMAIL_USER', 'EMAIL_PASSWORD', 'ADMIN_NOTIFICATION_EMAIL'];
 const emailSet = emailNames.filter(has);
